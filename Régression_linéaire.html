@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guide Visuel &amp; Mémento Code — Régression Linéaire</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Fraunces', 'Georgia', 'serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            ivory: '#FAF8F5',
+            ink: '#0F172A',
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background-color: #FAF8F5;
+      color: #0F172A;
+      font-family: 'Inter', sans-serif;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 999px; }
+
+    input[type="range"].ml-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 8px;
+      border-radius: 999px;
+      background: #CBD5E1;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"].ml-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #0284C7;
+      border: 3px solid #FFFFFF;
+      box-shadow: 0 2px 6px rgba(2,132,199,0.35);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col lg:flex-row bg-ivory text-ink">
+
+  <!-- MENU LATÉRAL : NOTIONS + ACTIONS PYTHON -->
+  <aside class="w-full lg:w-80 xl:w-[350px] bg-white border-b lg:border-b-0 lg:border-r border-slate-200/90 flex flex-col lg:h-screen lg:sticky lg:top-0 shrink-0 z-30">
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between gap-2">
+      <div>
+        <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-display font-extrabold tracking-widest text-white bg-sky-600 uppercase">
+          Cours 02 · Visuel &amp; Code
+        </span>
+        <h1 class="font-serif text-xl font-bold text-ink mt-1 leading-tight">La Régression Linéaire</h1>
+      </div>
+      <button id="btn-toggle-menu" class="lg:hidden px-3 py-2 rounded-xl bg-slate-100 text-xs font-display font-bold text-ink">
+        ☰ Menu
+      </button>
+    </div>
+
+    <div id="menu-body" class="hidden lg:flex flex-col flex-1 overflow-hidden">
+      <div class="p-3.5 border-b border-slate-100 bg-slate-50/70 space-y-2">
+        <div class="relative">
+          <input id="search-input" type="search" placeholder="Chercher une notion ou un code (fit, R², [[…)" class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-ink placeholder:text-slate-400 focus:outline-none focus:border-sky-400" />
+          <span class="absolute left-2.5 top-1.5 text-slate-400 text-xs">⌕</span>
+        </div>
+        <div class="grid grid-cols-2 gap-1.5">
+          <button id="tab-visual" class="mode-btn active px-2.5 py-1.5 rounded-xl text-xs font-display font-bold bg-ink text-white transition">
+            1. Comprendre (8 étapes)
+          </button>
+          <button id="tab-code" class="mode-btn px-2.5 py-1.5 rounded-xl text-xs font-display font-bold bg-white text-sky-800 border border-sky-200 hover:bg-sky-50 transition">
+            2. Tous les Codes (10)
+          </button>
+        </div>
+      </div>
+
+      <nav id="sidebar-list" class="flex-1 overflow-y-auto p-3 space-y-4"></nav>
+    </div>
+  </aside>
+
+  <!-- CONTENU PRINCIPAL -->
+  <main class="flex-1 flex flex-col min-w-0">
+    <header class="sticky top-0 z-20 bg-ivory/95 backdrop-blur border-b border-slate-200/80 px-5 sm:px-8 lg:px-10 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <button id="btn-prev" class="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-200 text-xs sm:text-sm font-display font-bold text-ink transition">
+          ← Précédent
+        </button>
+        <button id="btn-next" class="px-3.5 py-2 rounded-xl bg-ink hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-xs sm:text-sm font-display font-bold text-white transition">
+          Suivant →
+        </button>
+        <button id="btn-cheatsheet" class="ml-1 px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-xs font-display font-bold text-white transition shadow-2xs">
+          ⌘ Antisèche Code (10 actions)
+        </button>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span id="progress-badge" class="font-mono text-xs sm:text-sm font-bold px-3.5 py-1 rounded-full bg-white border border-slate-200 text-ink">
+          01 / 08
+        </span>
+      </div>
+    </header>
+
+    <article id="stage" class="flex-1 w-full max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 py-7 sm:py-9"></article>
+
+    <footer id="bottom-nav" class="w-full max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 pb-10 pt-4 flex items-center justify-between gap-4 border-t border-slate-200/70">
+      <button id="btn-prev-bottom" class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-200 text-xs sm:text-sm font-display font-bold text-ink transition">
+        ← Étape précédente
+      </button>
+      <span id="bottom-hint" class="text-xs text-slate-500 text-center hidden sm:block"></span>
+      <button id="btn-next-bottom" class="px-4 py-2.5 rounded-xl bg-ink hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-xs sm:text-sm font-display font-bold text-white transition">
+        Étape suivante →
+      </button>
+    </footer>
+  </main>
+
+  <script>
+    // =========================================================================
+    // UTILITAIRE DE BLOC DE CODE AVEC COPIE INSTANTANÉE
+    // =========================================================================
+    function renderCodeCard({ id, badge, title, why, code, tip }) {
+      const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return `
+        <div class="bg-slate-900 text-slate-100 rounded-2xl border border-slate-800 overflow-hidden shadow-2xs">
+          <div class="px-4 py-2.5 bg-slate-950/90 border-b border-slate-800 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 font-mono text-[10px] font-bold uppercase shrink-0">${badge}</span>
+              <span class="font-display font-bold text-xs sm:text-sm text-white truncate">${title}</span>
+            </div>
+            <button data-copy-target="${id}" class="copy-btn px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-sky-600 text-[11px] font-display font-bold text-slate-200 hover:text-white transition shrink-0">
+              Copier
+            </button>
+          </div>
+          <div class="px-4 py-2 bg-slate-900/60 border-b border-slate-800/80 text-xs text-slate-300">
+            <strong class="text-sky-400">À quoi ça sert :</strong> ${why}
+          </div>
+          <pre id="${id}" class="p-4 text-xs sm:text-[13px] font-mono leading-relaxed overflow-x-auto text-emerald-300"><code>${escaped}</code></pre>
+          ${tip ? `<div class="px-4 py-2.5 bg-amber-950/50 border-t border-amber-800/50 text-xs text-amber-200">💡 <strong>À retenir :</strong> ${tip}</div>` : ''}
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // LES 10 ACTIONS PYTHON DU COURS À RETENIR UN À UN
+    // =========================================================================
+    const CODE_ACTIONS = [
+      {
+        id: 'code-01',
+        num: 'A01',
+        group: '1. Charger & Explorer',
+        title: 'Charger le fichier météo depuis le web',
+        why: 'Lire directement le CSV Google Drive avec pandas sans avoir à le télécharger à la main.',
+        code: `import pandas as pd
+
+url = "https://drive.google.com/uc?export=download&id=1fxi8XN0M7IA0smfEF5x..."
+meteo = pd.read_csv(url)
+
+print(meteo.head())   # Affiche les 5 premières lignes
+print(meteo.shape)    # Affiche (365, 4) -> 365 jours, 4 colonnes`,
+        tip: 'Utilisez toujours l’adresse en uc?export=download&id=... (jamais /file/d/.../view qui renvoie une page web HTML).'
+      },
+      {
+        id: 'code-02',
+        num: 'A02',
+        group: '1. Charger & Explorer',
+        title: 'Regarder le nuage de points avant de modéliser',
+        why: 'Vérifier à l’œil nu si les points s’alignent vraiment le long d’une droite avant de lancer le calcul.',
+        code: `import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.regplot(data=meteo, x="SUNHOUR", y="MAX_TEMPERATURE_C")
+plt.title("Température maximale selon les heures d'ensoleillement")
+plt.show()`,
+        tip: 'Si le nuage ne forme aucune tendance droite, la régression linéaire ne pourra rien inventer.'
+      },
+      {
+        id: 'code-03',
+        num: 'A03',
+        group: '2. Préparer X et y',
+        title: 'Séparer les indices (X) et la cible (y)',
+        why: 'Indiquer à scikit-learn quelles colonnes servent à deviner (X) et quelle colonne on veut prédire (y).',
+        code: `# Régression SIMPLE (1 seule colonne -> DOUBLES crochets obligatoires !)
+X = meteo[["SUNHOUR"]]
+y = meteo["MAX_TEMPERATURE_C"]
+
+# Régression MULTIPLE (plusieurs colonnes)
+X_multi = meteo[["SUNHOUR", "MIN_TEMPERATURE_C"]]`,
+        tip: 'X doit TOUJOURS être un tableau 2D (doubles crochets [[...]]). Avec un seul crochet, scikit-learn plante (Expected 2D array).'
+      },
+      {
+        id: 'code-04',
+        num: 'A04',
+        group: '2. Préparer X et y',
+        title: 'Garder un jeu de test sous clé (train_test_split)',
+        why: 'Séparer 80 % des jours pour apprendre et garder 20 % des jours cachés pour tester honnêtement le modèle.',
+        code: `from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)`,
+        tip: 'random_state=42 fige le tirage au sort pour obtenir exactement le même découpage à chaque exécution.'
+      },
+      {
+        id: 'code-05',
+        num: 'A05',
+        group: '3. Entraîner & Prédire',
+        title: 'Créer et entraîner le modèle avec fit()',
+        why: 'Demander à la machine de trouver la meilleure droite (ou le meilleur plan) sur les données d’entraînement.',
+        code: `from sklearn.linear_model import LinearRegression
+
+model = LinearRegression()
+model.fit(X_train, y_train)   # Le modèle apprend la pente et le point de départ`,
+        tip: 'Sur scikit-learn, fit(X_train, y_train) est toujours l’étape d’apprentissage, quel que soit l’algorithme.'
+      },
+      {
+        id: 'code-06',
+        num: 'A06',
+        group: '3. Entraîner & Prédire',
+        title: 'Prédire une nouvelle valeur avec predict()',
+        why: 'Appliquer la droite apprise pour deviner la température d’un jour nouveau (ex : 10 heures de soleil).',
+        code: `# Prédire sur le jeu de test complet
+y_pred = model.predict(X_test)
+
+# Prédire pour une journée précise (10h de soleil)
+demain = pd.DataFrame({"SUNHOUR": [10]})
+print(model.predict(demain))   # Résultat : [17.69] °C`,
+        tip: 'Passez un DataFrame nommé {"SUNHOUR": [10]} plutôt que [[10]] pour éviter l’avertissement de nom de colonne.'
+      },
+      {
+        id: 'code-07',
+        num: 'A07',
+        group: '4. Lire la recette',
+        title: 'Lire les coefficients (pentes) et l’intercept',
+        why: 'Traduire le modèle en français clair : combien chaque heure de soleil ajoute-t-elle de degrés ?',
+        code: `import pandas as pd
+
+# Afficher chaque variable face à son coefficient
+coefficients = pd.DataFrame({
+    "Feature": X.columns,
+    "Coefficient": model.coef_
+})
+print(coefficients)
+print(f"Intercept (départ à 0) : {model.intercept_:.3f}")`,
+        tip: 'En régression multiple, un coefficient se lit « toutes les autres variables restant égales par ailleurs ».'
+      },
+      {
+        id: 'code-08',
+        num: 'A08',
+        group: '5. Évaluer & Comparer',
+        title: 'Calculer le R² rapidement avec score()',
+        why: 'Obtenir directement la part de variation expliquée (entre 0 et 1) sur le jeu de test.',
+        code: `r2 = model.score(X_test, y_test)
+print(f"R² : {r2:.3f}")   # 0.477 en simple -> 0.867 en multiple`,
+        tip: 'R² = 0,867 signifie 86,7 % de variation expliquée (et NON 86,7 % de prédictions exactes).'
+      },
+      {
+        id: 'code-09',
+        num: 'A09',
+        group: '5. Évaluer & Comparer',
+        title: 'Calculer les 4 métriques d’évaluation',
+        why: 'Mesurer l’erreur moyenne en degrés (MAE), repérer les grosses erreurs (MSE / RMSE) et le R².',
+        code: `import numpy as np
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+mae  = mean_absolute_error(y_test, y_pred)
+mse  = mean_squared_error(y_test, y_pred)
+rmse = np.sqrt(mse)   # Pas de fonction dédiée : racine carrée du MSE
+r2   = r2_score(y_test, y_pred)
+
+print(f"MAE : {mae:.2f} °C | RMSE : {rmse:.2f} °C | R² : {r2:.3f}")`,
+        tip: 'Comparez toujours RMSE et MAE : si RMSE est beaucoup plus grand que MAE, quelques grosses erreurs tirent la moyenne.'
+      },
+      {
+        id: 'code-10',
+        num: 'A10',
+        group: '5. Évaluer & Comparer',
+        title: 'Créer le modèle de référence (DummyRegressor)',
+        why: 'Calculer l’erreur obtenue si l’on répondait bêtement la moyenne de l’année (16,8 °C) tous les jours.',
+        code: `from sklearn.dummy import DummyRegressor
+
+reference = DummyRegressor(strategy="mean").fit(X_train, y_train)
+mae_ref = mean_absolute_error(y_test, reference.predict(X_test))
+
+print(f"Erreur moyenne bête (Référence) : {mae_ref:.2f} °C") # 5.55 °C
+print(f"Erreur de mon modèle           : {mae:.2f} °C")     # 1.91 °C`,
+        tip: 'Sans cette comparaison, un score seul ne dit rien à un non-technicien. Passer de 5,55 °C à 1,91 °C parle à tout le monde !'
+      }
+    ];
+
+    // =========================================================================
+    // LES 8 ÉTAPES VISUELLES DU COURS (VULGARISATION + SCHÉMA + CODE ASSOCIÉ)
+    // =========================================================================
+    const CHAPTERS = [
+      // CHAPITRE 01 — LE FIL ROUGE MÉTÉO
+      {
+        num: '01',
+        group: 'Le Fil Rouge',
+        shortTitle: '01 · Le défi météo (5,5 °C → 1,9 °C)',
+        render: () => `
+          <div class="space-y-7">
+            <header class="pb-5 border-b border-slate-200/80">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+                <span class="w-2 h-2 rounded-full bg-sky-600"></span>
+                INTRODUCTION · ÉTAPE 01
+              </span>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+                Quelle température fera-t-il aujourd’hui ?
+              </h2>
+              <div class="mt-3 flex items-start sm:items-center gap-3">
+                <span class="w-1.5 h-6 rounded-full bg-sky-600 shrink-0 mt-1 sm:mt-0"></span>
+                <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+                  « Sans indices, on devine la moyenne (erreur de 5,55 °C). Avec deux indices météo, la régression linéaire divise l’erreur par près de trois ! »
+                </p>
+              </div>
+            </header>
+
+            <!-- Progression visuelle des 3 niveaux -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <section class="bg-white rounded-3xl border-2 border-slate-200 p-6 flex flex-col justify-between">
+                <div>
+                  <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-700 font-display font-extrabold text-xs uppercase">Niveau 0 · À l’aveugle</span>
+                  <h3 class="font-serif text-2xl font-bold text-ink mt-3">Répondre la moyenne (16,8 °C)</h3>
+                  <p class="text-sm text-slate-600 mt-1">On ignore la météo du jour et on répond toujours 16,8 °C, en janvier comme en juillet.</p>
+                </div>
+                <div class="my-6 bg-rose-50 border border-rose-200 rounded-2xl p-5 text-center">
+                  <div class="text-xs font-display font-extrabold text-rose-700 uppercase">Erreur moyenne (MAE)</div>
+                  <div class="font-serif text-5xl font-bold text-rose-600 mt-1">5,55 °C</div>
+                  <div class="text-xs font-mono text-slate-500 mt-1">R² = 0,000 (Référence)</div>
+                </div>
+                <div class="text-xs font-display font-bold text-slate-500">C’est la barre minimale à battre (<code class="text-ink">DummyRegressor</code>).</div>
+              </section>
+
+              <section class="bg-white rounded-3xl border-2 border-sky-300 p-6 flex flex-col justify-between">
+                <div>
+                  <span class="px-3 py-1 rounded-full bg-sky-100 text-sky-800 font-display font-extrabold text-xs uppercase">Niveau 1 · Régression simple</span>
+                  <h3 class="font-serif text-2xl font-bold text-sky-700 mt-3">+ Heures de soleil</h3>
+                  <p class="text-sm text-slate-600 mt-1">On trace une droite selon <code class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded">SUNHOUR</code> : chaque heure de soleil ajoute +1,28 °C.</p>
+                </div>
+                <div class="my-6 bg-sky-50 border border-sky-200 rounded-2xl p-5 text-center">
+                  <div class="text-xs font-display font-extrabold text-sky-700 uppercase">Erreur moyenne (MAE)</div>
+                  <div class="font-serif text-5xl font-bold text-sky-600 mt-1">3,94 °C</div>
+                  <div class="text-xs font-mono text-sky-800 font-bold mt-1">R² = 0,477 (48 % expliqués)</div>
+                </div>
+                <div class="text-xs font-display font-bold text-sky-700">On gagne déjà 1,6 °C de précision avec 1 seule colonne.</div>
+              </section>
+
+              <section class="bg-white rounded-3xl border-2 border-teal-500 p-6 flex flex-col justify-between shadow-2xs">
+                <div>
+                  <span class="px-3 py-1 rounded-full bg-teal-100 text-teal-800 font-display font-extrabold text-xs uppercase">Niveau 2 · Régression multiple</span>
+                  <h3 class="font-serif text-2xl font-bold text-teal-700 mt-3">+ Température minimale</h3>
+                  <p class="text-sm text-slate-600 mt-1">On combine soleil (<code class="font-mono text-xs bg-slate-100 px-1 rounded">SUNHOUR</code>) + fraîcheur du matin (<code class="font-mono text-xs bg-slate-100 px-1 rounded">MIN_TEMPERATURE_C</code>).</p>
+                </div>
+                <div class="my-6 bg-teal-50 border border-teal-200 rounded-2xl p-5 text-center">
+                  <div class="text-xs font-display font-extrabold text-teal-700 uppercase">Erreur moyenne (MAE)</div>
+                  <div class="font-serif text-5xl font-bold text-teal-600 mt-1">1,91 °C</div>
+                  <div class="text-xs font-mono text-teal-800 font-bold mt-1">R² = 0,867 (87 % expliqués)</div>
+                </div>
+                <div class="text-xs font-display font-bold text-teal-700">Objectif atteint : erreur sous les 2 °C !</div>
+              </section>
+            </div>
+
+            <!-- Aperçu du fichier meteo2019.csv + Code A01 -->
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+              <div class="xl:col-span-5 bg-white rounded-2xl border border-slate-200 p-5">
+                <div class="font-display text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">Le fichier du cours : meteo2019.csv (365 jours)</div>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left text-xs font-mono">
+                    <thead>
+                      <tr class="border-b border-slate-200 text-slate-500">
+                        <th class="py-2">DATE</th>
+                        <th class="py-2 text-sky-700">SUNHOUR (X)</th>
+                        <th class="py-2 text-indigo-700">MIN_TEMP (X)</th>
+                        <th class="py-2 text-rose-600">MAX_TEMP (y)</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                      <tr><td class="py-1.5">2019-01-01</td><td class="font-bold">5.1</td><td>4</td><td class="font-bold text-rose-600">9 °C</td></tr>
+                      <tr><td class="py-1.5">2019-01-02</td><td class="font-bold">8.7</td><td>5</td><td class="font-bold text-rose-600">8 °C</td></tr>
+                      <tr><td class="py-1.5">2019-01-03</td><td class="font-bold">8.7</td><td>0</td><td class="font-bold text-rose-600">6 °C</td></tr>
+                      <tr><td class="py-1.5">2019-01-04</td><td class="font-bold">5.1</td><td>-1</td><td class="font-bold text-rose-600">5 °C</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="xl:col-span-7">
+                ${renderCodeCard(CODE_ACTIONS[0])}
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // CHAPITRE 02 — LES 3 VERBES DE SCIKIT-LEARN
+      {
+        num: '02',
+        group: 'Les Bases Code',
+        shortTitle: '02 · Les 3 verbes : fit, predict, score',
+        render: () => `
+          <div class="space-y-7">
+            <header class="pb-5 border-b border-slate-200/80">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+                <span class="w-2 h-2 rounded-full bg-sky-600"></span>
+                MÉCANIQUE SCIKIT-LEARN · ÉTAPE 02
+              </span>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+                Trois verbes universels : fit(), predict(), score()
+              </h2>
+              <div class="mt-3 flex items-start sm:items-center gap-3">
+                <span class="w-1.5 h-6 rounded-full bg-sky-600 shrink-0 mt-1 sm:mt-0"></span>
+                <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+                  « Quel que soit l’algorithme choisi dans scikit-learn, vous utiliserez toujours exactement les mêmes trois commandes. »
+                </p>
+              </div>
+            </header>
+
+            <!-- Schéma pipeline 3 étapes -->
+            <div class="bg-white rounded-3xl border border-slate-200 p-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
+                <div class="bg-sky-50/80 border-2 border-sky-300 rounded-2xl p-5 flex flex-col justify-between">
+                  <div>
+                    <span class="px-2.5 py-0.5 rounded-full bg-sky-600 text-white font-mono text-xs font-bold">1. model.fit(X, y)</span>
+                    <h3 class="font-serif text-2xl font-bold text-ink mt-3">J’étudie les exemples</h3>
+                    <p class="text-sm text-slate-700 mt-1.5">La machine regarde les heures de soleil (X) et les vraies températures (y) pour calculer la pente idéale.</p>
+                  </div>
+                  <div class="mt-4 text-xs font-mono font-bold text-sky-800 bg-white px-3 py-2 rounded-xl border border-sky-200">
+                    Entrée : X (2D) + y (1D)
+                  </div>
+                </div>
+
+                <div class="bg-amber-50/80 border-2 border-amber-300 rounded-2xl p-5 flex flex-col justify-between">
+                  <div>
+                    <span class="px-2.5 py-0.5 rounded-full bg-amber-600 text-white font-mono text-xs font-bold">2. model.predict(X_new)</span>
+                    <h3 class="font-serif text-2xl font-bold text-ink mt-3">Je devine la suite</h3>
+                    <p class="text-sm text-slate-700 mt-1.5">On lui donne 10 h de soleil demain, et elle applique sa formule pour annoncer <strong>17,69 °C</strong>.</p>
+                  </div>
+                  <div class="mt-4 text-xs font-mono font-bold text-amber-900 bg-white px-3 py-2 rounded-xl border border-amber-200">
+                    Entrée : X_new → Sortie : y_pred
+                  </div>
+                </div>
+
+                <div class="bg-teal-50/80 border-2 border-teal-300 rounded-2xl p-5 flex flex-col justify-between">
+                  <div>
+                    <span class="px-2.5 py-0.5 rounded-full bg-teal-600 text-white font-mono text-xs font-bold">3. model.score(X, y)</span>
+                    <h3 class="font-serif text-2xl font-bold text-ink mt-3">Je note ma précision</h3>
+                    <p class="text-sm text-slate-700 mt-1.5">En régression, <code class="font-mono text-xs">score()</code> calcule automatiquement le coefficient <strong>R²</strong> entre 0 et 1.</p>
+                  </div>
+                  <div class="mt-4 text-xs font-mono font-bold text-teal-900 bg-white px-3 py-2 rounded-xl border border-teal-200">
+                    Sortie : un nombre (ex : 0.477)
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Piège visuel [[ ]] vs [ ] -->
+            <div class="bg-rose-50 border-2 border-rose-300 rounded-3xl p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+              <div class="lg:col-span-5">
+                <span class="px-3 py-1 rounded-full bg-rose-600 text-white font-display font-extrabold text-[11px] uppercase">⚠ Le piège n°1 des débutants</span>
+                <h3 class="font-serif text-2xl font-bold text-ink mt-2">Pourquoi <code class="font-mono text-rose-700">X</code> a doubles crochets ?</h3>
+                <p class="text-sm text-slate-700 mt-1">scikit-learn exige un <strong>tableau 2D</strong> (lignes × colonnes) pour les indices <code class="font-mono">X</code>, même s’il n’y a qu’une seule colonne !</p>
+              </div>
+              <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
+                <div class="bg-white border-2 border-rose-400 rounded-2xl p-4">
+                  <div class="text-rose-600 font-bold mb-1">✕ meteo["SUNHOUR"]</div>
+                  <div class="text-slate-600">Renvoie une liste simple (1D).</div>
+                  <div class="mt-2 text-rose-700 font-bold">Erreur : Expected 2D array, got 1D array</div>
+                </div>
+                <div class="bg-white border-2 border-teal-500 rounded-2xl p-4">
+                  <div class="text-teal-700 font-bold mb-1">✓ meteo[["SUNHOUR"]]</div>
+                  <div class="text-slate-600">Renvoie un mini-tableau (2D).</div>
+                  <div class="mt-2 text-teal-700 font-bold">Accepté par fit() et predict() !</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Codes A03, A05, A06 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              ${renderCodeCard(CODE_ACTIONS[2])}
+              ${renderCodeCard(CODE_ACTIONS[4])}
+            </div>
+            ${renderCodeCard(CODE_ACTIONS[5])}
+          </div>
+        `
+      },
+
+      // CHAPITRE 03 — RÉGRESSION LINÉAIRE SIMPLE (INTERACTIF)
+      {
+        num: '03',
+        group: 'Régression Simple',
+        shortTitle: '03 · Régression simple (1 variable)',
+        render: () => `
+          <div class="space-y-7">
+            <header class="pb-5 border-b border-slate-200/80">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+                <span class="w-2 h-2 rounded-full bg-sky-600"></span>
+                1 SEULE VARIABLE · ÉTAPE 03
+              </span>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+                La régression linéaire simple : y = β₀ + β₁·x
+              </h2>
+              <div class="mt-3 flex items-start sm:items-center gap-3">
+                <span class="w-1.5 h-6 rounded-full bg-sky-600 shrink-0 mt-1 sm:mt-0"></span>
+                <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+                  « Je trace la ligne droite qui rend les petits écarts verts les plus courts possible. »
+                </p>
+              </div>
+            </header>
+
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-7 items-stretch">
+              <!-- Graphique interactif -->
+              <section class="xl:col-span-7 bg-white rounded-3xl border border-slate-200 p-5 sm:p-6 flex flex-col justify-between">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                  <span class="font-display text-xs font-extrabold text-sky-700 uppercase tracking-wider">Simulateur météo interactif</span>
+                  <div class="flex items-center gap-2.5 bg-sky-50 border border-sky-200 px-3 py-1.5 rounded-xl">
+                    <label for="sim-sun" class="text-xs font-display font-bold text-sky-900">Soleil :</label>
+                    <input id="sim-sun" type="range" min="0" max="14" step="0.5" value="10" class="ml-slider w-28" />
+                    <span id="sim-sun-label" class="font-mono text-xs font-bold text-sky-700">10.0 h → 17,69 °C</span>
+                  </div>
+                </div>
+
+                <svg viewBox="0 0 820 460" class="w-full h-auto">
+                  <!-- Axes -->
+                  <line x1="80" y1="395" x2="770" y2="395" stroke="#0F172A" stroke-width="2.5"/>
+                  <text x="765" y="432" text-anchor="end" font-family="Plus Jakarta Sans" font-size="14" font-weight="700" fill="#475569">Heures d'ensoleillement (SUNHOUR) →</text>
+                  <line x1="80" y1="395" x2="80" y2="30" stroke="#0F172A" stroke-width="2.5"/>
+                  <text x="95" y="42" font-family="Plus Jakarta Sans" font-size="14" font-weight="700" fill="#475569">↑ Température max (°C)</text>
+
+                  <!-- Repères Y -->
+                  <text x="70" y="335" text-anchor="end" font-family="JetBrains Mono" font-size="12" fill="#64748B">4.8° (β₀)</text>
+                  <text x="70" y="245" text-anchor="end" font-family="JetBrains Mono" font-size="12" fill="#64748B">12°C</text>
+                  <text x="70" y="155" text-anchor="end" font-family="JetBrains Mono" font-size="12" fill="#64748B">20°C</text>
+
+                  <!-- Résidus (écarts verts) -->
+                  <line x1="170" y1="275" x2="170" y2="306" stroke="#16A34A" stroke-width="2.5" stroke-dasharray="4 4"/>
+                  <line x1="280" y1="312" x2="280" y2="275" stroke="#16A34A" stroke-width="2.5" stroke-dasharray="4 4"/>
+                  <line x1="390" y1="210" x2="390" y2="244" stroke="#16A34A" stroke-width="2.5" stroke-dasharray="4 4"/>
+                  <line x1="630" y1="145" x2="630" y2="175" stroke="#16A34A" stroke-width="2.5" stroke-dasharray="4 4"/>
+                  <line x1="710" y1="185" x2="710" y2="152" stroke="#16A34A" stroke-width="2.5" stroke-dasharray="4 4"/>
+
+                  <!-- Droite y = 4.847 + 1.284 * x -->
+                  <line x1="80" y1="332" x2="750" y2="141" stroke="#E11D48" stroke-width="5" stroke-linecap="round"/>
+
+                  <!-- Point Intercept β0 -->
+                  <circle cx="80" cy="332" r="9" fill="#0F172A"/>
+                  <rect x="94" y="342" width="175" height="36" rx="8" fill="#0F172A"/>
+                  <text x="181" y="365" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#38BDF8">β₀ = 4,85 °C (0h soleil)</text>
+
+                  <!-- Points observés -->
+                  <circle cx="170" cy="275" r="8" fill="#0284C7"/><circle cx="280" cy="312" r="8" fill="#0284C7"/>
+                  <circle cx="390" cy="210" r="8" fill="#0284C7"/><circle cx="630" cy="145" r="8" fill="#0284C7"/>
+                  <circle cx="710" cy="185" r="8" fill="#0284C7"/>
+
+                  <!-- Curseur prédiction interactive (10h -> 17.69°C) -->
+                  <line id="sun-vline" x1="558" y1="395" x2="558" y2="195" stroke="#F59E0B" stroke-width="2.5" stroke-dasharray="6 4"/>
+                  <circle id="sun-dot" cx="558" cy="195" r="13" fill="#F59E0B" stroke="#0F172A" stroke-width="3"/>
+
+                  <g id="sun-callout" transform="translate(435, 95)">
+                    <rect x="0" y="0" width="246" height="66" rx="14" fill="#0F172A"/>
+                    <text id="sun-callout-top" x="123" y="25" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#94A3B8">10.0 H DE SOLEIL</text>
+                    <text id="sun-callout-val" x="123" y="51" text-anchor="middle" font-family="Fraunces" font-size="22" font-weight="700" fill="#38BDF8">17,69 °C prédits</text>
+                  </g>
+                </svg>
+              </section>
+
+              <!-- Décodage des 3 chiffres -->
+              <aside class="xl:col-span-5 flex flex-col justify-between gap-4">
+                <div class="bg-white rounded-2xl border border-slate-200 p-5">
+                  <div class="font-display text-[11px] font-extrabold text-sky-700 uppercase tracking-widest">1. La pente (β₁ = 1,284)</div>
+                  <div class="font-serif text-2xl font-bold text-ink mt-1">+1,28 °C par heure de soleil</div>
+                  <p class="text-sm text-slate-600 mt-1">Chaque heure de soleil supplémentaire fait monter la température maximale de 1,28 °C en moyenne. C’est la phrase à dire à un non-technicien !</p>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200 p-5">
+                  <div class="font-display text-[11px] font-extrabold text-slate-500 uppercase tracking-widest">2. L’ordonnée à l’origine (β₀ = 4,847)</div>
+                  <div class="font-serif text-2xl font-bold text-ink mt-1">4,85 °C sans aucun soleil</div>
+                  <p class="text-sm text-slate-600 mt-1">C’est la température prédite quand <code class="font-mono text-xs">SUNHOUR = 0</code> (un jour complètement couvert).</p>
+                </div>
+
+                <div class="bg-sky-50 rounded-2xl border border-sky-200 p-5">
+                  <div class="font-display text-[11px] font-extrabold text-sky-800 uppercase tracking-widest">3. Le score R² = 0,477</div>
+                  <div class="font-serif text-2xl font-bold text-sky-900 mt-1">48 % expliqués, 52 % manquants</div>
+                  <p class="text-sm text-slate-700 mt-1">Le soleil seul ne suffit pas : en hiver comme en été, 8 heures de soleil ne donnent pas la même température. Il faut ajouter un 2e indice !</p>
+                </div>
+              </aside>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              ${renderCodeCard(CODE_ACTIONS[1])}
+              ${renderCodeCard(CODE_ACTIONS[6])}
+            </div>
+          </div>
+        `
+      },
+
+      // CHAPITRE 04 — RÉGRESSION LINÉAIRE MULTIPLE
+      {
+        num: '04',
+        group: 'Régression Multiple',
+        shortTitle: '04 · Régression multiple (2+ variables)',
+        render: () => `
+          <div class="space-y-7">
+            <header class="pb-5 border-b border-slate-200/80">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+                <span class="w-2 h-2 rounded-full bg-sky-600"></span>
+                PLUSIEURS VARIABLES · ÉTAPE 04
+              </span>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+                La régression multiple : passer de la droite au plan
+              </h2>
+              <div class="mt-3 flex items-start sm:items-center gap-3">
+                <span class="w-1.5 h-6 rounded-full bg-sky-600 shrink-0 mt-1 sm:mt-0"></span>
+                <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+                  « En ajoutant la température minimale du matin, le R² bondit de 0,477 à 0,867 ! »
+                </p>
+              </div>
+            </header>
+
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-7 items-stretch">
+              <!-- Comparaison visuelle Avant / Après -->
+              <section class="xl:col-span-7 bg-white rounded-3xl border border-slate-200 p-6 flex flex-col justify-between space-y-5">
+                <div class="font-display text-xs font-extrabold text-sky-700 uppercase tracking-wider">Ce qui change quand on ajoute MIN_TEMPERATURE_C</div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5">
+                    <div class="text-xs font-display font-extrabold text-slate-500 uppercase">Modèle 1 · Simple</div>
+                    <div class="font-serif text-2xl font-bold text-ink mt-1">1 seule variable</div>
+                    <div class="mt-4 space-y-2 text-sm">
+                      <div class="flex justify-between"><span>SUNHOUR :</span><strong class="font-mono text-sky-700">+1,284 °C</strong></div>
+                      <div class="flex justify-between text-slate-400"><span>MIN_TEMP :</span><span>absent</span></div>
+                      <div class="flex justify-between border-t pt-2"><span>Score R² :</span><strong class="font-mono">0,477</strong></div>
+                    </div>
+                  </div>
+
+                  <div class="bg-sky-50/80 border-2 border-sky-500 rounded-2xl p-5">
+                    <div class="text-xs font-display font-extrabold text-sky-700 uppercase">Modèle 2 · Multiple</div>
+                    <div class="font-serif text-2xl font-bold text-ink mt-1">2 variables combinées</div>
+                    <div class="mt-4 space-y-2 text-sm">
+                      <div class="flex justify-between"><span>SUNHOUR :</span><strong class="font-mono text-amber-700">+0,662 °C</strong></div>
+                      <div class="flex justify-between"><span>MIN_TEMP :</span><strong class="font-mono text-teal-700">+0,989 °C</strong></div>
+                      <div class="flex justify-between border-t border-sky-200 pt-2"><span>Score R² :</span><strong class="font-mono text-teal-700">0,867 (+82%)</strong></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Explication visuelle de la baisse de 1.284 à 0.662 -->
+                <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-5">
+                  <div class="font-display font-extrabold text-sm text-amber-900">🤔 Pourquoi le coefficient du soleil chute-t-il de 1,284 à 0,662 ?</div>
+                  <p class="text-sm text-amber-950 mt-1.5 leading-relaxed">
+                    Dans le modèle simple, le soleil portait <strong>tout seul</strong> l’effet de la saison (il fait plus ensoleillé l’été, quand les nuits sont aussi plus douces). Dès qu’on ajoute <code class="font-mono text-xs bg-white px-1 rounded">MIN_TEMPERATURE_C</code>, cette variable récupère l’effet saisonnier, et il ne reste à <code class="font-mono text-xs bg-white px-1 rounded">SUNHOUR</code> que son <strong>effet propre</strong> (+0,66 °C par heure de soleil, <em>à température minimale égale</em>).
+                  </p>
+                </div>
+              </section>
+
+              <!-- Règles d'or de la régression multiple -->
+              <aside class="xl:col-span-5 flex flex-col justify-between gap-4">
+                <div class="bg-white rounded-2xl border border-slate-200 p-5">
+                  <div class="font-display text-[11px] font-extrabold text-sky-700 uppercase tracking-widest">Géométrie</div>
+                  <div class="font-serif text-xl font-bold text-ink mt-1">Un plan en 3D (puis un hyperplan)</div>
+                  <p class="text-sm text-slate-600 mt-1">Avec 2 variables explicatives, le modèle ne trace plus une ligne mais une feuille plate inclinée dans l’espace 3D.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200 p-5">
+                  <div class="font-display text-[11px] font-extrabold text-teal-700 uppercase tracking-widest">Règle de lecture</div>
+                  <div class="font-serif text-xl font-bold text-ink mt-1">« Toutes choses égales par ailleurs »</div>
+                  <p class="text-sm text-slate-600 mt-1">Chaque coefficient mesure l’effet d’une variable quand toutes les autres restent figées.</p>
+                </div>
+
+                <div class="bg-rose-50 rounded-2xl border border-rose-200 p-5">
+                  <div class="font-display text-[11px] font-extrabold text-rose-700 uppercase tracking-widest">⚠ Piège : la multicolinéarité</div>
+                  <div class="font-serif text-xl font-bold text-ink mt-1">Deux variables quasi identiques</div>
+                  <p class="text-sm text-slate-700 mt-1">Si deux colonnes sont corrélées à 0,95, le modèle partage arbitrairement le poids entre les deux : les coefficients deviennent instables.</p>
+                </div>
+              </aside>
+            </div>
+
+            ${renderCodeCard({
+              id: 'code-multi-full',
+              badge: 'A11 · Code complet',
+              title: 'Entraîner et lire une régression linéaire multiple',
+              why: 'Combiner plusieurs colonnes explicatives et afficher proprement le tableau des coefficients.',
+              code: `from sklearn.linear_model import LinearRegression
+import pandas as pd
+
+X = meteo[["SUNHOUR", "MIN_TEMPERATURE_C"]]
+y = meteo["MAX_TEMPERATURE_C"]
+
+model = LinearRegression().fit(X, y)
+
+coefficients = pd.DataFrame({
+    "Feature": X.columns,
+    "Coefficient": model.coef_
+})
+print(coefficients)
+print(f"Intercept : {model.intercept_:.3f}")   # 1.649
+print(f"R²        : {model.score(X, y):.3f}")  # 0.867`,
+              tip: 'En régression multiple, X contient déjà plusieurs colonnes : il forme naturellement un tableau 2D.'
+            })}
+          </div>
+        `
+      },
+
+      // CHAPITRE 05 — LES 4 MÉTRIQUES D'ÉVALUATION
+      {
+        num: '05',
+        group: 'Évaluer le modèle',
+        shortTitle: '05 · Les 4 métriques (MAE, MSE, RMSE, R²)',
+        render: () => `
+          <div class="space-y-7">
+            <header class="pb-5 border-b border-slate-200/80">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-100 text-teal-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+                <span class="w-2 h-2 rounded-full bg-teal-600"></span>
+                ÉVALUATION · ÉTAPE 05
+              </span>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+                Quatre chiffres pour répondre à quatre questions
+              </h2>
+              <div class="mt-3 flex items-start sm:items-center gap-3">
+                <span class="w-1.5 h-6 rounded-full bg-teal-600 shrink-0 mt-1 sm:mt-0"></span>
+                <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+                  « Toutes les métriques se calculent sur le jeu de test (jamais sur l’entraînement). »
+                </p>
+              </div>
+            </header>
+
+            <!-- Grille 2x2 des 4 métriques -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <section class="bg-white rounded-3xl border-2 border-sky-400 p-6 flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between">
+                    <span class="px-3 py-1 rounded-full bg-sky-100 text-sky-800 font-display font-extrabold text-xs">1. MAE</span>
+                    <span class="font-mono text-xs font-bold text-slate-400">Unité : °C</span>
+                  </div>
+                  <h3 class="font-serif text-2xl font-bold text-ink mt-3">De combien je me trompe en moyenne ?</h3>
+                  <p class="text-sm text-slate-600 mt-1.5">Moyenne simple des écarts absolus. Toutes les erreurs comptent proportionnellement à leur taille.</p>
+                </div>
+                <div class="mt-4 bg-sky-50 rounded-xl p-3 text-xs font-display font-bold text-sky-900">
+                  Ici : MAE = 1,91 °C → En moyenne, la prédiction est à moins de 2 °C de la réalité.
+                </div>
+              </section>
+
+              <section class="bg-white rounded-3xl border-2 border-amber-400 p-6 flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between">
+                    <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-display font-extrabold text-xs">2. MSE</span>
+                    <span class="font-mono text-xs font-bold text-slate-400">Unité : (°C)²</span>
+                  </div>
+                  <h3 class="font-serif text-2xl font-bold text-ink mt-3">Y a-t-il des erreurs graves ?</h3>
+                  <p class="text-sm text-slate-600 mt-1.5">Les écarts sont élevés au carré : une erreur de 10 °C pèse <strong>100 fois plus</strong> qu’une erreur de 1 °C. Unité au carré peu lisible.</p>
+                </div>
+                <div class="mt-4 bg-amber-50 rounded-xl p-3 text-xs font-display font-bold text-amber-900">
+                  Sert surtout de marche intermédiaire pour calculer la RMSE.
+                </div>
+              </section>
+
+              <section class="bg-white rounded-3xl border-2 border-indigo-400 p-6 flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between">
+                    <span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 font-display font-extrabold text-xs">3. RMSE</span>
+                    <span class="font-mono text-xs font-bold text-slate-400">Unité : °C</span>
+                  </div>
+                  <h3 class="font-serif text-2xl font-bold text-ink mt-3">La sévérité du MSE, en degrés lisibles</h3>
+                  <p class="text-sm text-slate-600 mt-1.5">Racine carrée du MSE. Elle remet le score en °C tout en restant très sensible aux grosses erreurs ponctuelles.</p>
+                </div>
+                <div class="mt-4 bg-indigo-50 rounded-xl p-3 text-xs font-display font-bold text-indigo-900">
+                  Réflexe pro : si RMSE ≫ MAE (ex : RMSE = 6, MAE = 2), cherchez quelques valeurs extrêmes !
+                </div>
+              </section>
+
+              <section class="bg-white rounded-3xl border-2 border-teal-500 p-6 flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between">
+                    <span class="px-3 py-1 rounded-full bg-teal-100 text-teal-800 font-display font-extrabold text-xs">4. R²</span>
+                    <span class="font-mono text-xs font-bold text-slate-400">Sans unité (≤ 1)</span>
+                  </div>
+                  <h3 class="font-serif text-2xl font-bold text-ink mt-3">Quelle part de la variation j’explique ?</h3>
+                  <p class="text-sm text-slate-600 mt-1.5"><strong>1</strong> = parfait · <strong>0</strong> = pas mieux que répondre la moyenne · <strong>&lt; 0</strong> = pire que la moyenne.</p>
+                </div>
+                <div class="mt-4 bg-teal-50 rounded-xl p-3 text-xs font-display font-bold text-teal-900">
+                  Ici : R² = 0,867 → Le modèle explique 86,7 % des variations de température.
+                </div>
+              </section>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              ${renderCodeCard(CODE_ACTIONS[3])}
+              ${renderCodeCard(CODE_ACTIONS[8])}
+            </div>
+          </div>
+        `
+      },
+
+      // CHAPITRE 06 — LE MODÈLE DE RÉFÉRENCE (DUMMY)
+      {
+        num: '06',
+        group: 'Évaluer le modèle',
+        shortTitle: '06 · Le modèle de référence (DummyRegressor)',
+        render: () => `
+          <div class="space-y-7">
+            <header class="pb-5 border-b border-slate-200/80">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-100 text-teal-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+                <span class="w-2 h-2 rounded-full bg-teal-600"></span>
+                PREUVE DE VALEUR · ÉTAPE 06
+              </span>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+                Le modèle de référence : la barre à franchir
+              </h2>
+              <div class="mt-3 flex items-start sm:items-center gap-3">
+                <span class="w-1.5 h-6 rounded-full bg-teal-600 shrink-0 mt-1 sm:mt-0"></span>
+                <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+                  « Dire “mon R² vaut 0,87” ne parle pas à un décideur. Dire “je réduis l’erreur de 5,55 °C à 1,91 °C” convainc tout le monde. »
+                </p>
+              </div>
+            </header>
+
+            <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-6">
+              <div class="font-display text-xs font-extrabold text-slate-400 uppercase tracking-wider">Comparaison des erreurs moyennes (MAE) sur l’année</div>
+              <div class="space-y-4">
+                <div>
+                  <div class="flex justify-between text-sm font-display font-bold mb-1">
+                    <span>1. Référence naïve (<code class="font-mono text-xs">DummyRegressor</code> : répond toujours 16,8 °C)</span>
+                    <span class="text-rose-600 font-mono">5,55 °C d'erreur (R² = 0,000)</span>
+                  </div>
+                  <div class="w-full h-9 bg-slate-100 rounded-xl overflow-hidden">
+                    <div class="h-full bg-rose-500 rounded-xl flex items-center px-3 text-white font-display font-bold text-xs" style="width:100%">100 % de l'erreur initiale</div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-sm font-display font-bold mb-1">
+                    <span>2. Régression simple (<code class="font-mono text-xs">SUNHOUR</code> seul)</span>
+                    <span class="text-sky-700 font-mono">3,94 °C d'erreur (R² = 0,477)</span>
+                  </div>
+                  <div class="w-full h-9 bg-slate-100 rounded-xl overflow-hidden">
+                    <div class="h-full bg-sky-600 rounded-xl flex items-center px-3 text-white font-display font-bold text-xs" style="width:71%">−1,61 °C gagnés</div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-sm font-display font-bold mb-1">
+                    <span>3. Régression multiple (<code class="font-mono text-xs">SUNHOUR + MIN_TEMPERATURE_C</code>)</span>
+                    <span class="text-teal-700 font-mono">1,91 °C d'erreur (R² = 0,867)</span>
+                  </div>
+                  <div class="w-full h-9 bg-slate-100 rounded-xl overflow-hidden">
+                    <div class="h-full bg-teal-600 rounded-xl flex items-center px-3 text-white font-display font-bold text-xs" style="width:34.4%">Erreur divisée par ~3 !</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            ${renderCodeCard(CODE_ACTIONS[9])}
+          </div>
+        `
+      },
+
+      // CHAPITRE 07 — LE SCRIPT COMPLET DE A À Z
+      {
+        num: '07',
+        group: 'Pratique & Challenge',
+        shortTitle: '07 · Le script complet prêt à exécuter',
+        render: () => `
+          <div class="space-y-7">
+            <header class="pb-5 border-b border-slate-200/80">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+                <span class="w-2 h-2 rounded-full bg-amber-600"></span>
+                SYNTHÈSE CODE · ÉTAPE 07
+              </span>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+                Le script complet de bout en bout
+              </h2>
+              <div class="mt-3 flex items-start sm:items-center gap-3">
+                <span class="w-1.5 h-6 rounded-full bg-amber-600 shrink-0 mt-1 sm:mt-0"></span>
+                <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+                  « Toutes les étapes réunies dans l’ordre exact : charger, séparer, entraîner, évaluer et comparer. »
+                </p>
+              </div>
+            </header>
+
+            ${renderCodeCard({
+              id: 'code-end-to-end',
+              badge: 'Pipeline complet',
+              title: 'Script complet : Régression linéaire multiple sur meteo2019.csv',
+              why: 'Enchaîner proprement toutes les étapes d’un projet de régression supervisée dans scikit-learn.',
+              code: `import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.dummy import DummyRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+# 1. Charger les données
+meteo = pd.read_csv("meteo2019.csv")
+
+# 2. Définir les indices X (2D) et la cible y (1D)
+X = meteo[["SUNHOUR", "MIN_TEMPERATURE_C"]]
+y = meteo["MAX_TEMPERATURE_C"]
+
+# 3. Séparer entraînement (80 %) et test (20 %) AVANT d'apprendre
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# 4. Entraîner le modèle de référence (moyenne bête)
+ref = DummyRegressor(strategy="mean").fit(X_train, y_train)
+mae_ref = mean_absolute_error(y_test, ref.predict(X_test))
+
+# 5. Entraîner la régression linéaire et prédire sur le test
+model = LinearRegression().fit(X_train, y_train)
+y_pred = model.predict(X_test)
+
+# 6. Calculer les 4 métriques sur le jeu de test
+mae  = mean_absolute_error(y_test, y_pred)
+mse  = mean_squared_error(y_test, y_pred)
+rmse = np.sqrt(mse)
+r2   = r2_score(y_test, y_pred)
+
+print(f"Référence MAE : {mae_ref:.2f} °C")
+print(f"Modèle    MAE : {mae:.2f} °C | RMSE : {rmse:.2f} °C | R² : {r2:.3f}")
+
+# 7. Lire les coefficients avec leurs noms
+print(pd.DataFrame({"Feature": X.columns, "Coefficient": model.coef_}))`,
+              tip: 'Pour valider le challenge du cours, n’oubliez jamais d’accompagner vos chiffres d’une conclusion rédigée en français clair !'
+            })}
+          </div>
+        `
+      },
+
+      // CHAPITRE 08 — QUIZ EXPRESS DU COURS
+      {
+        num: '08',
+        group: 'Pratique & Challenge',
+        shortTitle: '08 · Quiz express (auto-test)',
+        render: () => `
+          <div class="space-y-7">
+            <header class="pb-5 border-b border-slate-200/80">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+                <span class="w-2 h-2 rounded-full bg-amber-600"></span>
+                VÉRIFIER SES ACQUIS · ÉTAPE 08
+              </span>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+                Les 5 réflexes clés à vérifier
+              </h2>
+              <p class="mt-2 text-sm sm:text-base text-slate-600">Cliquez sur chaque question pour révéler l’explication.</p>
+            </header>
+
+            <div class="space-y-3.5">
+              ${[
+                {
+                  q: '1. Pourquoi écrit-on X = meteo[["SUNHOUR"]] avec doubles crochets et y = meteo["MAX_TEMPERATURE_C"] avec simples crochets ?',
+                  a: 'scikit-learn exige un tableau à 2 dimensions (DataFrame) pour les features X, et une série à 1 dimension (Series) pour la cible y.'
+                },
+                {
+                  q: '2. Le coefficient de SUNHOUR vaut 1,284 en simple, puis 0,662 quand on ajoute MIN_TEMPERATURE_C. Le modèle s’est-il dégradé ?',
+                  a: 'Non, il s’est nettement amélioré (R² passe de 0,477 à 0,867) ! En simple, le soleil portait seul l’effet saisonnier ; en multiple, il ne garde que son effet propre à température minimale égale.'
+                },
+                {
+                  q: '3. Votre RMSE vaut 6 °C alors que votre MAE vaut 2 °C. Que se passe-t-il ?',
+                  a: 'Quelques prédictions très fausses (valeurs extrêmes) tirent le score vers le haut car la RMSE met les écarts au carré avant de prendre la racine.'
+                },
+                {
+                  q: '4. Vous obtenez un R² de −0,3 sur le jeu de test. Est-ce un bug de calcul ?',
+                  a: 'Non : un R² négatif est tout à fait possible sur le jeu de test. Cela signifie que votre modèle prédit pire que si l’on répondait simplement la moyenne à chaque fois.'
+                },
+                {
+                  q: '5. Deux colonnes explicatives sont corrélées à 0,95 entre elles. Quel est le risque ?',
+                  a: 'La multicolinéarité : le modèle répartit arbitrairement l’effet entre les deux colonnes, rendant leurs coefficients instables et impossibles à interpréter.'
+                }
+              ].map((item, idx) => `
+                <details class="bg-white rounded-2xl border border-slate-200 p-5 group">
+                  <summary class="font-display font-bold text-sm sm:text-base text-ink cursor-pointer list-none flex items-center justify-between gap-4">
+                    <span>${item.q}</span>
+                    <span class="px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 text-xs font-bold shrink-0">Voir la réponse</span>
+                  </summary>
+                  <p class="mt-3 pt-3 border-t border-slate-100 text-sm text-slate-700 leading-relaxed">${item.a}</p>
+                </details>
+              `).join('')}
+            </div>
+          </div>
+        `
+      }
+    ];
+
+    // =========================================================================
+    // NAVIGATION & ÉTAT DE L'APPLICATION
+    // =========================================================================
+    let viewMode = 'visual'; // 'visual' (8 étapes) | 'code' (antisèche complète des 10 codes)
+    let currentIdx = 0;
+    let searchQuery = '';
+
+    const sidebarList = document.getElementById('sidebar-list');
+    const stage = document.getElementById('stage');
+    const badge = document.getElementById('progress-badge');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrevBottom = document.getElementById('btn-prev-bottom');
+    const btnNextBottom = document.getElementById('btn-next-bottom');
+    const bottomNav = document.getElementById('bottom-nav');
+    const bottomHint = document.getElementById('bottom-hint');
+    const searchInput = document.getElementById('search-input');
+    const menuBody = document.getElementById('menu-body');
+
+    function bindCopyButtons() {
+      document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const pre = document.getElementById(btn.dataset.copyTarget);
+          if (!pre) return;
+          const ta = document.createElement('textarea');
+          ta.value = pre.textContent;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          const old = btn.textContent;
+          btn.textContent = '✓ Copié !';
+          btn.classList.add('bg-emerald-600', 'text-white');
+          setTimeout(() => {
+            btn.textContent = old;
+            btn.classList.remove('bg-emerald-600', 'text-white');
+          }, 1500);
+        });
+      });
+    }
+
+    function bindSimulators() {
+      const slider = document.getElementById('sim-sun');
+      if (!slider) return;
+      const label = document.getElementById('sim-sun-label');
+      const vline = document.getElementById('sun-vline');
+      const dot = document.getElementById('sun-dot');
+      const callout = document.getElementById('sun-callout');
+      const cTop = document.getElementById('sun-callout-top');
+      const cVal = document.getElementById('sun-callout-val');
+
+      slider.addEventListener('input', () => {
+        const h = parseFloat(slider.value);
+        const temp = (4.847 + 1.284 * h).toFixed(2).replace('.', ',');
+        const x = 80 + (h / 14) * 670;
+        const y = 332 - (h / 14) * 191;
+
+        label.textContent = `${h.toFixed(1)} h → ${temp} °C`;
+        vline.setAttribute('x1', x); vline.setAttribute('x2', x); vline.setAttribute('y2', y);
+        dot.setAttribute('cx', x); dot.setAttribute('cy', y);
+        const boxX = Math.min(Math.max(x - 123, 95), 510);
+        const boxY = Math.max(y - 98, 42);
+        callout.setAttribute('transform', `translate(${boxX}, ${boxY})`);
+        cTop.textContent = `${h.toFixed(1)} H DE SOLEIL`;
+        cVal.textContent = `${temp} °C prédits`;
+      });
+    }
+
+    function renderSidebar() {
+      if (viewMode === 'visual') {
+        const filtered = CHAPTERS.filter(c =>
+          !searchQuery || c.shortTitle.toLowerCase().includes(searchQuery) || c.group.toLowerCase().includes(searchQuery)
+        );
+        const groups = [...new Set(filtered.map(c => c.group))];
+        sidebarList.innerHTML = groups.map(g => `
+          <div>
+            <div class="px-2.5 mb-1.5 text-[10px] font-display font-extrabold tracking-widest uppercase text-slate-400">${g}</div>
+            <div class="space-y-0.5">
+              ${filtered.filter(c => c.group === g).map(c => {
+                const realIdx = CHAPTERS.findIndex(x => x.num === c.num);
+                const active = realIdx === currentIdx;
+                return `
+                  <button data-idx="${realIdx}" class="chap-btn w-full text-left px-3 py-2 rounded-xl text-xs sm:text-[13px] transition ${
+                    active ? 'bg-ink text-white font-display font-bold' : 'hover:bg-slate-100 text-slate-700 font-medium'
+                  }">${c.shortTitle}</button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `).join('');
+
+        document.querySelectorAll('.chap-btn').forEach(b => {
+          b.addEventListener('click', () => {
+            showChapter(parseInt(b.dataset.idx, 10));
+            if (window.innerWidth < 1024) menuBody.classList.add('hidden');
+          });
+        });
+      } else {
+        const filtered = CODE_ACTIONS.filter(a =>
+          !searchQuery || a.title.toLowerCase().includes(searchQuery) || a.code.toLowerCase().includes(searchQuery) || a.group.toLowerCase().includes(searchQuery)
+        );
+        const groups = [...new Set(filtered.map(a => a.group))];
+        sidebarList.innerHTML = groups.map(g => `
+          <div>
+            <div class="px-2.5 mb-1.5 text-[10px] font-display font-extrabold tracking-widest uppercase text-sky-700">${g}</div>
+            <div class="space-y-0.5">
+              ${filtered.filter(a => a.group === g).map(a => `
+                <a href="#card-${a.id}" class="block px-3 py-2 rounded-xl text-xs text-slate-700 hover:bg-sky-50 hover:text-sky-900 font-medium transition truncate">
+                  <span class="font-mono text-[11px] font-bold text-sky-600 mr-1">${a.num}</span> ${a.title}
+                </a>
+              `).join('')}
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function showChapter(idx) {
+      viewMode = 'visual';
+      currentIdx = Math.max(0, Math.min(idx, CHAPTERS.length - 1));
+      document.getElementById('tab-visual').classList.add('bg-ink', 'text-white');
+      document.getElementById('tab-visual').classList.remove('bg-white', 'text-slate-700');
+      document.getElementById('tab-code').classList.remove('bg-ink', 'text-white');
+      document.getElementById('tab-code').classList.add('bg-white', 'text-sky-800');
+
+      bottomNav.classList.remove('hidden');
+      const ch = CHAPTERS[currentIdx];
+      stage.innerHTML = ch.render();
+      badge.textContent = `${ch.num} / 0${CHAPTERS.length}`;
+
+      btnPrev.disabled = currentIdx === 0;
+      btnNext.disabled = currentIdx === CHAPTERS.length - 1;
+      btnPrevBottom.disabled = currentIdx === 0;
+      btnNextBottom.disabled = currentIdx === CHAPTERS.length - 1;
+      bottomHint.textContent = currentIdx < CHAPTERS.length - 1
+        ? `À suivre : ${CHAPTERS[currentIdx + 1].shortTitle}`
+        : 'Vous avez parcouru tout le cours ! Consultez l’antisèche des 10 codes.';
+
+      bindCopyButtons();
+      bindSimulators();
+      renderSidebar();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showCodeCheatsheet() {
+      viewMode = 'code';
+      document.getElementById('tab-code').classList.add('bg-ink', 'text-white');
+      document.getElementById('tab-code').classList.remove('bg-white', 'text-sky-800');
+      document.getElementById('tab-visual').classList.remove('bg-ink', 'text-white');
+      document.getElementById('tab-visual').classList.add('bg-white', 'text-slate-700');
+
+      bottomNav.classList.add('hidden');
+      badge.textContent = '10 CODES';
+
+      const filtered = CODE_ACTIONS.filter(a =>
+        !searchQuery || a.title.toLowerCase().includes(searchQuery) || a.code.toLowerCase().includes(searchQuery) || a.why.toLowerCase().includes(searchQuery)
+      );
+
+      stage.innerHTML = `
+        <div class="space-y-7">
+          <header class="pb-5 border-b border-slate-200/80">
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+              MÉMENTO PYTHON &amp; SCIKIT-LEARN
+            </span>
+            <h2 class="font-serif text-3xl sm:text-4xl font-bold text-ink">Les 10 codes à retenir action par action</h2>
+            <p class="text-sm sm:text-base text-slate-600 mt-1">Chaque action du cours isolée, expliquée en français simple et prête à copier.</p>
+          </header>
+
+          <div class="space-y-6">
+            ${filtered.map(a => `
+              <div id="card-${a.id}" class="scroll-mt-20">
+                ${renderCodeCard({
+                  id: a.id,
+                  badge: `${a.num} · ${a.group}`,
+                  title: a.title,
+                  why: a.why,
+                  code: a.code,
+                  tip: a.tip
+                })}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      bindCopyButtons();
+      renderSidebar();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('tab-visual').addEventListener('click', () => showChapter(currentIdx));
+    document.getElementById('tab-code').addEventListener('click', showCodeCheatsheet);
+    document.getElementById('btn-cheatsheet').addEventListener('click', showCodeCheatsheet);
+
+    btnPrev.addEventListener('click', () => showChapter(currentIdx - 1));
+    btnNext.addEventListener('click', () => showChapter(currentIdx + 1));
+    btnPrevBottom.addEventListener('click', () => showChapter(currentIdx - 1));
+    btnNextBottom.addEventListener('click', () => showChapter(currentIdx + 1));
+
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.trim().toLowerCase();
+      if (viewMode === 'code') showCodeCheatsheet();
+      else renderSidebar();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (document.activeElement === searchInput || viewMode !== 'visual') return;
+      if (e.key === 'ArrowRight') showChapter(currentIdx + 1);
+      if (e.key === 'ArrowLeft') showChapter(currentIdx - 1);
+    });
+
+    document.getElementById('btn-toggle-menu').addEventListener('click', () => {
+      menuBody.classList.toggle('hidden');
+      menuBody.classList.add('flex');
+    });
+
+    showChapter(0);
+  </script>
+</body>
+</html>

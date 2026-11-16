@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guides Visuels — Machine Learning & Data Science</title>
+  <!-- Aperçu Discord (Open Graph) -->
+  <meta property="og:title" content="Guides Visuels — Initiation au Machine Learning & Streamlit" />
+  <meta property="og:description" content="3 guides interactifs vulgarisés : les 25 notions clés du ML, la Régression Linéaire et Streamlit (graphiques & codes prêts à copier)." />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#0a5a8a" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #FAF8F5;
+      color: #141B29;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.25rem;
+    }
+    .container { max-width: 960px; width: 100%; }
+    .badge {
+      display: inline-block;
+      background: #E6F0F6;
+      color: #0A5A8A;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.15;
+      margin-bottom: 0.75rem;
+    }
+    .subtitle {
+      font-size: 1.1rem;
+      color: #4A5568;
+      margin-bottom: 2.5rem;
+      max-width: 650px;
+      line-height: 1.6;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 1.5rem;
+    }
+    .card {
+      background: #FFFFFF;
+      border: 1px solid #E5E0D8;
+      border-radius: 20px;
+      padding: 1.75rem;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 30px rgba(20, 27, 41, 0.08);
+      border-color: #0A5A8A;
+    }
+    .tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+      display: inline-block;
+    }
+    .t-blue { color: #0A5A8A; }
+    .t-coral { color: #D94E34; }
+    .t-purple { color: #6B46C1; }
+    .card h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.4rem;
+      margin-bottom: 0.6rem;
+    }
+    .card p {
+      font-size: 0.95rem;
+      color: #526075;
+      line-height: 1.55;
+      margin-bottom: 1.5rem;
+    }
+    .cta {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #0A5A8A;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <span class="badge">Parcours Data Analyst · Fiches Visuelles</span>
+    <h1>Comprendre le Machine Learning par l'image</h1>
+    <p class="subtitle">Des guides visuels, vulgarisés et interactifs avec schémas explicatifs et codes Python prêts à copier.</p>
+
+    <div class="grid">
+      <a class="card" href="Machine_learning.html">
+        <div>
+          <span class="tag t-purple">Module 01 · Panorama</span>
+          <h2>Les 25 notions du Machine Learning</h2>
+          <p>Régression, classification, clustering, choix d'algorithme et métriques expliqués visuellement sans jargon.</p>
+        </div>
+        <span class="cta">Ouvrir le guide →</span>
+      </a>
+
+      <a class="card" href="Regression_lineaire.html">
+        <div>
+          <span class="tag t-blue">Module 02 · Modélisation</span>
+          <h2>Régression linéaire & scikit-learn</h2>
+          <p>Simple et multiple, simulateur météo interactif, R², MAE/RMSE et les 10 blocs de code Python commentés.</p>
+        </div>
+        <span class="cta">Ouvrir le guide →</span>
+      </a>
+
+      <a class="card" href="Streamlit_les_graphiques.html">
+        <div>
+          <span class="tag t-coral">Module 03 · Data App</span>
+          <h2>Streamlit : les graphiques</h2>
+          <p>Graphiques natifs, Matplotlib, Plotly interactif, cartes et pilotage par widgets avec antisèche code.</p>
+        </div>
+        <span class="cta">Ouvrir le guide →</span>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

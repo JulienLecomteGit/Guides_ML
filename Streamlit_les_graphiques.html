@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guide Visuel &amp; Mémento Code — Streamlit : les graphiques</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Fraunces', 'Georgia', 'serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            ivory: '#FAF8F5',
+            ink: '#0F172A',
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background-color: #FAF8F5;
+      color: #0F172A;
+      font-family: 'Inter', sans-serif;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 999px; }
+
+    input[type="range"].st-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 8px;
+      border-radius: 999px;
+      background: #CBD5E1;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"].st-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #E11D48;
+      border: 3px solid #FFFFFF;
+      box-shadow: 0 2px 6px rgba(225,29,72,0.35);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col lg:flex-row bg-ivory text-ink">
+
+  <!-- MENU LATÉRAL : NOTIONS + ACTIONS PYTHON -->
+  <aside class="w-full lg:w-80 xl:w-[350px] bg-white border-b lg:border-b-0 lg:border-r border-slate-200/90 flex flex-col lg:h-screen lg:sticky lg:top-0 shrink-0 z-30">
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between gap-2">
+      <div>
+        <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-display font-extrabold tracking-widest text-white bg-rose-600 uppercase">
+          Cours 03 · Visuel &amp; Code
+        </span>
+        <h1 class="font-serif text-xl font-bold text-ink mt-1 leading-tight">Streamlit : les graphiques</h1>
+      </div>
+      <button id="btn-toggle-menu" class="lg:hidden px-3 py-2 rounded-xl bg-slate-100 text-xs font-display font-bold text-ink">
+        ☰ Menu
+      </button>
+    </div>
+
+    <div id="menu-body" class="hidden lg:flex flex-col flex-1 overflow-hidden">
+      <div class="p-3.5 border-b border-slate-100 bg-slate-50/70 space-y-2">
+        <div class="relative">
+          <input id="search-input" type="search" placeholder="Chercher (Plotly, pyplot, map, bar_chart…)" class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-ink placeholder:text-slate-400 focus:outline-none focus:border-rose-400" />
+          <span class="absolute left-2.5 top-1.5 text-slate-400 text-xs">⌕</span>
+        </div>
+        <div class="grid grid-cols-2 gap-1.5">
+          <button id="tab-visual" class="px-2.5 py-1.5 rounded-xl text-xs font-display font-bold bg-ink text-white transition">
+            1. Comprendre (8 étapes)
+          </button>
+          <button id="tab-code" class="px-2.5 py-1.5 rounded-xl text-xs font-display font-bold bg-white text-rose-800 border border-rose-200 hover:bg-rose-50 transition">
+            2. Tous les Codes (10)
+          </button>
+        </div>
+      </div>
+
+      <nav id="sidebar-list" class="flex-1 overflow-y-auto p-3 space-y-4"></nav>
+    </div>
+  </aside>
+
+  <!-- CONTENU PRINCIPAL -->
+  <main class="flex-1 flex flex-col min-w-0">
+    <header class="sticky top-0 z-20 bg-ivory/95 backdrop-blur border-b border-slate-200/80 px-5 sm:px-8 lg:px-10 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <button id="btn-prev" class="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-200 text-xs sm:text-sm font-display font-bold text-ink transition">
+          ← Précédent
+        </button>
+        <button id="btn-next" class="px-3.5 py-2 rounded-xl bg-ink hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-xs sm:text-sm font-display font-bold text-white transition">
+          Suivant →
+        </button>
+        <button id="btn-cheatsheet" class="ml-1 px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-xs font-display font-bold text-white transition shadow-2xs">
+          ⌘ Antisèche Code (10 actions)
+        </button>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span id="progress-badge" class="font-mono text-xs sm:text-sm font-bold px-3.5 py-1 rounded-full bg-white border border-slate-200 text-ink">
+          01 / 08
+        </span>
+      </div>
+    </header>
+
+    <article id="stage" class="flex-1 w-full max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 py-7 sm:py-9"></article>
+
+    <footer id="bottom-nav" class="w-full max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 pb-10 pt-4 flex items-center justify-between gap-4 border-t border-slate-200/70">
+      <button id="btn-prev-bottom" class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-200 text-xs sm:text-sm font-display font-bold text-ink transition">
+        ← Étape précédente
+      </button>
+      <span id="bottom-hint" class="text-xs text-slate-500 text-center hidden sm:block"></span>
+      <button id="btn-next-bottom" class="px-4 py-2.5 rounded-xl bg-ink hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-xs sm:text-sm font-display font-bold text-white transition">
+        Étape suivante →
+      </button>
+    </footer>
+  </main>
+
+  <script>
+    // =========================================================================
+    // UTILITAIRE BLOC DE CODE + BOUTON COPIER
+    // =========================================================================
+    function renderCodeCard({ id, badge, title, why, code, tip }) {
+      const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return `
+        <div class="bg-slate-900 text-slate-100 rounded-2xl border border-slate-800 overflow-hidden shadow-2xs">
+          <div class="px-4 py-2.5 bg-slate-950/90 border-b border-slate-800 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-mono text-[10px] font-bold uppercase shrink-0">${badge}</span>
+              <span class="font-display font-bold text-xs sm:text-sm text-white truncate">${title}</span>
+            </div>
+            <button data-copy-target="${id}" class="copy-btn px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-600 text-[11px] font-display font-bold text-slate-200 hover:text-white transition shrink-0">
+              Copier
+            </button>
+          </div>
+          <div class="px-4 py-2 bg-slate-900/60 border-b border-slate-800/80 text-xs text-slate-300">
+            <strong class="text-rose-400">À quoi ça sert :</strong> ${why}
+          </div>
+          <pre id="${id}" class="p-4 text-xs sm:text-[13px] font-mono leading-relaxed overflow-x-auto text-emerald-300"><code>${escaped}</code></pre>
+          ${tip ? `<div class="px-4 py-2.5 bg-amber-950/50 border-t border-amber-800/50 text-xs text-amber-200">💡 <strong>À retenir :</strong> ${tip}</div>` : ''}
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // LES 10 ACTIONS PYTHON DU COURS STREAMLIT GRAPHIQUES
+    // =========================================================================
+    const CODE_ACTIONS = [
+      {
+        id: 'st-01',
+        num: 'A01',
+        group: '0. Démarrage & Cache',
+        title: 'Préparer la page et charger le CSV en cache',
+        why: 'Configurer l’affichage large et éviter de relire le fichier à chaque mouvement de curseur.',
+        code: `import streamlit as st
+import pandas as pd
+
+FICHIER = "data/livres_poetry.csv"
+st.set_page_config(page_title="Graphiques", layout="wide")
+
+@st.cache_data
+def charger_donnees(chemin):
+    return pd.read_csv(chemin)
+
+df = charger_donnees(FICHIER)`,
+        tip: 'Lancez toujours streamlit run graphiques.py depuis la racine du projet (là où se trouve data/), sinon FileNotFoundError.'
+      },
+      {
+        id: 'st-02',
+        num: 'A02',
+        group: '1. Graphiques Intégrés (1 ligne)',
+        title: 'Barres rapides sur une Series comptée (st.bar_chart)',
+        why: 'Afficher immédiatement combien de livres ont obtenu chaque note (1 à 5) en une seule ligne.',
+        code: `st.subheader("Nombre de livres par note")
+par_note = df["note"].value_counts().sort_index()
+st.bar_chart(par_note)`,
+        tip: 'st.bar_chart utilise l’index en axe horizontal : value_counts().sort_index() met bien les notes 1, 2, 3, 4, 5 en abscisse.'
+      },
+      {
+        id: 'st-03',
+        num: 'A03',
+        group: '1. Graphiques Intégrés (1 ligne)',
+        title: 'Nuage de points à 3 variables (st.scatter_chart)',
+        why: 'Croiser le prix, la note et la taille du stock en nommant explicitement les colonnes x, y et size.',
+        code: `st.subheader("Prix et note, livre par livre")
+st.scatter_chart(df, x="prix_gbp", y="note", size="stock")`,
+        tip: 'Pour un DataFrame complet, précisez toujours x="..." et y="..." (sinon l’axe X affiche 0, 1, 2, 3...).'
+      },
+      {
+        id: 'st-04',
+        num: 'A04',
+        group: '2. Matplotlib & Seaborn',
+        title: 'Afficher une figure Matplotlib avec st.pyplot(fig)',
+        why: 'Réutiliser un graphique de notebook dans Streamlit sans que les anciens dessins ne se superposent.',
+        code: `import matplotlib.pyplot as plt
+
+st.subheader("Répartition des prix")
+fig, ax = plt.subplots(figsize=(8, 4))
+ax.hist(df["prix_gbp"], bins=10, color="#4C72B0", edgecolor="white")
+ax.set_xlabel("Prix (GBP)")
+ax.set_ylabel("Nombre de livres")
+ax.set_title("Distribution des prix du catalogue")
+
+st.pyplot(fig)   # Toujours passer fig, jamais plt.show() !`,
+        tip: 'Créez un fig, ax = plt.subplots() neuf avant chaque graphique et passez fig à st.pyplot(fig) pour éviter les superpositions.'
+      },
+      {
+        id: 'st-05',
+        num: 'A05',
+        group: '2. Matplotlib & Seaborn',
+        title: 'Relier Seaborn à la figure avec ax=ax',
+        why: 'Forcer Seaborn à dessiner dans l’encadré préparé pour Streamlit au lieu d’une figure vide.',
+        code: `import seaborn as sns
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(8, 4))
+sns.barplot(data=df, x="note", y="prix_gbp", ax=ax)
+st.pyplot(fig)`,
+        tip: 'Sans ax=ax, Seaborn crée sa propre figure invisible et st.pyplot(fig) affiche un cadre blanc.'
+      },
+      {
+        id: 'st-06',
+        num: 'A06',
+        group: '3. Plotly Interactif',
+        title: 'Nuage de points interactif avec infobulle (px.scatter)',
+        why: 'Permettre au visiteur de survoler chaque point pour lire le titre du livre et ses valeurs propres.',
+        code: `import plotly.express as px
+
+fig = px.scatter(
+    df,
+    x="prix_gbp",
+    y="note",
+    size="stock",
+    hover_name="titre",
+    labels={"prix_gbp": "Prix (GBP)", "note": "Note sur 5"},
+    title="Chaque point est un livre",
+)
+st.plotly_chart(fig, use_container_width=True)`,
+        tip: 'labels={...} remplace les noms techniques (prix_gbp) par du vrai français. Indispensable pour un rendu professionnel !'
+      },
+      {
+        id: 'st-07',
+        num: 'A07',
+        group: '3. Plotly Interactif',
+        title: 'Barres triées avec étiquettes inclinées (px.bar)',
+        why: 'Classer les livres par stock décroissant et éviter que les titres longs ne se chevauchent.',
+        code: `fig = px.bar(
+    df.sort_values("stock", ascending=False),
+    x="titre",
+    y="stock",
+    color="note",
+    labels={"titre": "", "stock": "Exemplaires", "note": "Note"},
+)
+fig.update_layout(xaxis_tickangle=-45)
+st.plotly_chart(fig, use_container_width=True)`,
+        tip: 'xaxis_tickangle=-45 penche les étiquettes pour les rendre parfaitement lisibles.'
+      },
+      {
+        id: 'st-08',
+        num: 'A08',
+        group: '4. Cartographie',
+        title: 'Tracer des points GPS propres sur une carte (st.map)',
+        why: 'Nettoyer les coordonnées et afficher instantanément des adresses sur une carte interactive.',
+        code: `points = pd.read_csv("data/restaurants_geocodes.csv")
+
+# Nettoyage obligatoire avant st.map
+points = points.dropna(subset=["lat", "lon"])
+points["lat"] = pd.to_numeric(points["lat"])
+points["lon"] = pd.to_numeric(points["lon"])
+
+st.map(points, size=50, color="#FF4B4B")`,
+        tip: '3 conditions obligatoires : colonnes numériques, zéro valeur manquante (dropna), et lat ∈ [-90, 90], lon ∈ [-180, 180].'
+      },
+      {
+        id: 'st-09',
+        num: 'A09',
+        group: '5. Interactivité & Mise en page',
+        title: 'Piloter un graphique par un widget + sécurité sélection vide',
+        why: 'Relier un curseur latéral au graphique et bloquer proprement l’exécution si aucun livre ne correspond.',
+        code: `note_mini = st.sidebar.slider("Note minimale", 1, 5, 1)
+selection = df[df["note"] >= note_mini]
+
+# Sécurité obligatoire AVANT de dessiner
+if len(selection) == 0:
+    st.warning("Aucun livre ne correspond.")
+    st.stop()
+
+fig = px.histogram(
+    selection,
+    x="prix_gbp",
+    nbins=10,
+    labels={"prix_gbp": "Prix (GBP)"},
+    title=f"{len(selection)} livres notés {note_mini} ou plus",
+)
+st.plotly_chart(fig, use_container_width=True)`,
+        tip: 'Utilisez toujours un titre dynamique en f-string et st.stop() quand len(selection) == 0.'
+      },
+      {
+        id: 'st-10',
+        num: 'A10',
+        group: '5. Interactivité & Mise en page',
+        title: 'Disposer 2 graphiques côte à côte + phrase de lecture',
+        why: 'Structurer un vrai tableau de bord avec st.columns et expliquer chaque visuel avec st.caption.',
+        code: `col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("Comment les prix se répartissent-ils ?")
+    st.plotly_chart(fig_prix, use_container_width=True)
+    st.caption(f"Les prix s'étalent de {selection['prix_gbp'].min():.2f} à {selection['prix_gbp'].max():.2f} GBP.")
+
+with col2:
+    st.subheader("Combien de livres par note ?")
+    st.bar_chart(selection["note"].value_counts().sort_index())
+    st.caption("Répartition des notes sur la sélection active.")`,
+        tip: 'Règle d’or du cours : un graphique sans phrase de lecture en dessous (st.caption) ne sert à rien.'
+      }
+    ];
+
+    // =========================================================================
+    // LES 8 ÉTAPES VISUELLES DU COURS
+    // =========================================================================
+    const CHAPTERS = [
+      // 01 — POURQUOI DES GRAPHIQUES & LES 3 FAMILLES D'OUTILS
+      {
+        num: '01',
+        group: 'Vue d’ensemble',
+        shortTitle: '01 · Les 3 outils graphiques Streamlit',
+        render: () => `
+          <div class="space-y-7">
+            <header class="pb-5 border-b border-slate-200/80">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+                <span class="w-2 h-2 rounded-full bg-rose-600"></span>
+                INTRODUCTION · ÉTAPE 01
+              </span>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+                Trois façons de dessiner dans Streamlit
+              </h2>
+              <div class="mt-3 flex items-start sm:items-center gap-3">
+                <span class="w-1.5 h-6 rounded-full bg-rose-600 shrink-0 mt-1 sm:mt-0"></span>
+                <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+                  « On ne repère jamais une tendance dans un tableau de mille lignes. Chaque outil graphique répond à un besoin précis : explorer vite, réutiliser ou présenter. »
+                </p>
+              </div>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <!-- Outil 1 -->
+              <section class="bg-white rounded-3xl border-2 border-sky-300 p-6 flex flex-col justify-between">
+                <div>
+                  <span class="px-3 py-1 rounded-full bg-sky-100 text-sky-800 font-display font-extrabold text-xs uppercase">1. Graphiques intégrés</span>
+                  <h3 class="font-serif text-2xl font-bold text-sky-700 mt-3">1 ligne de code</h3>
+                  <p class="text-sm text-slate-600 mt-1"><code class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded">st.bar_chart</code>, <code class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded">st.line_chart</code>, <code class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded">st.scatter_chart</code></p>
+                </div>
+                <div class="my-5 bg-sky-50 rounded-2xl p-4 space-y-2 text-xs text-slate-700">
+                  <div><strong>Écriture :</strong> 1 seule ligne</div>
+                  <div><strong>Interactif :</strong> Oui, basique (zoom, survol simple)</div>
+                  <div><strong>Quand :</strong> Pour explorer vos données très vite</div>
+                </div>
+                <div class="bg-sky-600 text-white font-display font-bold text-xs px-3 py-2 rounded-xl text-center">
+                  Premier réflexe pendant l’exploration
+                </div>
+              </section>
+
+              <!-- Outil 2 -->
+              <section class="bg-white rounded-3xl border-2 border-amber-300 p-6 flex flex-col justify-between">
+                <div>
+                  <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-display font-extrabold text-xs uppercase">2. Matplotlib &amp; Seaborn</span>
+                  <h3 class="font-serif text-2xl font-bold text-amber-700 mt-3">Image fixe sur-mesure</h3>
+                  <p class="text-sm text-slate-600 mt-1"><code class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded">fig, ax = plt.subplots()</code> + <code class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded">st.pyplot(fig)</code></p>
+                </div>
+                <div class="my-5 bg-amber-50 rounded-2xl p-4 space-y-2 text-xs text-slate-700">
+                  <div><strong>Écriture :</strong> ~10 lignes</div>
+                  <div><strong>Interactif :</strong> Non (image statique)</div>
+                  <div><strong>Quand :</strong> Reprendre un graphique déjà prêt en notebook</div>
+                </div>
+                <div class="bg-amber-600 text-white font-display font-bold text-xs px-3 py-2 rounded-xl text-center">
+                  Contrôle total au pixel près
+                </div>
+              </section>
+
+              <!-- Outil 3 -->
+              <section class="bg-white rounded-3xl border-2 border-rose-500 p-6 flex flex-col justify-between shadow-2xs">
+                <div>
+                  <span class="px-3 py-1 rounded-full bg-rose-100 text-rose-800 font-display font-extrabold text-xs uppercase">3. Plotly Express</span>
+                  <h3 class="font-serif text-2xl font-bold text-rose-600 mt-3">Graphique vivant &amp; pro</h3>
+                  <p class="text-sm text-slate-600 mt-1"><code class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded">px.scatter(...)</code> + <code class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded">st.plotly_chart(fig)</code></p>
+                </div>
+                <div class="my-5 bg-rose-50 rounded-2xl p-4 space-y-2 text-xs text-slate-700">
+                  <div><strong>Écriture :</strong> Quelques lignes propres</div>
+                  <div><strong>Interactif :</strong> Oui, complet (infobulles, légende cliquable)</div>
+                  <div><strong>Quand :</strong> La page finale qu’on montre à un client</div>
+                </div>
+                <div class="bg-rose-600 text-white font-display font-bold text-xs px-3 py-2 rounded-xl text-center">
+                  Règle d’or : commencez intégré, finissez en Plotly
+                </div>
+              </section>
+            </div>
+
+            ${renderCodeCard(CODE_ACTIONS[0])}
+          </div>
+        `
+      },
+
+      // 02 — LES GRAPHIQUES INTÉGRÉS (1 LIGNE)
+      {
+        num: '02',
+        group: 'Les 4 Outils',
+        shortTitle: '02 · Graphiques intégrés (st.bar_chart…)',
+        render: () => `
+          <div class="space-y-7">
+            <header class="pb-5 border-b border-slate-200/80">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+                <span class="w-2 h-2 rounded-full bg-sky-600"></span>
+                OUTIL 01 · ÉTAPE 02
+              </span>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+                Les graphiques intégrés : dessiner en une ligne
+              </h2>
+              <div class="mt-3 flex items-start sm:items-center gap-3">
+                <span class="w-1.5 h-6 rounded-full bg-sky-600 shrink-0 mt-1 sm:mt-0"></span>
+                <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+                  « Aucune bibliothèque à importer : passez un tableau à Streamlit et il trace aussitôt barres, courbes ou nuage de points. »
+                </p>
+              </div>
+            </header>
+
+            <!-- Les 4 fonctions -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="bg-white rounded-2xl border border-slate-200 p-4">
+                <code class="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2 py-1 rounded">st.bar_chart</code>
+                <div class="font-display font-bold text-sm text-ink mt-2">Comparer des quantités</div>
+                <p class="text-xs text-slate-600 mt-1">Catégorie par catégorie (ex : nombre de livres par note).</p>
+              </div>
+              <div class="bg-white rounded-2xl border border-slate-200 p-4">
+                <code class="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2 py-1 rounded">st.line_chart</code>
+                <div class="font-display font-bold text-sm text-ink mt-2">Suivre une évolution</div>
+                <p class="text-xs text-slate-600 mt-1">Le long d’un axe ordonné (dates, mois, étapes).</p>
+              </div>
+              <div class="bg-white rounded-2xl border border-slate-200 p-4">
+                <code class="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2 py-1 rounded">st.area_chart</code>
+                <div class="font-display font-bold text-sm text-ink mt-2">Évolution remplie</div>
+                <p class="text-xs text-slate-600 mt-1">Identique à la courbe, avec la surface colorée dessous.</p>
+              </div>
+              <div class="bg-white rounded-2xl border border-slate-200 p-4">
+                <code class="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2 py-1 rounded">st.scatter_chart</code>
+                <div class="font-display font-bold text-sm text-ink mt-2">Croiser 2 à 3 nombres</div>
+                <p class="text-xs text-slate-600 mt-1">Ex : prix en X, note en Y, et <code class="font-mono">size="stock"</code>.</p>
+              </div>
+            </div>
+
+            <!-- Piège de l'index -->
+            <div class="bg-amber-50 border-2 border-amber-300 rounded-3xl p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+              <div class="lg:col-span-5">
+                <span class="px-3 py-1 rounded-full bg-amber-600 text-white font-display font-extrabold text-[11px] uppercase">⚠ La confusion numéro 1</span>
+                <h3 class="font-serif text-2xl font-bold text-ink mt-2">L’axe horizontal lit toujours l’index !</h3>
+                <p class="text-sm text-slate-700 mt-1">Si vous passez un DataFrame brut, l’axe X affiche les numéros de lignes <strong>0, 1, 2, 3…</strong> ce qui n’a aucun sens.</p>
+              </div>
+              <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
+                <div class="bg-white border-2 border-teal-500 rounded-2xl p-4">
+                  <div class="text-teal-700 font-bold mb-1">✓ Option A : Series comptée</div>
+                  <div class="text-slate-700">par_note = df["note"].value_counts().sort_index()</div>
+                  <div class="text-teal-700 font-bold mt-1">st.bar_chart(par_note)</div>
+                </div>
+                <div class="bg-white border-2 border-teal-500 rounded-2xl p-4">
+                  <div class="text-teal-700 font-bold mb-1">✓ Option B : Nommer x et y</div>
+                  <div class="text-slate-700">st.bar_chart(df, x="titre", y="prix_gbp")</div>
+                  <div class="text-teal-700 font-bold mt-1">Colonnes explicites !</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              ${renderCodeCard(CODE_ACTIONS[1])}
+              ${renderCodeCard(CODE_ACTIONS[2])}
+            </div>
+          </div>
+        `
+      },
+
+      // 03 — MATPLOTLIB & SEABORN
+      {
+        num: '03',
+        group: 'Les 4 Outils',
+        shortTitle: '03 · Matplotlib & Seaborn (st.pyplot)',
+        render: () => `
+          <div class="space-y-7">
+            <header class="pb-5 border-b border-slate-200/80">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+                <span class="w-2 h-2 rounded-full bg-amber-600"></span>
+                OUTIL 02 · ÉTAPE 03
+              </span>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+                Matplotlib &amp; Seaborn : réutiliser vos graphiques de notebook
+              </h2>
+              <div class="mt-3 flex items-start sm:items-center gap-3">
+                <span class="w-1.5 h-6 rounded-full bg-amber-600 shrink-0 mt-1 sm:mt-0"></span>
+                <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+                  « Ne réécrivez pas vos graphiques : remplacez simplement plt.show() par st.pyplot(fig). »
+                </p>
+              </div>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="bg-rose-50 border-2 border-rose-300 rounded-3xl p-6">
+                <span class="px-3 py-1 rounded-full bg-rose-600 text-white font-display font-extrabold text-xs uppercase">✕ À éviter absolument</span>
+                <h3 class="font-serif text-2xl font-bold text-ink mt-3">Appeler <code class="font-mono text-rose-700">st.pyplot()</code> sans argument</h3>
+                <p class="text-sm text-slate-700 mt-2 leading-relaxed">
+                  Comme Streamlit rejoue tout le script à chaque clic, les dessins s’empilent dans la mémoire globale de Matplotlib. Résultat : <strong>deux graphiques se superposent l’un sur l’autre</strong> !
+                </p>
+              </div>
+
+              <div class="bg-teal-50 border-2 border-teal-500 rounded-3xl p-6">
+                <span class="px-3 py-1 rounded-full bg-teal-600 text-white font-display font-extrabold text-xs uppercase">✓ La bonne pratique</span>
+                <h3 class="font-serif text-2xl font-bold text-ink mt-3">Toujours <code class="font-mono text-teal-800">fig, ax = plt.subplots()</code></h3>
+                <p class="text-sm text-slate-700 mt-2 leading-relaxed">
+                  Vous créez une feuille neuve <code class="font-mono text-xs bg-white px-1 rounded">fig</code>, vous dessinez dans <code class="font-mono text-xs bg-white px-1 rounded">ax</code> (y compris avec Seaborn <code class="font-mono text-xs bg-white px-1 rounded">ax=ax</code>), puis vous affichez <code class="font-mono text-xs bg-white px-1 rounded">st.pyplot(fig)</code>.
+                </p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              ${renderCodeCard(CODE_ACTIONS[3])}
+              ${renderCodeCard(CODE_ACTIONS[4])}
+            </div>
+          </div>
+        `
+      },
+
+      // 04 — PLOTLY EXPRESS
+      {
+        num: '04',
+        group: 'Les 4 Outils',
+        shortTitle: '04 · Plotly Express (st.plotly_chart)',
+        render: () => `
+          <div class="space-y-7">
+            <header class="pb-5 border-b border-slate-200/80">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+                <span class="w-2 h-2 rounded-full bg-rose-600"></span>
+                OUTIL 03 · ÉTAPE 04
+              </span>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+                Plotly Express : l’interactivité qui fait la différence
+              </h2>
+              <div class="mt-3 flex items-start sm:items-center gap-3">
+                <span class="w-1.5 h-6 rounded-full bg-rose-600 shrink-0 mt-1 sm:mt-0"></span>
+                <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+                  « Survolez un point : le titre du livre s’affiche. C’est ce détail qui transforme un dessin en outil d’analyse. »
+                </p>
+              </div>
+            </header>
+
+            <!-- Les 3 réglages indispensables de Plotly -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div class="bg-white rounded-2xl border border-slate-200 p-5">
+                <code class="font-mono text-xs font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded">hover_name="titre"</code>
+                <h3 class="font-serif text-xl font-bold text-ink mt-3">1. L’infobulle utile</h3>
+                <p class="text-sm text-slate-600 mt-1">Quand on repère un point isolé sur le graphique, le survol révèle immédiatement de quel livre il s’agit.</p>
+              </div>
+
+              <div class="bg-white rounded-2xl border border-slate-200 p-5">
+                <code class="font-mono text-xs font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded">labels={"prix_gbp": "Prix"}</code>
+                <h3 class="font-serif text-xl font-bold text-ink mt-3">2. Zéro jargon sur les axes</h3>
+                <p class="text-sm text-slate-600 mt-1">Une page livrée à un lecteur ne doit jamais afficher <code class="font-mono text-xs">prix_gbp</code> mais « Prix (GBP) ».</p>
+              </div>
+
+              <div class="bg-white rounded-2xl border border-slate-200 p-5">
+                <code class="font-mono text-xs font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded">use_container_width=True</code>
+                <h3 class="font-serif text-xl font-bold text-ink mt-3">3. Pleine largeur</h3>
+                <p class="text-sm text-slate-600 mt-1">Dans <code class="font-mono text-xs">st.plotly_chart</code>, étire proprement le graphique sur toute la largeur de la colonne.</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              ${renderCodeCard(CODE_ACTIONS[5])}
+              ${renderCodeCard(CODE_ACTIONS[6])}
+            </div>
+          </div>
+        `
+      },
+
+      // 05 — CARTOGRAPHIE (ST.MAP)
+      {
+        num: '05',
+        group: 'Les 4 Outils',
+        shortTitle: '05 · Cartes GPS en 1 ligne (st.map)',
+        render: () => `
+          <div class="space-y-7">
+            <header class="pb-5 border-b border-slate-200/80">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-100 text-teal-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+                <span class="w-2 h-2 rounded-full bg-teal-600"></span>
+                OUTIL 04 · ÉTAPE 05
+              </span>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+                Afficher des points sur une carte avec st.map()
+              </h2>
+              <div class="mt-3 flex items-start sm:items-center gap-3">
+                <span class="w-1.5 h-6 rounded-full bg-teal-600 shrink-0 mt-1 sm:mt-0"></span>
+                <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+                  « Une ligne suffit si votre fichier contient des colonnes lat et lon propres. »
+                </p>
+              </div>
+            </header>
+
+            <div class="bg-white rounded-3xl border border-slate-200 p-6">
+              <div class="font-display text-xs font-extrabold text-rose-700 uppercase tracking-wider mb-4">Les 3 conditions obligatoires (sinon la carte reste vide !)</div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                  <div class="font-display font-extrabold text-base text-ink">1. Format numérique</div>
+                  <p class="text-sm text-slate-600 mt-1">Une latitude lue comme du texte ne trace rien : forcez <code class="font-mono text-xs bg-white px-1 rounded">pd.to_numeric()</code>.</p>
+                </div>
+                <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                  <div class="font-display font-extrabold text-base text-ink">2. Zéro valeur manquante</div>
+                  <p class="text-sm text-slate-600 mt-1">Supprimez les lignes vides avec <code class="font-mono text-xs bg-white px-1 rounded">.dropna(subset=["lat", "lon"])</code>.</p>
+                </div>
+                <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                  <div class="font-display font-extrabold text-base text-ink">3. Ne pas inverser lat / lon</div>
+                  <p class="text-sm text-slate-600 mt-1">Latitude ∈ [-90, 90], Longitude ∈ [-180, 180]. Si vos points tombent au large de la Somalie, vous les avez inversées !</p>
+                </div>
+              </div>
+            </div>
+
+            ${renderCodeCard(CODE_ACTIONS[7])}
+          </div>
+        `
+      },
+
+      // 06 — LEQUEL CHOISIR ? (ARBRE DE DÉCISION VISUEL)
+      {
+        num: '06',
+        group: 'Choisir & Piloter',
+        shortTitle: '06 · Quel outil graphique choisir ?',
+        render: () => `
+          <div class="space-y-7">
+            <header class="pb-5 border-b border-slate-200/80">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+                <span class="w-2 h-2 rounded-full bg-amber-600"></span>
+                ANTISÈCHE DE DÉCISION · ÉTAPE 06
+              </span>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+                Lequel choisir en 2 secondes ?
+              </h2>
+              <div class="mt-3 flex items-start sm:items-center gap-3">
+                <span class="w-1.5 h-6 rounded-full bg-amber-600 shrink-0 mt-1 sm:mt-0"></span>
+                <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+                  « Le temps passé à choisir le bon graphique est toujours mieux investi que celui passé à embellir le mauvais. »
+                </p>
+              </div>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              ${[
+                { q: 'J’explore mes données, je veux voir vite', tool: 'st.bar_chart / st.scatter_chart', badge: '1 ligne', color: 'border-sky-400 bg-sky-50/60' },
+                { q: 'La page sera montrée à quelqu’un d’autre', tool: 'Plotly + st.plotly_chart', badge: 'Interactif', color: 'border-rose-500 bg-rose-50/60' },
+                { q: 'J’ai déjà écrit la figure dans un notebook', tool: 'Matplotlib + st.pyplot(fig)', badge: 'Réutilisation', color: 'border-amber-400 bg-amber-50/60' },
+                { q: 'J’ai des coordonnées GPS (lat, lon)', tool: 'st.map(points)', badge: 'Carte', color: 'border-teal-500 bg-teal-50/60' },
+                { q: 'J’ai besoin d’un type rare (treemap, radar…)', tool: 'Plotly Express (px)', badge: 'Galerie', color: 'border-indigo-400 bg-indigo-50/60' },
+                { q: 'Je veux contrôler chaque pixel du dessin', tool: 'Matplotlib (fig, ax)', badge: 'Sur-mesure', color: 'border-slate-400 bg-slate-100/70' }
+              ].map(item => `
+                <div class="rounded-2xl border-2 ${item.color} p-5 flex flex-col justify-between">
+                  <div>
+                    <span class="px-2.5 py-0.5 rounded-full bg-white text-ink font-display font-extrabold text-[10px] uppercase border border-slate-200">${item.badge}</span>
+                    <div class="font-display font-bold text-base text-ink mt-3">« ${item.q} »</div>
+                  </div>
+                  <div class="mt-4 pt-3 border-t border-slate-200/70 font-mono text-xs sm:text-sm font-bold text-ink">
+                    → ${item.tool}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="bg-ink text-white rounded-3xl p-6 text-center">
+              <div class="font-display text-xs font-extrabold tracking-widest text-amber-400 uppercase">La règle d’or du cours</div>
+              <p class="font-serif text-2xl sm:text-3xl font-bold mt-1">« Un graphique dont on ne peut pas écrire la lecture en une phrase ne sert à rien. »</p>
+            </div>
+          </div>
+        `
+      },
+
+      // 07 — SIMULATEUR DE TABLEAU DE BORD PILOTÉ PAR WIDGET
+      {
+        num: '07',
+        group: 'Choisir & Piloter',
+        shortTitle: '07 · Piloter un graphique par widget',
+        render: () => `
+          <div class="space-y-7">
+            <header class="pb-5 border-b border-slate-200/80">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+                <span class="w-2 h-2 rounded-full bg-rose-600"></span>
+                INTERACTIVITÉ · ÉTAPE 07
+              </span>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+                Faire piloter un graphique par un widget
+              </h2>
+              <div class="mt-3 flex items-start sm:items-center gap-3">
+                <span class="w-1.5 h-6 rounded-full bg-rose-600 shrink-0 mt-1 sm:mt-0"></span>
+                <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+                  « Le widget renvoie une valeur → le tableau est filtré → le graphique et sa légende se redessinent tout seuls. »
+                </p>
+              </div>
+            </header>
+
+            <!-- Mini Simulateur du Challenge Streamlit -->
+            <div class="bg-white rounded-3xl border-2 border-slate-200 p-6 space-y-5">
+              <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-50 border border-slate-200 p-4 rounded-2xl">
+                <div>
+                  <span class="font-display text-[11px] font-extrabold text-rose-700 uppercase">Simulation du tableau de bord</span>
+                  <div class="font-serif text-xl font-bold text-ink">Catalogue en graphiques (19 livres)</div>
+                </div>
+                <div class="flex items-center gap-3 bg-white border border-slate-300 px-4 py-2 rounded-xl">
+                  <label for="st-sim-note" class="text-xs font-display font-bold text-ink">Note minimale :</label>
+                  <input id="st-sim-note" type="range" min="1" max="5" value="1" class="st-slider w-28" />
+                  <span id="st-sim-note-val" class="font-mono text-sm font-bold text-rose-600">≥ 1 / 5</span>
+                </div>
+              </div>
+
+              <!-- Aperçu 2 colonnes comme st.columns(2) -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="border border-slate-200 rounded-2xl p-4">
+                  <div id="st-sim-title" class="font-display font-bold text-sm text-ink mb-2">19 livres notés 1 ou plus</div>
+                  <div id="st-sim-bars" class="flex items-end gap-3 h-36 pt-4 px-2 bg-slate-50 rounded-xl"></div>
+                  <p id="st-sim-caption" class="text-xs text-slate-500 mt-2 italic">Les prix s'étalent de 14.19 à 57.31 GBP (moyenne 35.97 GBP).</p>
+                </div>
+
+                <div class="border border-slate-200 rounded-2xl p-4 flex flex-col justify-between bg-slate-50/60">
+                  <div class="font-display text-xs font-extrabold text-slate-400 uppercase">Les 3 règles du Challenge</div>
+                  <ul class="space-y-2 text-xs sm:text-sm text-slate-700 my-2">
+                    <li>• <strong>1. Sécurité vide :</strong> vérifier <code class="font-mono bg-white px-1 rounded">if len(selection) == 0: st.stop()</code> avant de dessiner.</li>
+                    <li>• <strong>2. Titre dynamique :</strong> utiliser une f-string avec le nombre de livres filtrés.</li>
+                    <li>• <strong>3. Phrase de lecture :</strong> ajouter <code class="font-mono bg-white px-1 rounded">st.caption(...)</code> sous chaque graphique.</li>
+                  </ul>
+                  <div class="text-xs font-display font-bold text-teal-700 bg-teal-50 border border-teal-200 px-3 py-2 rounded-xl">
+                    Aucun code de rafraîchissement à écrire : Streamlit rejoue le script !
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              ${renderCodeCard(CODE_ACTIONS[8])}
+              ${renderCodeCard(CODE_ACTIONS[9])}
+            </div>
+          </div>
+        `
+      },
+
+      // 08 — QUIZ EXPRESS DU COURS
+      {
+        num: '08',
+        group: 'Choisir & Piloter',
+        shortTitle: '08 · Quiz express (auto-test)',
+        render: () => `
+          <div class="space-y-7">
+            <header class="pb-5 border-b border-slate-200/80">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+                <span class="w-2 h-2 rounded-full bg-amber-600"></span>
+                VÉRIFIER SES ACQUIS · ÉTAPE 08
+              </span>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+                Les 5 questions clés du cours
+              </h2>
+              <p class="mt-2 text-sm sm:text-base text-slate-600">Cliquez sur chaque question pour révéler la réponse.</p>
+            </header>
+
+            <div class="space-y-3.5">
+              ${[
+                {
+                  q: '1. st.bar_chart(df["note"].value_counts()) : qu’affiche l’axe horizontal ?',
+                  a: 'L’index de la Series renvoyée par value_counts(), c’est-à-dire les notes 1 à 5 (pensez à ajouter .sort_index() pour les ranger dans l’ordre).'
+                },
+                {
+                  q: '2. Pourquoi faut-il toujours passer fig à st.pyplot(fig) plutôt que d’appeler st.pyplot() sans argument ?',
+                  a: 'Parce que Streamlit réexécute tout le script à chaque interaction : sans objet fig explicite, les nouvelles courbes s’accumulent et se superposent sur l’ancienne figure.'
+                },
+                {
+                  q: '3. À quoi sert labels={"prix_gbp": "Prix (GBP)"} dans un graphique Plotly Express ?',
+                  a: 'À afficher un intitulé français compréhensible sur les axes et dans l’infobulle au survol, au lieu du nom technique de la colonne.'
+                },
+                {
+                  q: '4. st.map(points) n’affiche aucun point sur la carte. Quelle est la cause la plus fréquente ?',
+                  a: 'Les colonnes lat ou lon sont lues comme du texte (au lieu de nombres), contiennent des valeurs manquantes (NaN), ou ont été inversées.'
+                },
+                {
+                  q: '5. Pourquoi écrire if len(selection) == 0: st.warning(...); st.stop() avant de tracer un graphique ?',
+                  a: 'Parce que si l’utilisateur combine des filtres qui ne laissent aucun livre, construire un graphique sur un tableau vide déclenche une erreur ou affiche un cadre blanc.'
+                }
+              ].map(item => `
+                <details class="bg-white rounded-2xl border border-slate-200 p-5">
+                  <summary class="font-display font-bold text-sm sm:text-base text-ink cursor-pointer list-none flex items-center justify-between gap-4">
+                    <span>${item.q}</span>
+                    <span class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 text-xs font-bold shrink-0">Voir la réponse</span>
+                  </summary>
+                  <p class="mt-3 pt-3 border-t border-slate-100 text-sm text-slate-700 leading-relaxed">${item.a}</p>
+                </details>
+              `).join('')}
+            </div>
+          </div>
+        `
+      }
+    ];
+
+    // =========================================================================
+    // NAVIGATION & ÉTAT DE L'APPLICATION
+    // =========================================================================
+    let viewMode = 'visual';
+    let currentIdx = 0;
+    let searchQuery = '';
+
+    const sidebarList = document.getElementById('sidebar-list');
+    const stage = document.getElementById('stage');
+    const badge = document.getElementById('progress-badge');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrevBottom = document.getElementById('btn-prev-bottom');
+    const btnNextBottom = document.getElementById('btn-next-bottom');
+    const bottomNav = document.getElementById('bottom-nav');
+    const bottomHint = document.getElementById('bottom-hint');
+    const searchInput = document.getElementById('search-input');
+    const menuBody = document.getElementById('menu-body');
+
+    function bindCopyButtons() {
+      document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const pre = document.getElementById(btn.dataset.copyTarget);
+          if (!pre) return;
+          const ta = document.createElement('textarea');
+          ta.value = pre.textContent;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          const old = btn.textContent;
+          btn.textContent = '✓ Copié !';
+          btn.classList.add('bg-emerald-600', 'text-white');
+          setTimeout(() => {
+            btn.textContent = old;
+            btn.classList.remove('bg-emerald-600', 'text-white');
+          }, 1500);
+        });
+      });
+    }
+
+    function bindSimulators() {
+      const slider = document.getElementById('st-sim-note');
+      if (!slider) return;
+      const valEl = document.getElementById('st-sim-note-val');
+      const titleEl = document.getElementById('st-sim-title');
+      const barsEl = document.getElementById('st-sim-bars');
+      const capEl = document.getElementById('st-sim-caption');
+
+      // Données fidèles au fichier du cours (19 livres : note 1=3, 2=2, 3=2, 4=6, 5=6)
+      const counts = { 1: 3, 2: 2, 3: 2, 4: 6, 5: 6 };
+
+      function updateDashboard() {
+        const minNote = parseInt(slider.value, 10);
+        valEl.textContent = `≥ ${minNote} / 5`;
+
+        let total = 0;
+        let barsHtml = '';
+        for (let n = 1; n <= 5; n++) {
+          const active = n >= minNote;
+          const c = active ? counts[n] : 0;
+          total += c;
+          const hPct = Math.round((c / 6) * 100);
+          barsHtml += `
+            <div class="flex-1 flex flex-col items-center h-full justify-end">
+              <span class="font-mono text-xs font-bold ${active ? 'text-rose-600' : 'text-slate-300'} mb-1">${c}</span>
+              <div class="w-full rounded-t-lg transition-all ${active ? 'bg-rose-600' : 'bg-slate-200'}" style="height:${Math.max(hPct, 6)}%"></div>
+              <span class="font-mono text-xs font-bold text-slate-600 mt-1">★${n}</span>
+            </div>
+          `;
+        }
+        titleEl.textContent = `${total} livres notés ${minNote} ou plus`;
+        barsEl.innerHTML = barsHtml;
+        capEl.textContent = minNote === 1
+          ? "19 livres affichés · Égalité entre les notes 4 et 5 (6 livres chacune)."
+          : `${total} livres retenus après filtrage par le curseur latéral.`;
+      }
+
+      slider.addEventListener('input', updateDashboard);
+      updateDashboard();
+    }
+
+    function renderSidebar() {
+      if (viewMode === 'visual') {
+        const filtered = CHAPTERS.filter(c =>
+          !searchQuery || c.shortTitle.toLowerCase().includes(searchQuery) || c.group.toLowerCase().includes(searchQuery)
+        );
+        const groups = [...new Set(filtered.map(c => c.group))];
+        sidebarList.innerHTML = groups.map(g => `
+          <div>
+            <div class="px-2.5 mb-1.5 text-[10px] font-display font-extrabold tracking-widest uppercase text-slate-400">${g}</div>
+            <div class="space-y-0.5">
+              ${filtered.filter(c => c.group === g).map(c => {
+                const realIdx = CHAPTERS.findIndex(x => x.num === c.num);
+                const active = realIdx === currentIdx;
+                return `
+                  <button data-idx="${realIdx}" class="chap-btn w-full text-left px-3 py-2 rounded-xl text-xs sm:text-[13px] transition ${
+                    active ? 'bg-ink text-white font-display font-bold' : 'hover:bg-slate-100 text-slate-700 font-medium'
+                  }">${c.shortTitle}</button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `).join('');
+
+        document.querySelectorAll('.chap-btn').forEach(b => {
+          b.addEventListener('click', () => {
+            showChapter(parseInt(b.dataset.idx, 10));
+            if (window.innerWidth < 1024) menuBody.classList.add('hidden');
+          });
+        });
+      } else {
+        const filtered = CODE_ACTIONS.filter(a =>
+          !searchQuery || a.title.toLowerCase().includes(searchQuery) || a.code.toLowerCase().includes(searchQuery) || a.group.toLowerCase().includes(searchQuery)
+        );
+        const groups = [...new Set(filtered.map(a => a.group))];
+        sidebarList.innerHTML = groups.map(g => `
+          <div>
+            <div class="px-2.5 mb-1.5 text-[10px] font-display font-extrabold tracking-widest uppercase text-rose-700">${g}</div>
+            <div class="space-y-0.5">
+              ${filtered.filter(a => a.group === g).map(a => `
+                <a href="#card-${a.id}" class="block px-3 py-2 rounded-xl text-xs text-slate-700 hover:bg-rose-50 hover:text-rose-900 font-medium transition truncate">
+                  <span class="font-mono text-[11px] font-bold text-rose-600 mr-1">${a.num}</span> ${a.title}
+                </a>
+              `).join('')}
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function showChapter(idx) {
+      viewMode = 'visual';
+      currentIdx = Math.max(0, Math.min(idx, CHAPTERS.length - 1));
+      document.getElementById('tab-visual').classList.add('bg-ink', 'text-white');
+      document.getElementById('tab-visual').classList.remove('bg-white', 'text-slate-700');
+      document.getElementById('tab-code').classList.remove('bg-ink', 'text-white');
+      document.getElementById('tab-code').classList.add('bg-white', 'text-rose-800');
+
+      bottomNav.classList.remove('hidden');
+      const ch = CHAPTERS[currentIdx];
+      stage.innerHTML = ch.render();
+      badge.textContent = `${ch.num} / 0${CHAPTERS.length}`;
+
+      btnPrev.disabled = currentIdx === 0;
+      btnNext.disabled = currentIdx === CHAPTERS.length - 1;
+      btnPrevBottom.disabled = currentIdx === 0;
+      btnNextBottom.disabled = currentIdx === CHAPTERS.length - 1;
+      bottomHint.textContent = currentIdx < CHAPTERS.length - 1
+        ? `À suivre : ${CHAPTERS[currentIdx + 1].shortTitle}`
+        : 'Vous avez parcouru tout le cours ! Consultez l’antisèche des 10 codes.';
+
+      bindCopyButtons();
+      bindSimulators();
+      renderSidebar();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showCodeCheatsheet() {
+      viewMode = 'code';
+      document.getElementById('tab-code').classList.add('bg-ink', 'text-white');
+      document.getElementById('tab-code').classList.remove('bg-white', 'text-rose-800');
+      document.getElementById('tab-visual').classList.remove('bg-ink', 'text-white');
+      document.getElementById('tab-visual').classList.add('bg-white', 'text-slate-700');
+
+      bottomNav.classList.add('hidden');
+      badge.textContent = '10 CODES';
+
+      const filtered = CODE_ACTIONS.filter(a =>
+        !searchQuery || a.title.toLowerCase().includes(searchQuery) || a.code.toLowerCase().includes(searchQuery) || a.why.toLowerCase().includes(searchQuery)
+      );
+
+      stage.innerHTML = `
+        <div class="space-y-7">
+          <header class="pb-5 border-b border-slate-200/80">
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+              MÉMENTO STREAMLIT, MATPLOTLIB &amp; PLOTLY
+            </span>
+            <h2 class="font-serif text-3xl sm:text-4xl font-bold text-ink">Les 10 codes à retenir action par action</h2>
+            <p class="text-sm sm:text-base text-slate-600 mt-1">Chaque action du cours isolée, expliquée en français simple et prête à copier.</p>
+          </header>
+
+          <div class="space-y-6">
+            ${filtered.map(a => `
+              <div id="card-${a.id}" class="scroll-mt-20">
+                ${renderCodeCard({
+                  id: a.id,
+                  badge: `${a.num} · ${a.group}`,
+                  title: a.title,
+                  why: a.why,
+                  code: a.code,
+                  tip: a.tip
+                })}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      bindCopyButtons();
+      renderSidebar();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('tab-visual').addEventListener('click', () => showChapter(currentIdx));
+    document.getElementById('tab-code').addEventListener('click', showCodeCheatsheet);
+    document.getElementById('btn-cheatsheet').addEventListener('click', showCodeCheatsheet);
+
+    btnPrev.addEventListener('click', () => showChapter(currentIdx - 1));
+    btnNext.addEventListener('click', () => showChapter(currentIdx + 1));
+    btnPrevBottom.addEventListener('click', () => showChapter(currentIdx - 1));
+    btnNextBottom.addEventListener('click', () => showChapter(currentIdx + 1));
+
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.trim().toLowerCase();
+      if (viewMode === 'code') showCodeCheatsheet();
+      else renderSidebar();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (document.activeElement === searchInput || viewMode !== 'visual') return;
+      if (e.key === 'ArrowRight') showChapter(currentIdx + 1);
+      if (e.key === 'ArrowLeft') showChapter(currentIdx - 1);
+    });
+
+    document.getElementById('btn-toggle-menu').addEventListener('click', () => {
+      menuBody.classList.toggle('hidden');
+      menuBody.classList.add('flex');
+    });
+
+    showChapter(0);
+  </script>
+</body>
+</html>

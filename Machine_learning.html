@@ -1,0 +1,2509 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guide Visuel du Machine Learning — 25 Notions Interactives</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Fraunces', 'Georgia', 'serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            ivory: '#FAF8F5',
+            ink: '#0F172A',
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background-color: #FAF8F5;
+      color: #0F172A;
+      font-family: 'Inter', sans-serif;
+    }
+    /* Barre de défilement discrète */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 999px; }
+
+    /* Curseurs interactifs */
+    input[type="range"].ml-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 8px;
+      border-radius: 999px;
+      background: #CBD5E1;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"].ml-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #0F172A;
+      border: 3px solid #FFFFFF;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col lg:flex-row bg-ivory text-ink">
+
+  <!-- MENU LATÉRAL DE NAVIGATION (25 NOTIONS) -->
+  <aside id="sidebar" class="w-full lg:w-80 xl:w-[340px] bg-white border-b lg:border-b-0 lg:border-r border-slate-200/90 flex flex-col lg:h-screen lg:sticky lg:top-0 shrink-0 z-30">
+    <!-- En-tête du menu -->
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between gap-2">
+      <div>
+        <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-display font-extrabold tracking-widest text-white bg-gradient-to-r from-sky-600 via-rose-600 to-violet-600 uppercase">
+          25 Notions Visuelles
+        </span>
+        <h1 class="font-serif text-xl font-bold text-ink mt-1 leading-tight">Guide du Machine Learning</h1>
+      </div>
+      <button id="btn-toggle-menu" class="lg:hidden px-3 py-2 rounded-xl bg-slate-100 text-xs font-display font-bold text-ink">
+        ☰ Sommaire
+      </button>
+    </div>
+
+    <!-- Recherche + Filtres par famille -->
+    <div id="menu-body" class="hidden lg:flex flex-col flex-1 overflow-hidden">
+      <div class="p-3.5 border-b border-slate-100 space-y-2.5 bg-slate-50/70">
+        <div class="relative">
+          <input id="search-input" type="search" placeholder="Rechercher (ex : KNN, F1, R², Ridge…)" class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-ink placeholder:text-slate-400 focus:outline-none focus:border-slate-400" />
+          <span class="absolute left-2.5 top-1.5 text-slate-400 text-xs">⌕</span>
+        </div>
+        <div class="flex flex-wrap gap-1">
+          <button data-fam="all" class="fam-btn active px-2 py-1 rounded-lg text-[11px] font-display font-bold bg-ink text-white transition">Toutes</button>
+          <button data-fam="intro" class="fam-btn px-2 py-1 rounded-lg text-[11px] font-display font-bold bg-white text-slate-600 border border-slate-200 hover:border-slate-400 transition">Intro</button>
+          <button data-fam="regression" class="fam-btn px-2 py-1 rounded-lg text-[11px] font-display font-bold bg-white text-sky-700 border border-sky-200 hover:bg-sky-50 transition">Régression</button>
+          <button data-fam="classification" class="fam-btn px-2 py-1 rounded-lg text-[11px] font-display font-bold bg-white text-rose-700 border border-rose-200 hover:bg-rose-50 transition">Classification</button>
+          <button data-fam="clustering" class="fam-btn px-2 py-1 rounded-lg text-[11px] font-display font-bold bg-white text-violet-700 border border-violet-200 hover:bg-violet-50 transition">Clustering</button>
+          <button data-fam="choix" class="fam-btn px-2 py-1 rounded-lg text-[11px] font-display font-bold bg-white text-amber-700 border border-amber-200 hover:bg-amber-50 transition">Choix</button>
+          <button data-fam="evaluation" class="fam-btn px-2 py-1 rounded-lg text-[11px] font-display font-bold bg-white text-teal-700 border border-teal-200 hover:bg-teal-50 transition">Évaluation</button>
+        </div>
+      </div>
+
+      <!-- Liste groupée des notions -->
+      <nav id="notion-list" class="flex-1 overflow-y-auto p-3 space-y-4"></nav>
+    </div>
+  </aside>
+
+  <!-- CONTENU PRINCIPAL FLUIDE -->
+  <main class="flex-1 flex flex-col min-w-0">
+    <!-- Barre supérieure sticky de progression -->
+    <header class="sticky top-0 z-20 bg-ivory/95 backdrop-blur border-b border-slate-200/80 px-5 sm:px-8 lg:px-10 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <button id="btn-prev" class="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-200 text-xs sm:text-sm font-display font-bold text-ink transition">
+          ← Précédent
+        </button>
+        <button id="btn-next" class="px-3.5 py-2 rounded-xl bg-ink hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-xs sm:text-sm font-display font-bold text-white transition">
+          Suivant →
+        </button>
+        <button id="btn-overview" class="ml-1 px-3 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-display font-bold text-slate-700 transition">
+          ⊞ Grille des 25
+        </button>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span class="hidden md:inline text-xs text-slate-500">Clavier <kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded font-mono text-[11px]">←</kbd> <kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded font-mono text-[11px]">→</kbd></span>
+        <span id="progress-badge" class="font-mono text-xs sm:text-sm font-bold px-3.5 py-1 rounded-full bg-white border border-slate-200 text-ink">
+          01 / 25
+        </span>
+      </div>
+    </header>
+
+    <!-- Zone d'affichage de la notion -->
+    <article id="notion-stage" class="flex-1 w-full max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 py-7 sm:py-9"></article>
+
+    <!-- Barre de navigation bas de page -->
+    <footer id="bottom-nav" class="w-full max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 pb-10 pt-2 flex items-center justify-between gap-4 border-t border-slate-200/70">
+      <button id="btn-prev-bottom" class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-200 text-xs sm:text-sm font-display font-bold text-ink transition">
+        ← Notion précédente
+      </button>
+      <span id="bottom-hint" class="text-xs text-slate-500 text-center hidden sm:block"></span>
+      <button id="btn-next-bottom" class="px-4 py-2.5 rounded-xl bg-ink hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-xs sm:text-sm font-display font-bold text-white transition">
+        Notion suivante →
+      </button>
+    </footer>
+  </main>
+
+  <script>
+    // =========================================================================
+    // PALETTE ÉDITORIALE PAR FAMILLE
+    // =========================================================================
+    const FAMILIES = {
+      intro:          { label: 'INTRODUCTION', color: '#0F172A', badge: 'bg-slate-200 text-slate-900', dot: 'bg-slate-900', border: 'border-slate-300', soft: 'bg-slate-100/80' },
+      regression:     { label: 'RÉGRESSION', color: '#0284C7', badge: 'bg-sky-100 text-sky-800', dot: 'bg-sky-600', border: 'border-sky-200', soft: 'bg-sky-50/80' },
+      classification: { label: 'CLASSIFICATION', color: '#E11D48', badge: 'bg-rose-100 text-rose-800', dot: 'bg-rose-600', border: 'border-rose-200', soft: 'bg-rose-50/80' },
+      clustering:     { label: 'CLUSTERING', color: '#7C3AED', badge: 'bg-violet-100 text-violet-800', dot: 'bg-violet-600', border: 'border-violet-200', soft: 'bg-violet-50/80' },
+      choix:          { label: 'COMPRENDRE & CHOISIR', color: '#D97706', badge: 'bg-amber-100 text-amber-800', dot: 'bg-amber-600', border: 'border-amber-200', soft: 'bg-amber-50/80' },
+      evaluation:     { label: 'ÉVALUATION DES RÉSULTATS', color: '#0D9488', badge: 'bg-teal-100 text-teal-800', dot: 'bg-teal-600', border: 'border-teal-200', soft: 'bg-teal-50/80' },
+    };
+
+    // =========================================================================
+    // GABARIT WEB ÉQUILIBRÉ POUR LES FICHES D'ALGORITHMES (02 À 15)
+    // =========================================================================
+    function renderAlgoPage(cfg) {
+      const fam = FAMILIES[cfg.family];
+      return `
+        <div class="space-y-7">
+          <!-- En-tête éditorial : A. Nom + B. Traduction enfant de 12 ans -->
+          <header class="pb-5 border-b border-slate-200/80">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full ${fam.badge} font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+              <span class="w-2 h-2 rounded-full ${fam.dot}"></span>
+              ${fam.label} · NOTION ${cfg.num}
+            </div>
+            <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">${cfg.heading}</h2>
+            <div class="mt-3 flex items-start sm:items-center gap-3">
+              <span class="w-1.5 h-6 rounded-full shrink-0 mt-1 sm:mt-0" style="background:${fam.color}"></span>
+              <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">« ${cfg.kidQuote} »</p>
+            </div>
+          </header>
+
+          <!-- Grille équilibrée 12 colonnes : Visuel + 3 étapes à gauche (7 col) | Synthèse pratique à droite (5 col) -->
+          <div class="grid grid-cols-1 xl:grid-cols-12 gap-7 items-stretch">
+            <!-- COLONNE GAUCHE (7 cols) : Illustration centrale + 3 petites étapes -->
+            <div class="xl:col-span-7 flex flex-col gap-5">
+              <section class="bg-white rounded-3xl border border-slate-200/90 shadow-2xs p-5 sm:p-6 flex-1 flex flex-col justify-center">
+                ${cfg.visualHtml}
+              </section>
+
+              <!-- D. Trois petites étapes en frise horizontale -->
+              <section class="bg-white rounded-2xl border border-slate-200/90 p-5">
+                <div class="font-display text-[11px] font-extrabold tracking-widest text-slate-400 uppercase mb-3">Comment ça marche en 3 temps</div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div class="flex items-start gap-2.5">
+                    <span class="w-6 h-6 rounded-full bg-ink text-white font-display font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">1</span>
+                    <p class="text-xs sm:text-sm text-slate-700 leading-snug"><strong class="text-ink block">Au départ</strong>${cfg.step1}</p>
+                  </div>
+                  <div class="flex items-start gap-2.5">
+                    <span class="w-6 h-6 rounded-full text-white font-display font-bold text-xs flex items-center justify-center shrink-0 mt-0.5" style="background:${fam.color}">2</span>
+                    <p class="text-xs sm:text-sm text-slate-700 leading-snug"><strong class="text-ink block">Le modèle</strong>${cfg.step2}</p>
+                  </div>
+                  <div class="flex items-start gap-2.5">
+                    <span class="w-6 h-6 rounded-full bg-ink text-white font-display font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">3</span>
+                    <p class="text-xs sm:text-sm text-slate-700 leading-snug"><strong class="text-ink block">À l'arrivée</strong>${cfg.step3}</p>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <!-- COLONNE DROITE (5 cols) : Exemple concret + Forces/Limites + Vérification -->
+            <aside class="xl:col-span-5 flex flex-col justify-between gap-5">
+              <!-- E. Exemple concret -->
+              <div class="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6">
+                <div class="font-display text-[11px] font-extrabold tracking-widest uppercase mb-1.5" style="color:${fam.color}">Exemple concret (fictif)</div>
+                <div class="font-display font-bold text-base sm:text-lg text-ink leading-snug">${cfg.exTitle}</div>
+                <p class="text-sm text-slate-600 mt-1.5 leading-relaxed">${cfg.exText}</p>
+              </div>
+
+              <!-- F. Avantage et faiblesse -->
+              <div class="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 space-y-4 flex-1 flex flex-col justify-center">
+                <div class="font-display text-[11px] font-extrabold tracking-widest text-slate-400 uppercase">Forces &amp; limites à retenir</div>
+                <div class="flex items-start gap-3">
+                  <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">✓</span>
+                  <p class="text-sm text-slate-700 leading-snug"><strong class="text-ink block">${cfg.proTitle}</strong>${cfg.proText}</p>
+                </div>
+                <div class="border-t border-slate-100"></div>
+                <div class="flex items-start gap-3">
+                  <span class="w-6 h-6 rounded-full bg-rose-100 text-rose-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">✕</span>
+                  <p class="text-sm text-slate-700 leading-snug"><strong class="text-ink block">${cfg.conTitle}</strong>${cfg.conText}</p>
+                </div>
+              </div>
+
+              <!-- G. Comment vérifier le résultat ? -->
+              <div class="rounded-2xl ${fam.soft} border ${fam.border} p-5">
+                <div class="font-display text-[11px] font-extrabold tracking-wider uppercase" style="color:${fam.color}">Comment vérifier le résultat ?</div>
+                <div class="font-display font-bold text-sm sm:text-base text-ink mt-1">${cfg.metricTitle}</div>
+                <p class="text-xs sm:text-sm text-slate-700 mt-0.5 leading-snug">${cfg.metricText}</p>
+              </div>
+            </aside>
+          </div>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // LES 25 NOTIONS COMPLÈTES
+    // =========================================================================
+    const NOTIONS = [
+      // 01 — LES TROIS GRANDES FAMILLES
+      {
+        num: '01',
+        family: 'intro',
+        shortTitle: '01 · Les 3 grandes familles',
+        render: () => `
+          <div class="space-y-8">
+            <header>
+              <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-200 text-slate-900 font-display font-extrabold text-xs tracking-wider uppercase mb-3">
+                <span class="w-2 h-2 rounded-full bg-slate-900"></span>
+                INTRODUCTION · NOTION 01
+              </div>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-ink tracking-tight">Les trois grandes familles du Machine Learning</h2>
+              <p class="mt-3 font-display text-lg sm:text-xl font-semibold text-slate-700">
+                « Au lieu d'écrire des règles à la main, la machine apprend à partir d'exemples selon la question posée. »
+              </p>
+            </header>
+
+            <!-- Distinction Supervisé vs Non Supervisé -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+              <div class="lg:col-span-8 bg-ink text-white rounded-2xl p-4 sm:px-6 flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <div class="font-display font-extrabold text-sm tracking-wider uppercase text-sky-300">Apprentissage supervisé (Familles 1 &amp; 2)</div>
+                  <p class="text-sm text-slate-200">On possède déjà les bonnes réponses (étiquettes) sur les exemples passés.</p>
+                </div>
+                <span class="text-xs font-mono bg-white/15 px-3 py-1 rounded-full">Données avec corrigé (X + y)</span>
+              </div>
+              <div class="lg:col-span-4 bg-violet-700 text-white rounded-2xl p-4 sm:px-6 flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <div class="font-display font-extrabold text-sm tracking-wider uppercase text-violet-200">Non supervisé (Famille 3)</div>
+                  <p class="text-sm text-violet-100">Aucune réponse connue d'avance.</p>
+                </div>
+                <span class="text-xs font-mono bg-white/15 px-3 py-1 rounded-full">Données brutes (X)</span>
+              </div>
+            </div>
+
+            <!-- 3 Colonnes -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <!-- Régression -->
+              <section class="bg-white rounded-3xl border-2 border-sky-200 p-6 flex flex-col justify-between shadow-2xs">
+                <div>
+                  <span class="inline-block px-3 py-1 rounded-full bg-sky-100 text-sky-800 font-display font-extrabold text-xs uppercase">1. Régression</span>
+                  <h3 class="font-serif text-3xl font-bold text-sky-600 mt-3">« Combien ? »</h3>
+                  <p class="font-display font-bold text-base text-ink mt-1">Prédire un nombre continu</p>
+                </div>
+                <div class="bg-sky-50/70 rounded-2xl p-3 my-4 border border-sky-100">
+                  <svg viewBox="0 0 420 200" class="w-full h-auto">
+                    <line x1="35" y1="170" x2="395" y2="170" stroke="#94A3B8" stroke-width="2"/>
+                    <line x1="35" y1="20" x2="35" y2="170" stroke="#94A3B8" stroke-width="2"/>
+                    <circle cx="80" cy="148" r="7" fill="#0284C7"/><circle cx="140" cy="126" r="7" fill="#0284C7"/>
+                    <circle cx="205" cy="102" r="7" fill="#0284C7"/><circle cx="325" cy="54" r="7" fill="#0284C7"/>
+                    <line x1="55" y1="158" x2="375" y2="34" stroke="#0284C7" stroke-width="4" stroke-linecap="round"/>
+                    <circle cx="260" cy="78" r="11" fill="#F59E0B" stroke="#0F172A" stroke-width="2.5"/>
+                    <rect x="175" y="14" width="175" height="30" rx="8" fill="#0F172A"/>
+                    <text x="262" y="34" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="13" font-weight="800" fill="#38BDF8">80 m² → 210 000 €</text>
+                  </svg>
+                </div>
+                <ul class="space-y-2 text-sm text-slate-700">
+                  <li>• <strong>Départ :</strong> maisons vendues avec leur prix.</li>
+                  <li>• <strong>Résultat :</strong> un prix, une durée, un volume.</li>
+                  <li>• <strong>Modèles :</strong> Linéaire, Polynomiale, Ridge, Lasso.</li>
+                </ul>
+                <div class="mt-4 bg-sky-100 text-sky-900 font-display font-bold text-xs px-3 py-2 rounded-xl text-center">
+                  Vérification : MAE, MSE, RMSE, R²
+                </div>
+              </section>
+
+              <!-- Classification -->
+              <section class="bg-white rounded-3xl border-2 border-rose-200 p-6 flex flex-col justify-between shadow-2xs">
+                <div>
+                  <span class="inline-block px-3 py-1 rounded-full bg-rose-100 text-rose-800 font-display font-extrabold text-xs uppercase">2. Classification</span>
+                  <h3 class="font-serif text-3xl font-bold text-rose-600 mt-3">« Quelle classe ? »</h3>
+                  <p class="font-display font-bold text-base text-ink mt-1">Choisir une catégorie connue</p>
+                </div>
+                <div class="bg-rose-50/70 rounded-2xl p-3 my-4 border border-rose-100">
+                  <svg viewBox="0 0 420 200" class="w-full h-auto">
+                    <line x1="215" y1="14" x2="195" y2="186" stroke="#0F172A" stroke-width="2.5" stroke-dasharray="6 6"/>
+                    <text x="95" y="30" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="13" font-weight="800" fill="#0D9488">NORMAL</text>
+                    <circle cx="65" cy="72" r="10" fill="#0D9488"/><circle cx="125" cy="108" r="10" fill="#0D9488"/><circle cx="75" cy="152" r="10" fill="#0D9488"/>
+                    <text x="325" y="30" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="13" font-weight="800" fill="#E11D48">SPAM</text>
+                    <circle cx="295" cy="70" r="10" fill="#E11D48"/><circle cx="355" cy="110" r="10" fill="#E11D48"/><circle cx="315" cy="152" r="10" fill="#E11D48"/>
+                    <circle cx="265" cy="105" r="14" fill="#FFFFFF" stroke="#E11D48" stroke-width="4"/>
+                    <rect x="220" y="158" width="180" height="30" rx="8" fill="#0F172A"/>
+                    <text x="310" y="178" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="13" font-weight="800" fill="#FDA4AF">E-mail → Classé SPAM</text>
+                  </svg>
+                </div>
+                <ul class="space-y-2 text-sm text-slate-700">
+                  <li>• <strong>Départ :</strong> exemples déjà rangés par catégorie.</li>
+                  <li>• <strong>Résultat :</strong> Spam / Normal, Fraude / Valide.</li>
+                  <li>• <strong>Modèles :</strong> KNN, Logistique, Arbre, Forêt, Bayes, SVM.</li>
+                </ul>
+                <div class="mt-4 bg-rose-100 text-rose-900 font-display font-bold text-xs px-3 py-2 rounded-xl text-center">
+                  Vérification : Matrice, Précision, Rappel, F1
+                </div>
+              </section>
+
+              <!-- Clustering -->
+              <section class="bg-white rounded-3xl border-2 border-violet-200 p-6 flex flex-col justify-between shadow-2xs">
+                <div>
+                  <span class="inline-block px-3 py-1 rounded-full bg-violet-100 text-violet-800 font-display font-extrabold text-xs uppercase">3. Clustering</span>
+                  <h3 class="font-serif text-3xl font-bold text-violet-600 mt-3">« Quels groupes ? »</h3>
+                  <p class="font-display font-bold text-base text-ink mt-1">Découvrir des familles cachées</p>
+                </div>
+                <div class="bg-violet-50/70 rounded-2xl p-3 my-4 border border-violet-100">
+                  <svg viewBox="0 0 420 200" class="w-full h-auto">
+                    <circle cx="100" cy="88" r="42" fill="#DDD6FE" stroke="#7C3AED" stroke-width="2" stroke-dasharray="4 4"/>
+                    <circle cx="88" cy="80" r="8" fill="#7C3AED"/><circle cx="114" cy="78" r="8" fill="#7C3AED"/><circle cx="100" cy="102" r="8" fill="#7C3AED"/>
+                    <circle cx="320" cy="84" r="42" fill="#FCE7F3" stroke="#DB2777" stroke-width="2" stroke-dasharray="4 4"/>
+                    <circle cx="308" cy="76" r="8" fill="#DB2777"/><circle cx="334" cy="76" r="8" fill="#DB2777"/><circle cx="320" cy="100" r="8" fill="#DB2777"/>
+                    <circle cx="210" cy="148" r="40" fill="#E0E7FF" stroke="#4F46E5" stroke-width="2" stroke-dasharray="4 4"/>
+                    <circle cx="198" cy="142" r="8" fill="#4F46E5"/><circle cx="224" cy="142" r="8" fill="#4F46E5"/><circle cx="210" cy="162" r="8" fill="#4F46E5"/>
+                    <rect x="90" y="10" width="240" height="28" rx="8" fill="#0F172A"/>
+                    <text x="210" y="29" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#C4B5FD">3 groupes de lecteurs découverts</text>
+                  </svg>
+                </div>
+                <ul class="space-y-2 text-sm text-slate-700">
+                  <li>• <strong>Départ :</strong> données brutes sans étiquettes.</li>
+                  <li>• <strong>Résultat :</strong> des groupes qui se ressemblent.</li>
+                  <li>• <strong>Modèles :</strong> K-means, Hiérarchique, DBSCAN, Spectral.</li>
+                </ul>
+                <div class="mt-4 bg-violet-100 text-violet-900 font-display font-bold text-xs px-3 py-2 rounded-xl text-center">
+                  Vérification : Score de silhouette &amp; sens métier
+                </div>
+              </section>
+            </div>
+          </div>
+        `
+      },
+
+      // 02 — RÉGRESSION LINÉAIRE (AVEC CURSEUR INTERACTIF)
+      {
+        num: '02',
+        family: 'regression',
+        shortTitle: '02 · Régression linéaire',
+        render: () => renderAlgoPage({
+          num: '02',
+          family: 'regression',
+          heading: 'Régression linéaire',
+          kidQuote: 'Je trace la ligne droite qui passe au plus près de tous les points pour deviner la suite.',
+          step1: 'Des maisons déjà vendues avec leur surface (m²) et leur prix connu.',
+          step2: 'Il ajuste une droite qui réduit au maximum l’écart moyen avec tous les points.',
+          step3: 'On lit la hauteur sur la droite pour estimer le prix d’une nouvelle maison.',
+          exTitle: 'Maison de 80 m² → prix estimé de 210 000 €',
+          exText: 'La droite ajoute environ 2 250 € par m² à un socle de 30 000 € : à 80 m², elle prédit 210 000 €.',
+          proTitle: 'Rapide et transparente',
+          proText: 'On comprend immédiatement combien chaque m² ou critère ajoute au prix.',
+          conTitle: 'Trop rigide pour les courbes',
+          conText: 'Si le prix accélère ou plafonne, une ligne droite reste à côté de la réalité.',
+          metricTitle: 'Métriques de régression uniquement :',
+          metricText: 'MAE (erreur moyenne en €), MSE, RMSE et R². Jamais de F1 ni de matrice de confusion.',
+          visualHtml: `
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <span class="font-display text-xs font-extrabold text-sky-700 uppercase tracking-wider">Tendance linéaire interactive</span>
+              <div class="flex items-center gap-2.5 bg-sky-50 border border-sky-200 px-3 py-1.5 rounded-xl">
+                <label for="sim-lin-surface" class="text-xs font-display font-bold text-sky-900">Surface :</label>
+                <input id="sim-lin-surface" type="range" min="40" max="130" value="80" class="ml-slider w-28" />
+                <span id="sim-lin-label" class="font-mono text-xs font-bold text-sky-700">80 m² → 210 000 €</span>
+              </div>
+            </div>
+            <svg viewBox="0 0 820 480" class="w-full h-auto">
+              <line x1="85" y1="415" x2="770" y2="415" stroke="#0F172A" stroke-width="2.5"/>
+              <text x="765" y="450" text-anchor="end" font-family="Plus Jakarta Sans" font-size="14" font-weight="700" fill="#475569">Surface de la maison (m²) →</text>
+              <line x1="85" y1="415" x2="85" y2="35" stroke="#0F172A" stroke-width="2.5"/>
+              <text x="100" y="46" font-family="Plus Jakarta Sans" font-size="14" font-weight="700" fill="#475569">↑ Prix (€)</text>
+
+              <line x1="85" y1="330" x2="755" y2="330" stroke="#F1F5F9" stroke-width="2"/>
+              <text x="75" y="335" text-anchor="end" font-family="JetBrains Mono" font-size="12" fill="#64748B">100 k€</text>
+              <line x1="85" y1="235" x2="755" y2="235" stroke="#F1F5F9" stroke-width="2"/>
+              <text x="75" y="240" text-anchor="end" font-family="JetBrains Mono" font-size="12" fill="#64748B">200 k€</text>
+              <line x1="85" y1="140" x2="755" y2="140" stroke="#F1F5F9" stroke-width="2"/>
+              <text x="75" y="145" text-anchor="end" font-family="JetBrains Mono" font-size="12" fill="#64748B">300 k€</text>
+
+              <!-- Écarts -->
+              <line x1="160" y1="365" x2="160" y2="346" stroke="#F59E0B" stroke-width="2.5" stroke-dasharray="4 4"/>
+              <line x1="250" y1="288" x2="250" y2="308" stroke="#F59E0B" stroke-width="2.5" stroke-dasharray="4 4"/>
+              <line x1="345" y1="275" x2="345" y2="262" stroke="#F59E0B" stroke-width="2.5" stroke-dasharray="4 4"/>
+              <line x1="550" y1="142" x2="550" y2="166" stroke="#F59E0B" stroke-width="2.5" stroke-dasharray="4 4"/>
+              <line x1="665" y1="122" x2="665" y2="108" stroke="#F59E0B" stroke-width="2.5" stroke-dasharray="4 4"/>
+
+              <!-- Droite -->
+              <line x1="115" y1="368" x2="735" y2="76" stroke="#0284C7" stroke-width="5" stroke-linecap="round"/>
+
+              <!-- Maisons connues -->
+              <circle cx="160" cy="365" r="10" fill="#0284C7"/><circle cx="250" cy="288" r="10" fill="#0284C7"/>
+              <circle cx="345" cy="275" r="10" fill="#0284C7"/><circle cx="550" cy="142" r="10" fill="#0284C7"/>
+              <circle cx="665" cy="122" r="10" fill="#0284C7"/>
+
+              <!-- Point cible (80 m2) -->
+              <line id="lin-vline" x1="425" y1="415" x2="425" y2="225" stroke="#E11D48" stroke-width="2.5" stroke-dasharray="6 4"/>
+              <line id="lin-hline" x1="85" y1="225" x2="425" y2="225" stroke="#E11D48" stroke-width="2.5" stroke-dasharray="6 4"/>
+              <circle id="lin-dot" cx="425" cy="225" r="14" fill="#F59E0B" stroke="#0F172A" stroke-width="3.5"/>
+
+              <g id="lin-callout" transform="translate(310, 125)">
+                <rect x="0" y="0" width="230" height="68" rx="14" fill="#0F172A"/>
+                <text id="lin-callout-top" x="115" y="26" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#94A3B8">MAISON DE 80 m²</text>
+                <text id="lin-callout-val" x="115" y="53" text-anchor="middle" font-family="Fraunces" font-size="23" font-weight="700" fill="#38BDF8">210 000 €</text>
+              </g>
+            </svg>
+          `
+        })
+      },
+
+      // 03 — RÉGRESSION POLYNOMIALE
+      {
+        num: '03',
+        family: 'regression',
+        shortTitle: '03 · Régression polynomiale',
+        render: () => renderAlgoPage({
+          num: '03',
+          family: 'regression',
+          heading: 'Régression polynomiale',
+          kidQuote: 'Quand les points forment un virage, j’assouplis la droite pour qu’elle épouse la courbe.',
+          step1: 'Des données qui suivent une relation courbe (accélération, freinage, consommation).',
+          step2: 'Il ajoute des puissances (x², x³) pour autoriser la ligne à se plier.',
+          step3: 'Une courbe régulière qui suit le virage sans casser la tendance.',
+          exTitle: 'Consommation de carburant selon la vitesse',
+          exText: 'À 20 km/h comme à 130 km/h, on consomme plus qu’à 80 km/h : la courbe en U prédit 4,8 L/100 km à 80 km/h.',
+          proTitle: 'Capture les virages',
+          proText: 'Suit des phénomènes non linéaires tout en restant une équation simple.',
+          conTitle: 'Danger de zigzags (surapprentissage)',
+          conText: 'Avec un degré trop grand, la courbe fait des vagues folles pour toucher chaque point.',
+          metricTitle: 'Métriques de régression uniquement :',
+          metricText: 'MAE, MSE, RMSE et R² (toujours vérifiés sur de nouvelles données de test).',
+          visualHtml: `
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-display text-xs font-extrabold text-sky-700 uppercase tracking-wider">Courbe polynomiale vs droite rigide</span>
+              <span class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-full">Degré 2 (parabole)</span>
+            </div>
+            <svg viewBox="0 0 820 480" class="w-full h-auto">
+              <line x1="85" y1="415" x2="765" y2="415" stroke="#0F172A" stroke-width="2.5"/>
+              <text x="760" y="448" text-anchor="end" font-family="Plus Jakarta Sans" font-size="14" font-weight="700" fill="#475569">Vitesse (km/h) →</text>
+              <line x1="85" y1="415" x2="85" y2="40" stroke="#0F172A" stroke-width="2.5"/>
+              <text x="100" y="50" font-family="Plus Jakarta Sans" font-size="14" font-weight="700" fill="#475569">↑ Consommation (L / 100 km)</text>
+
+              <line x1="130" y1="240" x2="720" y2="215" stroke="#94A3B8" stroke-width="3.5" stroke-dasharray="8 6"/>
+              <rect x="515" y="170" width="215" height="30" rx="8" fill="#F1F5F9"/>
+              <text x="622" y="190" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="13" font-weight="700" fill="#64748B">✕ Droite linéaire (fausse)</text>
+
+              <path d="M 135 105 Q 420 450 710 95" fill="none" stroke="#0284C7" stroke-width="5.5" stroke-linecap="round"/>
+
+              <circle cx="155" cy="135" r="10" fill="#0284C7"/><circle cx="225" cy="220" r="10" fill="#0284C7"/>
+              <circle cx="320" cy="295" r="10" fill="#0284C7"/><circle cx="420" cy="318" r="10" fill="#0284C7"/>
+              <circle cx="520" cy="288" r="10" fill="#0284C7"/><circle cx="615" cy="210" r="10" fill="#0284C7"/>
+              <circle cx="695" cy="122" r="10" fill="#0284C7"/>
+
+              <circle cx="420" cy="318" r="14" fill="#F59E0B" stroke="#0F172A" stroke-width="3"/>
+              <g transform="translate(290, 344)">
+                <rect x="0" y="0" width="260" height="58" rx="12" fill="#0F172A"/>
+                <text x="130" y="23" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#38BDF8">COURBE POLYNOMIALE</text>
+                <text x="130" y="45" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#FFF">80 km/h → 4,8 L / 100 km</text>
+              </g>
+            </svg>
+          `
+        })
+      },
+
+      // 04 — RIDGE
+      {
+        num: '04',
+        family: 'regression',
+        shortTitle: '04 · Régression Ridge',
+        render: () => renderAlgoPage({
+          num: '04',
+          family: 'regression',
+          heading: 'Ridge — Calmer tous les curseurs',
+          kidQuote: 'Quand trop d’indices crient en même temps, je baisse le volume de chacun pour éviter les excès.',
+          step1: 'Plusieurs variables explicatives, parfois très liées entre elles (surface, pièces, terrain).',
+          step2: 'Il ajoute un frein (pénalité L2) qui réduit tous les coefficients sans jamais les annuler.',
+          step3: 'Un modèle équilibré où chaque variable garde une petite voix raisonnable.',
+          exTitle: 'Estimer une maison avec 15 critères détaillés',
+          exText: 'Même la taille du balcon ou la couleur des volets gardent un poids minuscule (ex : 12 %) au lieu de fausser le prix.',
+          proTitle: 'Très stable face aux variables liées',
+          proText: 'Limite le surapprentissage tout en conservant toute l’information disponible.',
+          conTitle: 'Ne fait pas le tri des variables',
+          conText: 'Garde toutes les variables actives (poids ≠ 0) et impose de les mettre à la même échelle avant.',
+          metricTitle: 'Métriques de régression uniquement :',
+          metricText: 'MAE, MSE, RMSE et R².',
+          visualHtml: `
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-display text-xs font-extrabold text-sky-700 uppercase tracking-wider">Console · Réduction douce (L2)</span>
+              <span class="text-xs font-bold text-sky-800 bg-sky-100 px-3 py-1 rounded-full">Aucun curseur à 0 %</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-11 gap-4 items-center">
+              <div class="sm:col-span-5 bg-slate-50 rounded-2xl border border-slate-200 p-5">
+                <div class="text-center mb-4">
+                  <div class="font-serif text-lg font-bold text-slate-700">Avant : Sans frein</div>
+                  <div class="text-xs text-slate-500">Curseurs trop hauts → instable</div>
+                </div>
+                <div class="grid grid-cols-4 gap-2 items-end h-52">
+                  ${[
+                    { name: 'Surface', pct: 92, color: 'bg-slate-600' },
+                    { name: 'Quartier', pct: 80, color: 'bg-slate-600' },
+                    { name: 'Balcon', pct: 58, color: 'bg-amber-500' },
+                    { name: 'Couleur', pct: 48, color: 'bg-amber-500' }
+                  ].map(f => `
+                    <div class="flex flex-col items-center h-full justify-end">
+                      <div class="w-3.5 h-36 bg-slate-200 rounded-full flex items-end p-0.5"><div class="w-full rounded-full ${f.color}" style="height:${f.pct}%"></div></div>
+                      <span class="font-display font-bold text-[11px] text-ink mt-2">${f.name}</span>
+                      <span class="font-mono text-[11px] font-bold text-slate-600">${f.pct}%</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div class="sm:col-span-1 flex flex-col items-center justify-center py-2">
+                <div class="w-10 h-10 rounded-full bg-sky-600 text-white font-bold flex items-center justify-center shadow">→</div>
+                <span class="font-mono text-[10px] font-bold text-sky-700 mt-1">RIDGE</span>
+              </div>
+
+              <div class="sm:col-span-5 bg-sky-50/70 rounded-2xl border-2 border-sky-500 p-5">
+                <div class="text-center mb-4">
+                  <div class="font-serif text-lg font-bold text-sky-700">Après : Ridge</div>
+                  <div class="text-xs text-sky-800 font-medium">Tous abaissés, tous gardés</div>
+                </div>
+                <div class="grid grid-cols-4 gap-2 items-end h-52">
+                  ${[
+                    { name: 'Surface', pct: 65, color: 'bg-sky-600' },
+                    { name: 'Quartier', pct: 54, color: 'bg-sky-600' },
+                    { name: 'Balcon', pct: 20, color: 'bg-sky-400' },
+                    { name: 'Couleur', pct: 12, color: 'bg-sky-400' }
+                  ].map(f => `
+                    <div class="flex flex-col items-center h-full justify-end">
+                      <div class="w-3.5 h-36 bg-sky-200/70 rounded-full flex items-end p-0.5"><div class="w-full rounded-full ${f.color}" style="height:${f.pct}%"></div></div>
+                      <span class="font-display font-bold text-[11px] text-ink mt-2">${f.name}</span>
+                      <span class="font-mono text-[11px] font-bold text-sky-700">${f.pct}%</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+          `
+        })
+      },
+
+      // 05 — LASSO
+      {
+        num: '05',
+        family: 'regression',
+        shortTitle: '05 · Régression Lasso',
+        render: () => renderAlgoPage({
+          num: '05',
+          family: 'regression',
+          heading: 'Lasso — Couper les pistes inutiles',
+          kidQuote: 'Je garde uniquement les indices vraiment utiles et je mets tous les autres complètement à zéro.',
+          step1: 'Un grand nombre de variables, dont beaucoup ne servent en réalité à rien.',
+          step2: 'Il applique une pénalité (L1) qui pousse les petits coefficients jusqu’à zéro exact.',
+          step3: 'Un modèle épuré qui sélectionne tout seul les seules variables importantes.',
+          exTitle: 'Estimer le prix avec 20 critères dont le numéro de rue',
+          exText: 'Lasso coupe à 0 % le numéro de rue et la couleur des volets, et ne garde que la surface et le quartier.',
+          proTitle: 'Sélectionne automatiquement les variables',
+          proText: 'Rend le modèle beaucoup plus simple, lisible et rapide à expliquer.',
+          conTitle: 'Écarte parfois un indice utile lié à un autre',
+          conText: 'Si deux variables se ressemblent, il en garde une et coupe l’autre ; exige aussi la mise à l’échelle.',
+          metricTitle: 'Métriques de régression uniquement :',
+          metricText: 'MAE, MSE, RMSE et R².',
+          visualHtml: `
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-display text-xs font-extrabold text-teal-700 uppercase tracking-wider">Différence visible : Ridge vs Lasso</span>
+              <span class="text-xs font-bold text-rose-700 bg-rose-100 px-3 py-1 rounded-full">Mise à 0 % exact (L1)</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-11 gap-4 items-center">
+              <div class="sm:col-span-5 bg-slate-50 rounded-2xl border border-slate-200 p-5">
+                <div class="text-center mb-4">
+                  <div class="font-serif text-lg font-bold text-sky-700">Rappel : Ridge</div>
+                  <div class="text-xs text-slate-500">Garde les 4 pistes actives</div>
+                </div>
+                <div class="grid grid-cols-4 gap-2 items-end h-52">
+                  ${[
+                    { name: 'Surface', pct: 65, color: 'bg-sky-600' },
+                    { name: 'Quartier', pct: 54, color: 'bg-sky-600' },
+                    { name: 'Couleur', pct: 20, color: 'bg-sky-400' },
+                    { name: 'N° rue', pct: 12, color: 'bg-sky-400' }
+                  ].map(f => `
+                    <div class="flex flex-col items-center h-full justify-end">
+                      <div class="w-3.5 h-36 bg-slate-200 rounded-full flex items-end p-0.5"><div class="w-full rounded-full ${f.color}" style="height:${f.pct}%"></div></div>
+                      <span class="font-display font-bold text-[11px] text-ink mt-2">${f.name}</span>
+                      <span class="font-mono text-[11px] font-bold text-sky-700">${f.pct}%</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div class="sm:col-span-1 flex flex-col items-center justify-center py-2">
+                <div class="w-10 h-10 rounded-full bg-ink text-white font-display font-extrabold flex items-center justify-center text-xs shadow">VS</div>
+              </div>
+
+              <div class="sm:col-span-5 bg-emerald-50/70 rounded-2xl border-2 border-teal-600 p-5">
+                <div class="text-center mb-4">
+                  <div class="font-serif text-lg font-bold text-teal-800">Régression Lasso</div>
+                  <div class="text-xs text-teal-700 font-semibold">Coupe à 0 % les inutiles</div>
+                </div>
+                <div class="grid grid-cols-4 gap-2 items-end h-52">
+                  <div class="flex flex-col items-center h-full justify-end">
+                    <div class="w-3.5 h-36 bg-teal-200/70 rounded-full flex items-end p-0.5"><div class="w-full rounded-full bg-teal-600" style="height:70%"></div></div>
+                    <span class="font-display font-bold text-[11px] text-ink mt-2">Surface</span>
+                    <span class="font-mono text-[11px] font-bold text-teal-700">70%</span>
+                  </div>
+                  <div class="flex flex-col items-center h-full justify-end">
+                    <div class="w-3.5 h-36 bg-teal-200/70 rounded-full flex items-end p-0.5"><div class="w-full rounded-full bg-teal-600" style="height:58%"></div></div>
+                    <span class="font-display font-bold text-[11px] text-ink mt-2">Quartier</span>
+                    <span class="font-mono text-[11px] font-bold text-teal-700">58%</span>
+                  </div>
+                  <div class="flex flex-col items-center h-full justify-end">
+                    <div class="w-3.5 h-36 bg-slate-200 rounded-full flex items-end justify-center p-0.5"><div class="w-3 h-3 rounded-full bg-rose-600"></div></div>
+                    <span class="font-display font-bold text-[11px] text-slate-400 mt-2">Couleur</span>
+                    <span class="font-mono text-[11px] font-extrabold text-rose-600">0% OFF</span>
+                  </div>
+                  <div class="flex flex-col items-center h-full justify-end">
+                    <div class="w-3.5 h-36 bg-slate-200 rounded-full flex items-end justify-center p-0.5"><div class="w-3 h-3 rounded-full bg-rose-600"></div></div>
+                    <span class="font-display font-bold text-[11px] text-slate-400 mt-2">N° rue</span>
+                    <span class="font-mono text-[11px] font-extrabold text-rose-600">0% OFF</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `
+        })
+      },
+
+      // 06 — KNN
+      {
+        num: '06',
+        family: 'classification',
+        shortTitle: '06 · KNN (Voisins)',
+        render: () => renderAlgoPage({
+          num: '06',
+          family: 'classification',
+          heading: 'KNN — Les K plus proches voisins',
+          kidQuote: 'Je regarde les 5 exemples qui ressemblent le plus au nouveau, et je leur demande leur avis.',
+          step1: 'Des exemples déjà rangés avec leur bonne catégorie (Spam ou Normal).',
+          step2: 'Il mesure la ressemblance et sélectionne les K = 5 voisins les plus proches.',
+          step3: 'La majorité l’emporte : 3 voix contre 2, l’e-mail inconnu est classé SPAM.',
+          exTitle: 'E-mail inconnu → classé SPAM (3 contre 2)',
+          exText: 'Parmi les 5 e-mails connus les plus proches, 3 sont des spams et 2 sont normaux. Le vote majoritaire décide SPAM.',
+          proTitle: 'Très simple et polyvalent',
+          proText: 'Facile à expliquer ; fonctionne aussi en régression (moyenne des voisins).',
+          conTitle: 'Lent sur de très grands fichiers',
+          conText: 'Doit calculer la distance avec tout l’historique et exige des variables à la même échelle.',
+          metricTitle: 'Métriques de classification (ici) :',
+          metricText: 'Matrice de confusion, Précision, Rappel, F1 (ou MAE / RMSE en régression).',
+          visualHtml: `
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-display text-xs font-extrabold text-rose-700 uppercase tracking-wider">Vote des K = 5 plus proches voisins</span>
+              <span class="text-xs font-bold text-rose-800 bg-rose-100 px-3 py-1 rounded-full">3 SPAM vs 2 NORMAL</span>
+            </div>
+            <svg viewBox="0 0 820 480" class="w-full h-auto">
+              <g opacity="0.35">
+                <circle cx="110" cy="370" r="13" fill="#0D9488"/><circle cx="95" cy="220" r="13" fill="#0D9488"/>
+                <circle cx="180" cy="420" r="13" fill="#0D9488"/><circle cx="700" cy="95" r="13" fill="#E11D48"/>
+                <circle cx="735" cy="215" r="13" fill="#E11D48"/><circle cx="685" cy="380" r="13" fill="#E11D48"/>
+              </g>
+
+              <circle cx="410" cy="225" r="175" fill="#FFF1F2" stroke="#E11D48" stroke-width="3" stroke-dasharray="9 7"/>
+              <rect x="315" y="34" width="190" height="28" rx="14" fill="#0F172A"/>
+              <text x="410" y="53" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#FFF">CERCLE DES K = 5 VOISINS</text>
+
+              <line x1="305" y1="140" x2="410" y2="225" stroke="#E11D48" stroke-width="3"/>
+              <line x1="530" y1="135" x2="410" y2="225" stroke="#E11D48" stroke-width="3"/>
+              <line x1="520" y1="310" x2="410" y2="225" stroke="#E11D48" stroke-width="3"/>
+              <line x1="295" y1="300" x2="410" y2="225" stroke="#0D9488" stroke-width="3"/>
+              <line x1="265" y1="210" x2="410" y2="225" stroke="#0D9488" stroke-width="3"/>
+
+              <g transform="translate(305, 140)"><circle r="30" fill="#E11D48"/><text y="4" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#FFF">SPAM</text></g>
+              <g transform="translate(530, 135)"><circle r="30" fill="#E11D48"/><text y="4" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#FFF">SPAM</text></g>
+              <g transform="translate(520, 310)"><circle r="30" fill="#E11D48"/><text y="4" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#FFF">SPAM</text></g>
+              <g transform="translate(295, 300)"><circle r="30" fill="#0D9488"/><text y="4" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11" font-weight="800" fill="#FFF">NORMAL</text></g>
+              <g transform="translate(265, 210)"><circle r="30" fill="#0D9488"/><text y="4" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11" font-weight="800" fill="#FFF">NORMAL</text></g>
+
+              <g transform="translate(410, 225)">
+                <circle r="50" fill="#FFFFFF" stroke="#E11D48" stroke-width="4.5"/>
+                <text y="-12" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="10" font-weight="800" fill="#64748B">E-MAIL INCONNU</text>
+                <text y="12" text-anchor="middle" font-family="Fraunces" font-size="22" font-weight="700" fill="#E11D48">SPAM !</text>
+                <text y="30" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11" font-weight="700" fill="#0F172A">3 voix contre 2</text>
+              </g>
+
+              <rect x="180" y="422" width="460" height="40" rx="20" fill="#0F172A"/>
+              <text x="410" y="447" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="14" font-weight="700" fill="#FFF">
+                Majorité : <tspan fill="#FDA4AF">3 SPAM</tspan> &gt; <tspan fill="#5EEAD4">2 NORMAL</tspan> → Classé SPAM
+              </text>
+            </svg>
+          `
+        })
+      },
+
+      // 07 — RÉGRESSION LOGISTIQUE
+      {
+        num: '07',
+        family: 'classification',
+        shortTitle: '07 · Régression logistique',
+        render: () => renderAlgoPage({
+          num: '07',
+          family: 'classification',
+          heading: 'Régression logistique',
+          kidQuote: 'Malgré mon nom, je sers à classer : je calcule un risque de 0 à 100 %, puis je tranche avec un seuil.',
+          step1: 'Des indices chiffrés (liens suspects, majuscules) et la vraie classe connue.',
+          step2: 'Il transforme les indices en une probabilité entre 0 % et 100 % via une courbe en S.',
+          step3: 'Si la probabilité dépasse le seuil (ex : 50 %), l’e-mail est classé SPAM.',
+          exTitle: 'Probabilité estimée à 88 % > seuil de 50 % → SPAM',
+          exText: 'Avec plusieurs liens suspects, le modèle calcule 88 % de risque de spam. Comme 88 % dépasse 50 %, il le classe SPAM.',
+          proTitle: 'Donne une probabilité interprétable',
+          proText: 'Permet de régler le seuil de prudence (ex : 80 % pour éviter les fausses alertes).',
+          conTitle: 'Frontière de séparation droite',
+          conText: 'Attention : malgré son nom, c’est de la classification ; peine sur des frontières très courbes.',
+          metricTitle: 'Métriques de classification uniquement :',
+          metricText: 'Matrice de confusion, Précision, Rappel et F1.',
+          visualHtml: `
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <span class="font-display text-xs font-extrabold text-rose-700 uppercase tracking-wider">Courbe en S + Seuil de décision</span>
+              <span class="text-xs font-extrabold text-amber-800 bg-amber-100 border border-amber-300 px-3 py-1 rounded-full">⚠ Algorithme de classification</span>
+            </div>
+            <svg viewBox="0 0 820 470" class="w-full h-auto">
+              <rect x="95" y="38" width="665" height="185" fill="#FFF1F2" opacity="0.75"/>
+              <rect x="95" y="223" width="665" height="185" fill="#F0FDFA" opacity="0.75"/>
+              <line x1="95" y1="408" x2="765" y2="408" stroke="#0F172A" stroke-width="2.5"/>
+              <text x="760" y="440" text-anchor="end" font-family="Plus Jakarta Sans" font-size="13.5" font-weight="700" fill="#475569">Score d'indices suspects dans l'e-mail →</text>
+              <line x1="95" y1="408" x2="95" y2="32" stroke="#0F172A" stroke-width="2.5"/>
+
+              <text x="84" y="52" text-anchor="end" font-family="JetBrains Mono" font-size="13" font-weight="700" fill="#E11D48">100%</text>
+              <text x="84" y="228" text-anchor="end" font-family="JetBrains Mono" font-size="13" font-weight="700" fill="#0F172A">50%</text>
+              <text x="84" y="405" text-anchor="end" font-family="JetBrains Mono" font-size="13" font-weight="700" fill="#0D9488">0%</text>
+
+              <line x1="95" y1="223" x2="760" y2="223" stroke="#0F172A" stroke-width="2.5" stroke-dasharray="8 6"/>
+              <rect x="580" y="208" width="165" height="28" rx="8" fill="#0F172A"/>
+              <text x="662" y="227" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#FFF">SEUIL : 50 %</text>
+
+              <path d="M 125 396 C 305 396, 355 50, 725 50" fill="none" stroke="#E11D48" stroke-width="5.5" stroke-linecap="round"/>
+
+              <line x1="505" y1="408" x2="505" y2="82" stroke="#E11D48" stroke-width="2" stroke-dasharray="5 4"/>
+              <circle cx="505" cy="82" r="13" fill="#E11D48" stroke="#FFF" stroke-width="3"/>
+              <g transform="translate(365, 106)">
+                <rect x="0" y="0" width="280" height="54" rx="12" fill="#0F172A"/>
+                <text x="140" y="22" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#FDA4AF">PROBABILITÉ : 88 %</text>
+                <text x="140" y="43" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="13" font-weight="700" fill="#FFF">88 % &gt; 50 % → Classé SPAM</text>
+              </g>
+
+              <circle cx="245" cy="374" r="10" fill="#0D9488"/>
+              <text x="245" y="352" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12.5" font-weight="800" fill="#0F766E">12 % → NORMAL</text>
+            </svg>
+          `
+        })
+      },
+
+      // 08 — ARBRE DE DÉCISION
+      {
+        num: '08',
+        family: 'classification',
+        shortTitle: '08 · Arbre de décision',
+        render: () => renderAlgoPage({
+          num: '08',
+          family: 'classification',
+          heading: 'Arbre de décision',
+          kidQuote: 'Je pose une suite de questions simples Oui / Non jusqu’à tomber sur la bonne catégorie.',
+          step1: 'Des exemples avec leurs caractéristiques et leur catégorie connue.',
+          step2: 'Il trouve les questions Oui/Non qui séparent le plus proprement les groupes.',
+          step3: 'On suit les branches jusqu’à une feuille qui donne la décision finale.',
+          exTitle: 'Mot « Urgent » ? Oui → Expéditeur inconnu ? Oui → SPAM',
+          exText: 'En deux questions simples, l’arbre range l’e-mail dans la case SPAM et montre exactement pourquoi.',
+          proTitle: '100 % lisible et explicable',
+          proText: 'Idéal quand la loi ou un client exige de justifier une décision étape par étape.',
+          conTitle: 'Instable si l’arbre est trop profond',
+          conText: 'Un arbre trop grand apprend par cœur le bruit ; existe aussi en variante de régression.',
+          metricTitle: 'Métriques de classification (ici) :',
+          metricText: 'Matrice de confusion, Précision, Rappel, F1 (ou MAE / RMSE en régression).',
+          visualHtml: `
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-display text-xs font-extrabold text-rose-700 uppercase tracking-wider">Parcours de questions « Oui / Non »</span>
+              <span class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-full">Décision transparente</span>
+            </div>
+            <svg viewBox="0 0 820 470" class="w-full h-auto">
+              <rect x="245" y="20" width="330" height="66" rx="16" fill="#0F172A"/>
+              <text x="410" y="44" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11" font-weight="800" fill="#FDA4AF">QUESTION 1</text>
+              <text x="410" y="68" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="16" font-weight="700" fill="#FFF">Contient le mot « URGENT » ?</text>
+
+              <line x1="335" y1="86" x2="195" y2="185" stroke="#0D9488" stroke-width="4"/>
+              <rect x="225" y="120" width="58" height="24" rx="12" fill="#CCFBF1"/>
+              <text x="254" y="137" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#0F766E">NON</text>
+
+              <line x1="485" y1="86" x2="605" y2="185" stroke="#E11D48" stroke-width="4"/>
+              <rect x="525" y="120" width="58" height="24" rx="12" fill="#FFE4E6"/>
+              <text x="554" y="137" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#BE123C">OUI</text>
+
+              <rect x="85" y="185" width="220" height="78" rx="18" fill="#CCFBF1" stroke="#0D9488" stroke-width="2.5"/>
+              <text x="195" y="214" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#0F766E">CATÉGORIE</text>
+              <text x="195" y="244" text-anchor="middle" font-family="Fraunces" font-size="26" font-weight="700" fill="#0F766E">NORMAL</text>
+
+              <rect x="445" y="185" width="320" height="66" rx="16" fill="#0F172A"/>
+              <text x="605" y="209" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11" font-weight="800" fill="#FDA4AF">QUESTION 2</text>
+              <text x="605" y="233" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="16" font-weight="700" fill="#FFF">Expéditeur inconnu ?</text>
+
+              <line x1="530" y1="251" x2="420" y2="355" stroke="#0D9488" stroke-width="4"/>
+              <rect x="440" y="290" width="58" height="24" rx="12" fill="#CCFBF1"/>
+              <text x="469" y="307" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#0F766E">NON</text>
+
+              <line x1="675" y1="251" x2="700" y2="355" stroke="#E11D48" stroke-width="4"/>
+              <rect x="665" y="290" width="58" height="24" rx="12" fill="#FFE4E6"/>
+              <text x="694" y="307" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#BE123C">OUI</text>
+
+              <rect x="305" y="355" width="215" height="78" rx="18" fill="#CCFBF1" stroke="#0D9488" stroke-width="2.5"/>
+              <text x="412" y="384" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#0F766E">CATÉGORIE</text>
+              <text x="412" y="414" text-anchor="middle" font-family="Fraunces" font-size="26" font-weight="700" fill="#0F766E">NORMAL</text>
+
+              <rect x="585" y="355" width="215" height="78" rx="18" fill="#FFE4E6" stroke="#E11D48" stroke-width="3"/>
+              <text x="692" y="384" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#BE123C">VERDICT</text>
+              <text x="692" y="414" text-anchor="middle" font-family="Fraunces" font-size="26" font-weight="700" fill="#E11D48">SPAM !</text>
+            </svg>
+          `
+        })
+      },
+
+      // 09 — FORÊT ALÉATOIRE
+      {
+        num: '09',
+        family: 'classification',
+        shortTitle: '09 · Forêt aléatoire',
+        render: () => renderAlgoPage({
+          num: '09',
+          family: 'classification',
+          heading: 'Forêt aléatoire (Random Forest)',
+          kidQuote: 'Au lieu de faire confiance à un seul arbre, je fais voter 100 arbres différents et je prends la majorité.',
+          step1: 'Des données d’entraînement dont chaque arbre reçoit un échantillon tiré au hasard.',
+          step2: 'Des dizaines d’arbres indépendants examinent chacun des indices variés.',
+          step3: 'Le vote majoritaire produit une décision bien plus fiable qu’un arbre seul.',
+          exTitle: 'Jury de 100 arbres sur un e-mail douteux → SPAM',
+          exText: 'Si 82 arbres votent SPAM et 18 votent NORMAL, la forêt classe l’e-mail en SPAM avec assurance.',
+          proTitle: 'Très robuste contre le surapprentissage',
+          proText: 'Les erreurs d’un arbre isolé sont compensées par le vote collectif.',
+          conTitle: 'Moins lisible qu’un arbre unique',
+          conText: 'Difficile de résumer 200 arbres sur une feuille ; existe aussi en variante de régression.',
+          metricTitle: 'Métriques de classification (ici) :',
+          metricText: 'Matrice de confusion, Précision, Rappel, F1 (ou MAE / RMSE en régression).',
+          visualHtml: `
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-display text-xs font-extrabold text-rose-700 uppercase tracking-wider">Vote collectif de plusieurs arbres</span>
+              <span class="text-xs font-bold text-rose-800 bg-rose-100 px-3 py-1 rounded-full">La majorité l'emporte</span>
+            </div>
+            <div class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                <div class="bg-rose-50/70 border border-rose-200 rounded-2xl p-4 flex flex-col items-center">
+                  <span class="font-display font-extrabold text-xs text-ink mb-2">Arbre n°1</span>
+                  <svg viewBox="0 0 160 100" class="w-32 h-auto">
+                    <circle cx="80" cy="18" r="11" fill="#0F172A"/>
+                    <line x1="80" y1="29" x2="40" y2="76" stroke="#94A3B8" stroke-width="2.5"/>
+                    <line x1="80" y1="29" x2="120" y2="76" stroke="#E11D48" stroke-width="3.5"/>
+                    <circle cx="40" cy="80" r="10" fill="#CBD5E1"/><circle cx="120" cy="80" r="12" fill="#E11D48"/>
+                  </svg>
+                  <span class="mt-2 px-3 py-1 rounded-lg bg-rose-600 text-white font-display font-bold text-xs">Vote : SPAM</span>
+                </div>
+                <div class="bg-teal-50/70 border border-teal-200 rounded-2xl p-4 flex flex-col items-center">
+                  <span class="font-display font-extrabold text-xs text-ink mb-2">Arbre n°2</span>
+                  <svg viewBox="0 0 160 100" class="w-32 h-auto">
+                    <circle cx="80" cy="18" r="11" fill="#0F172A"/>
+                    <line x1="80" y1="29" x2="40" y2="76" stroke="#0D9488" stroke-width="3.5"/>
+                    <line x1="80" y1="29" x2="120" y2="76" stroke="#94A3B8" stroke-width="2.5"/>
+                    <circle cx="40" cy="80" r="12" fill="#0D9488"/><circle cx="120" cy="80" r="10" fill="#CBD5E1"/>
+                  </svg>
+                  <span class="mt-2 px-3 py-1 rounded-lg bg-teal-600 text-white font-display font-bold text-xs">Vote : NORMAL</span>
+                </div>
+                <div class="bg-rose-50/70 border border-rose-200 rounded-2xl p-4 flex flex-col items-center">
+                  <span class="font-display font-extrabold text-xs text-ink mb-2">Arbre n°3 (...n°100)</span>
+                  <svg viewBox="0 0 160 100" class="w-32 h-auto">
+                    <circle cx="80" cy="18" r="11" fill="#0F172A"/>
+                    <line x1="80" y1="29" x2="40" y2="76" stroke="#94A3B8" stroke-width="2.5"/>
+                    <line x1="80" y1="29" x2="120" y2="76" stroke="#E11D48" stroke-width="3.5"/>
+                    <circle cx="40" cy="80" r="10" fill="#CBD5E1"/><circle cx="120" cy="80" r="12" fill="#E11D48"/>
+                  </svg>
+                  <span class="mt-2 px-3 py-1 rounded-lg bg-rose-600 text-white font-display font-bold text-xs">Vote : SPAM</span>
+                </div>
+              </div>
+              <div class="text-center text-slate-400 font-bold text-lg">↓ &nbsp;&nbsp;&nbsp;&nbsp; ↓ &nbsp;&nbsp;&nbsp;&nbsp; ↓</div>
+              <div class="bg-ink text-white rounded-2xl p-5 text-center">
+                <div class="font-display text-[11px] font-extrabold tracking-widest text-slate-400 uppercase">Décision majoritaire de la forêt</div>
+                <div class="font-serif text-3xl font-bold text-rose-300 mt-1">Verdict : SPAM</div>
+                <p class="text-xs text-slate-300 mt-1">L’erreur isolée de l’arbre n°2 est effacée par le consensus de la forêt.</p>
+              </div>
+            </div>
+          `
+        })
+      },
+
+      // 10 — NAIVE BAYES
+      {
+        num: '10',
+        family: 'classification',
+        shortTitle: '10 · Naive Bayes',
+        render: () => renderAlgoPage({
+          num: '10',
+          family: 'classification',
+          heading: 'Naive Bayes',
+          kidQuote: 'Je compte les mots présents dans le message et je combine leurs probabilités d’appartenir à un spam.',
+          step1: 'Des textes déjà étiquetés pour compter la fréquence de chaque mot dans chaque classe.',
+          step2: 'Il multiplie les probabilités de chaque mot en les supposant indépendants entre eux.',
+          step3: 'Il choisit la catégorie qui obtient le score probabiliste le plus élevé.',
+          exTitle: 'Objet : « Gagné un million urgent » → SPAM',
+          exText: 'Les mots « gagné » (85 %), « million » (92 %) et « urgent » (74 %) se cumulent et font pencher la balance vers SPAM.',
+          proTitle: 'Ultra rapide et champion du texte',
+          proText: 'Fonctionne très bien sur les e-mails ou avis clients, même avec peu d’exemples.',
+          conTitle: 'Hypothèse « naïve » d’indépendance',
+          conText: 'Il suppose les indices indépendants une fois la classe connue (il ignore par exemple que « New » et « York » vont ensemble).',
+          metricTitle: 'Métriques de classification uniquement :',
+          metricText: 'Matrice de confusion, Précision, Rappel et F1.',
+          visualHtml: `
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-display text-xs font-extrabold text-rose-700 uppercase tracking-wider">Analyse probabiliste mot par mot</span>
+              <span class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-full">Théorème de Bayes</span>
+            </div>
+            <div class="space-y-4">
+              <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center">
+                <div class="font-display text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Message reçu</div>
+                <div class="font-serif text-xl sm:text-2xl font-bold text-ink mt-1">
+                  « Bravo, vous avez <span class="text-rose-600 underline decoration-rose-300">gagné</span> un <span class="text-rose-600 underline decoration-rose-300">million</span> <span class="text-amber-600 underline decoration-amber-300">urgent</span> ! »
+                </div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-center">
+                  <div class="font-serif text-lg font-bold text-ink">« gagné »</div>
+                  <div class="font-serif text-4xl font-bold text-rose-600 my-1">85 %</div>
+                  <div class="text-xs font-display font-bold text-rose-800">risque de SPAM</div>
+                </div>
+                <div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-center">
+                  <div class="font-serif text-lg font-bold text-ink">« million »</div>
+                  <div class="font-serif text-4xl font-bold text-rose-600 my-1">92 %</div>
+                  <div class="text-xs font-display font-bold text-rose-800">risque de SPAM</div>
+                </div>
+                <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center">
+                  <div class="font-serif text-lg font-bold text-ink">« urgent »</div>
+                  <div class="font-serif text-4xl font-bold text-amber-600 my-1">74 %</div>
+                  <div class="text-xs font-display font-bold text-amber-800">risque de SPAM</div>
+                </div>
+              </div>
+              <div class="bg-ink text-white rounded-2xl p-4 text-center">
+                <div class="font-display text-[11px] font-extrabold tracking-widest text-sky-400 uppercase">Combinaison des indices (supposés indépendants)</div>
+                <div class="font-serif text-2xl sm:text-3xl font-bold text-rose-300 mt-1">Probabilité globale : 99,4 % → SPAM</div>
+              </div>
+            </div>
+          `
+        })
+      },
+
+      // 11 — SVM
+      {
+        num: '11',
+        family: 'classification',
+        shortTitle: '11 · SVM (Grande marge)',
+        render: () => renderAlgoPage({
+          num: '11',
+          family: 'classification',
+          heading: 'SVM — La frontière à grande marge',
+          kidQuote: 'Je trace la route la plus large possible entre deux camps pour ne frôler aucun point.',
+          step1: 'Deux groupes de points étiquetés que l’on cherche à séparer nettement.',
+          step2: 'Il place la frontière centrale qui maximise la largeur du couloir vide entre les camps.',
+          step3: 'Seuls les points posés au bord de la route (vecteurs de support) fixent la frontière.',
+          exTitle: 'Séparer les e-mails normaux des spams avec sécurité',
+          exText: 'Grâce au large couloir de sécurité, un nouvel e-mail légèrement inhabituel reste du bon côté de la frontière.',
+          proTitle: 'Très précis et robuste',
+          proText: 'La marge maximale protège contre les petites variations de nouvelles données.',
+          conTitle: 'Sensible aux échelles et moins direct',
+          conText: 'Exige de standardiser les variables et devient lent sur de très grands tableaux.',
+          metricTitle: 'Métriques de classification uniquement :',
+          metricText: 'Matrice de confusion, Précision, Rappel et F1.',
+          visualHtml: `
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-display text-xs font-extrabold text-rose-700 uppercase tracking-wider">Couloir de marge maximale</span>
+              <span class="text-xs font-bold text-amber-800 bg-amber-100 px-3 py-1 rounded-full">Sécurité maximale</span>
+            </div>
+            <svg viewBox="0 0 820 470" class="w-full h-auto">
+              <polygon points="150,430 315,430 670,38 505,38" fill="#FEF3C7" opacity="0.85"/>
+              <line x1="150" y1="430" x2="505" y2="38" stroke="#0D9488" stroke-width="2.5" stroke-dasharray="8 6"/>
+              <line x1="315" y1="430" x2="670" y2="38" stroke="#E11D48" stroke-width="2.5" stroke-dasharray="8 6"/>
+              <line x1="232" y1="430" x2="587" y2="38" stroke="#0F172A" stroke-width="5" stroke-linecap="round"/>
+
+              <g transform="translate(410, 234) rotate(-48)">
+                <line x1="-78" y1="0" x2="78" y2="0" stroke="#D97706" stroke-width="3.5"/>
+                <polygon points="-78,-5 -90,0 -78,5" fill="#D97706"/>
+                <polygon points="78,-5 90,0 78,5" fill="#D97706"/>
+                <rect x="-70" y="-30" width="140" height="23" rx="7" fill="#0F172A"/>
+                <text x="0" y="-14" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="10.5" font-weight="800" fill="#FBBF24">MARGE MAXIMALE</text>
+              </g>
+
+              <text x="120" y="80" font-family="Plus Jakarta Sans" font-size="16" font-weight="800" fill="#0D9488">CLASSE : NORMAL</text>
+              <circle cx="120" cy="160" r="12" fill="#0D9488"/><circle cx="180" cy="235" r="12" fill="#0D9488"/>
+              <circle cx="115" cy="320" r="12" fill="#0D9488"/><circle cx="210" cy="130" r="12" fill="#0D9488"/>
+              <circle cx="347" cy="213" r="16" fill="#0D9488" stroke="#0F172A" stroke-width="4"/>
+              <text x="245" y="192" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#0F172A">Vecteur de support</text>
+
+              <text x="615" y="405" font-family="Plus Jakarta Sans" font-size="16" font-weight="800" fill="#E11D48">CLASSE : SPAM</text>
+              <circle cx="675" cy="165" r="12" fill="#E11D48"/><circle cx="645" cy="280" r="12" fill="#E11D48"/>
+              <circle cx="705" cy="345" r="12" fill="#E11D48"/>
+              <circle cx="563" cy="155" r="16" fill="#E11D48" stroke="#0F172A" stroke-width="4"/>
+              <circle cx="451" cy="280" r="16" fill="#E11D48" stroke="#0F172A" stroke-width="4"/>
+              <text x="630" y="122" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#0F172A">Vecteurs de support</text>
+            </svg>
+          `
+        })
+      },
+
+      // 12 — K-MEANS
+      {
+        num: '12',
+        family: 'clustering',
+        shortTitle: '12 · K-means',
+        render: () => renderAlgoPage({
+          num: '12',
+          family: 'clustering',
+          heading: 'K-means — Les K centres d’attraction',
+          kidQuote: 'Je pose 3 aimants au milieu des points, et chaque point rejoint l’aimant le plus proche.',
+          step1: 'Des données sans étiquettes et un nombre K de groupes choisi à l’avance (K = 3).',
+          step2: 'Il place K centres et déplace chacun au milieu de ses points jusqu’à stabilisation.',
+          step3: 'Chaque individu est rattaché au numéro du centre le plus proche.',
+          exTitle: 'Lecteurs aux habitudes similaires → 3 groupes découverts',
+          exText: 'Sans catégories connues d’avance, K = 3 centres séparent automatiquement les fans de BD, de romans et d’essais.',
+          proTitle: 'Très rapide et simple à résumer',
+          proText: 'Chaque groupe est représenté par son centre moyen (profil type).',
+          conTitle: 'Nécessite de fixer K à l’avance',
+          conText: 'Ne trouve pas K tout seul et fonctionne surtout sur des groupes compacts et arrondis.',
+          metricTitle: 'Évaluation du clustering uniquement :',
+          metricText: 'Score de silhouette (cohésion/séparation) et analyse de l’utilité métier des groupes.',
+          visualHtml: `
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-display text-xs font-extrabold text-violet-700 uppercase tracking-wider">K = 3 groupes · Attraction vers les centres</span>
+              <span class="text-xs font-bold text-violet-800 bg-violet-100 px-3 py-1 rounded-full">★ = Centroïde</span>
+            </div>
+            <svg viewBox="0 0 820 470" class="w-full h-auto">
+              <g transform="translate(195, 165)">
+                <circle r="110" fill="#EDE9FE" stroke="#7C3AED" stroke-width="2.5" stroke-dasharray="7 5"/>
+                <line x1="0" y1="0" x2="-50" y2="-38" stroke="#7C3AED" stroke-width="2"/><line x1="0" y1="0" x2="48" y2="-42" stroke="#7C3AED" stroke-width="2"/>
+                <line x1="0" y1="0" x2="-38" y2="48" stroke="#7C3AED" stroke-width="2"/><line x1="0" y1="0" x2="50" y2="38" stroke="#7C3AED" stroke-width="2"/>
+                <circle cx="-50" cy="-38" r="10" fill="#7C3AED"/><circle cx="48" cy="-42" r="10" fill="#7C3AED"/>
+                <circle cx="-38" cy="48" r="10" fill="#7C3AED"/><circle cx="50" cy="38" r="10" fill="#7C3AED"/>
+                <polygon points="0,-15 4,-4 15,-4 7,3 10,14 0,7 -10,14 -7,3 -15,-4 -4,-4" fill="#F59E0B" stroke="#0F172A" stroke-width="2"/>
+                <rect x="-65" y="86" width="130" height="26" rx="13" fill="#7C3AED"/>
+                <text y="103" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#FFF">GROUPE 1 (BD)</text>
+              </g>
+
+              <g transform="translate(615, 160)">
+                <circle r="110" fill="#E0E7FF" stroke="#4F46E5" stroke-width="2.5" stroke-dasharray="7 5"/>
+                <line x1="0" y1="0" x2="-48" y2="-38" stroke="#4F46E5" stroke-width="2"/><line x1="0" y1="0" x2="50" y2="-30" stroke="#4F46E5" stroke-width="2"/>
+                <line x1="0" y1="0" x2="-34" y2="50" stroke="#4F46E5" stroke-width="2"/><line x1="0" y1="0" x2="48" y2="48" stroke="#4F46E5" stroke-width="2"/>
+                <circle cx="-48" cy="-38" r="10" fill="#4F46E5"/><circle cx="50" cy="-30" r="10" fill="#4F46E5"/>
+                <circle cx="-34" cy="50" r="10" fill="#4F46E5"/><circle cx="48" cy="48" r="10" fill="#4F46E5"/>
+                <polygon points="0,-15 4,-4 15,-4 7,3 10,14 0,7 -10,14 -7,3 -15,-4 -4,-4" fill="#F59E0B" stroke="#0F172A" stroke-width="2"/>
+                <rect x="-75" y="86" width="150" height="26" rx="13" fill="#4F46E5"/>
+                <text y="103" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#FFF">GROUPE 2 (ROMANS)</text>
+              </g>
+
+              <g transform="translate(410, 338)">
+                <circle r="105" fill="#FCE7F3" stroke="#DB2777" stroke-width="2.5" stroke-dasharray="7 5"/>
+                <line x1="0" y1="0" x2="-48" y2="-32" stroke="#DB2777" stroke-width="2"/><line x1="0" y1="0" x2="48" y2="-32" stroke="#DB2777" stroke-width="2"/>
+                <line x1="0" y1="0" x2="-38" y2="42" stroke="#DB2777" stroke-width="2"/><line x1="0" y1="0" x2="38" y2="42" stroke="#DB2777" stroke-width="2"/>
+                <circle cx="-48" cy="-32" r="10" fill="#DB2777"/><circle cx="48" cy="-32" r="10" fill="#DB2777"/>
+                <circle cx="-38" cy="42" r="10" fill="#DB2777"/><circle cx="38" cy="42" r="10" fill="#DB2777"/>
+                <polygon points="0,-15 4,-4 15,-4 7,3 10,14 0,7 -10,14 -7,3 -15,-4 -4,-4" fill="#F59E0B" stroke="#0F172A" stroke-width="2"/>
+                <rect x="-75" y="80" width="150" height="26" rx="13" fill="#DB2777"/>
+                <text y="97" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#FFF">GROUPE 3 (ESSAIS)</text>
+              </g>
+            </svg>
+          `
+        })
+      },
+
+      // 13 — CLUSTERING HIÉRARCHIQUE (AVEC CURSEUR DE COUPE INTERACTIF)
+      {
+        num: '13',
+        family: 'clustering',
+        shortTitle: '13 · Clustering hiérarchique',
+        render: () => renderAlgoPage({
+          num: '13',
+          family: 'clustering',
+          heading: 'Clustering hiérarchique',
+          kidQuote: 'Je réunis d’abord les deux éléments les plus proches, puis j’assemble les paires comme un arbre de famille.',
+          step1: 'Des individus sans étiquettes (aucun nombre K imposé au départ).',
+          step2: 'Il fusionne pas à pas les voisins les plus proches jusqu’à former un arbre complet.',
+          step3: 'On coupe l’arbre (dendrogramme) à la hauteur voulue pour lire 2, 3 ou 4 groupes.',
+          exTitle: 'Explorer les profils de lecteurs à plusieurs échelles',
+          exText: 'Une coupe haute donne 2 grandes familles ; une coupe plus basse révèle 3 sous-groupes plus fins.',
+          proTitle: 'Montre toute la structure des liens',
+          proText: 'Un seul schéma permet d’observer plusieurs niveaux de regroupement.',
+          conTitle: 'Ne trouve pas automatiquement K optimal',
+          conText: 'C’est à vous de décider où couper l’arbre ; devient très lent sur de grands tableaux.',
+          metricTitle: 'Évaluation du clustering uniquement :',
+          metricText: 'Score de silhouette selon le niveau de coupe choisi et cohérence métier.',
+          visualHtml: `
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <span class="font-display text-xs font-extrabold text-violet-700 uppercase tracking-wider">Dendrogramme interactif</span>
+              <div class="flex items-center gap-2.5 bg-violet-50 border border-violet-200 px-3 py-1.5 rounded-xl">
+                <label for="sim-cut-height" class="text-xs font-display font-bold text-violet-900">Hauteur de coupe :</label>
+                <input id="sim-cut-height" type="range" min="95" max="295" value="198" class="ml-slider w-24" />
+                <span id="sim-cut-label" class="font-mono text-xs font-bold text-violet-700">3 groupes</span>
+              </div>
+            </div>
+            <svg viewBox="0 0 820 470" class="w-full h-auto">
+              <line x1="72" y1="385" x2="72" y2="45" stroke="#94A3B8" stroke-width="2"/>
+              <text x="62" y="62" text-anchor="end" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="700" fill="#64748B">Différents</text>
+              <text x="62" y="382" text-anchor="end" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="700" fill="#64748B">Proches</text>
+
+              <path d="M 230 160 L 230 78 L 600 78 L 600 142" fill="none" stroke="#0F172A" stroke-width="3.5"/>
+              <path d="M 150 310 L 150 160 L 310 160 L 310 275" fill="none" stroke="#7C3AED" stroke-width="4"/>
+              <path d="M 110 380 L 110 310 L 190 310 L 190 380" fill="none" stroke="#7C3AED" stroke-width="4"/>
+              <path d="M 270 380 L 270 275 L 350 275 L 350 380" fill="none" stroke="#7C3AED" stroke-width="4"/>
+
+              <path d="M 475 380 L 475 292 L 555 292 L 555 380" fill="none" stroke="#DB2777" stroke-width="4"/>
+              <path d="M 515 292 L 515 142 L 685 142 L 685 270" fill="none" stroke="#0F172A" stroke-width="3.5"/>
+              <path d="M 645 380 L 645 270 L 725 270 L 725 380" fill="none" stroke="#4F46E5" stroke-width="4"/>
+
+              <g id="dendro-cut-group" transform="translate(0, 198)">
+                <line x1="80" y1="0" x2="765" y2="0" stroke="#E11D48" stroke-width="3.5" stroke-dasharray="8 6"/>
+                <rect x="545" y="-28" width="220" height="24" rx="12" fill="#E11D48"/>
+                <text id="dendro-cut-text" x="655" y="-12" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11" font-weight="800" fill="#FFF">✂ COUPE → 3 GROUPES</text>
+              </g>
+
+              <circle cx="110" cy="385" r="8" fill="#7C3AED"/><circle cx="190" cy="385" r="8" fill="#7C3AED"/>
+              <circle cx="270" cy="385" r="8" fill="#7C3AED"/><circle cx="350" cy="385" r="8" fill="#7C3AED"/>
+              <rect x="110" y="408" width="240" height="30" rx="15" fill="#EDE9FE"/>
+              <text x="230" y="428" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#5B21B6">GROUPE 1</text>
+
+              <circle cx="475" cy="385" r="8" fill="#DB2777"/><circle cx="555" cy="385" r="8" fill="#DB2777"/>
+              <rect x="450" y="408" width="130" height="30" rx="15" fill="#FCE7F3"/>
+              <text x="515" y="428" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#BE185D">GROUPE 2</text>
+
+              <circle cx="645" cy="385" r="8" fill="#4F46E5"/><circle cx="725" cy="385" r="8" fill="#4F46E5"/>
+              <rect x="620" y="408" width="130" height="30" rx="15" fill="#E0E7FF"/>
+              <text x="685" y="428" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#3730A3">GROUPE 3</text>
+            </svg>
+          `
+        })
+      },
+
+      // 14 — DBSCAN
+      {
+        num: '14',
+        family: 'clustering',
+        shortTitle: '14 · DBSCAN',
+        render: () => renderAlgoPage({
+          num: '14',
+          family: 'clustering',
+          heading: 'DBSCAN — Les groupes par densité',
+          kidQuote: 'Je relie tous les points serrés les uns contre les autres, et je laisse les solitaires sans groupe.',
+          step1: 'Des points sans étiquettes répartis dans l’espace (pas besoin de fixer K).',
+          step2: 'Il repère les zones très denses et agrandit chaque groupe de proche en proche.',
+          step3: 'Des groupes de formes libres (même courbes) et des points isolés marqués « bruit ».',
+          exTitle: 'Cartographier les balades le long d’un fleuve sinueux',
+          exText: 'DBSCAN suit la courbe du fleuve pour former un groupe allongé et laisse les promeneurs isolés à part.',
+          proTitle: 'Découvre des formes courbes et isole le bruit',
+          proText: 'Pas besoin de deviner le nombre K de groupes à l’avance.',
+          conTitle: 'Difficulté si les densités varient beaucoup',
+          conText: 'Peine à détecter en même temps un groupe très serré et un groupe très clairsemé.',
+          metricTitle: 'Évaluation du clustering (avec prudence) :',
+          metricText: 'Attention : le score de silhouette pénalise les formes courbes ! Vérifier visuellement et par métier.',
+          visualHtml: `
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-display text-xs font-extrabold text-violet-700 uppercase tracking-wider">Formes courbes + détection des isolés</span>
+              <span class="text-xs font-bold text-violet-800 bg-violet-100 px-3 py-1 rounded-full">Pas besoin de fixer K</span>
+            </div>
+            <svg viewBox="0 0 820 470" class="w-full h-auto">
+              <path d="M 130 330 C 118 135, 350 72, 460 175" fill="none" stroke="#EDE9FE" stroke-width="82" stroke-linecap="round"/>
+              <path d="M 130 330 C 118 135, 350 72, 460 175" fill="none" stroke="#7C3AED" stroke-width="2.5" stroke-dasharray="8 6" stroke-linecap="round"/>
+
+              <circle cx="130" cy="330" r="9.5" fill="#7C3AED"/><circle cx="138" cy="278" r="9.5" fill="#7C3AED"/>
+              <circle cx="155" cy="228" r="9.5" fill="#7C3AED"/><circle cx="188" cy="184" r="9.5" fill="#7C3AED"/>
+              <circle cx="235" cy="150" r="9.5" fill="#7C3AED"/><circle cx="290" cy="126" r="9.5" fill="#7C3AED"/>
+              <circle cx="352" cy="122" r="9.5" fill="#7C3AED"/><circle cx="410" cy="138" r="9.5" fill="#7C3AED"/>
+              <circle cx="460" cy="175" r="9.5" fill="#7C3AED"/>
+
+              <rect x="185" y="54" width="235" height="28" rx="14" fill="#7C3AED"/>
+              <text x="302" y="73" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#FFF">GROUPE DENSE N°1 (COURBE)</text>
+
+              <ellipse cx="465" cy="322" rx="108" ry="70" fill="#FCE7F3" stroke="#DB2777" stroke-width="2.5" stroke-dasharray="8 6"/>
+              <circle cx="415" cy="312" r="9.5" fill="#DB2777"/><circle cx="450" cy="296" r="9.5" fill="#DB2777"/>
+              <circle cx="485" cy="308" r="9.5" fill="#DB2777"/><circle cx="518" cy="328" r="9.5" fill="#DB2777"/>
+              <circle cx="462" cy="348" r="9.5" fill="#DB2777"/>
+              <rect x="375" y="405" width="180" height="28" rx="14" fill="#DB2777"/>
+              <text x="465" y="424" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#FFF">GROUPE DENSE N°2</text>
+
+              <g transform="translate(675, 125)">
+                <circle r="10" fill="#94A3B8" stroke="#0F172A" stroke-width="2"/>
+                <rect x="-68" y="16" width="136" height="26" rx="13" fill="#F1F5F9" stroke="#94A3B8"/>
+                <text y="33" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11" font-weight="800" fill="#475569">Isolé (sans groupe)</text>
+              </g>
+              <g transform="translate(695, 355)">
+                <circle r="10" fill="#94A3B8" stroke="#0F172A" stroke-width="2"/>
+                <rect x="-68" y="16" width="136" height="26" rx="13" fill="#F1F5F9" stroke="#94A3B8"/>
+                <text y="33" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11" font-weight="800" fill="#475569">Isolé (sans groupe)</text>
+              </g>
+            </svg>
+          `
+        })
+      },
+
+      // 15 — CLUSTERING SPECTRAL
+      {
+        num: '15',
+        family: 'clustering',
+        shortTitle: '15 · Clustering spectral',
+        render: () => renderAlgoPage({
+          num: '15',
+          family: 'clustering',
+          heading: 'Clustering spectral',
+          kidQuote: 'Je relie les points qui se ressemblent comme un réseau d’amis pour démêler deux groupes entrelacés.',
+          step1: 'Des points sans étiquettes aux formes imbriquées (ex : deux anneaux concentriques).',
+          step2: 'Il construit un graphe de similarité entre voisins et projette les points dans un espace démêlé.',
+          step3: 'Les deux ensembles imbriqués sont séparés proprement.',
+          exTitle: 'Séparer deux communautés entrelacées sur un graphe',
+          exText: 'K-means échoue car les deux cercles ont le même centre ; les liens de proximité permettent au spectral de les séparer.',
+          proTitle: 'Démêle des formes très complexes',
+          proText: 'Réussit sur des anneaux ou spirales là où K-means découpe mal.',
+          conTitle: 'Gourmand en calcul et demande K',
+          conText: 'Nécessite de fixer K à l’avance et devient lent sur de très grands jeux de données.',
+          metricTitle: 'Évaluation du clustering (avec prudence) :',
+          metricText: 'Sur des anneaux imbriqués, la silhouette classique est trompeuse (faible) : vérifier la cohérence des liens.',
+          visualHtml: `
+            <div class="flex items-center justify-between mb-3">
+              <span class="font-display text-xs font-extrabold text-violet-700 uppercase tracking-wider">Démêler des ensembles imbriqués</span>
+              <span class="text-xs font-bold text-violet-800 bg-violet-100 px-3 py-1 rounded-full">Graphe de similarité</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-11 gap-3 items-center">
+              <div class="sm:col-span-5 bg-slate-50 rounded-2xl border border-slate-200 p-4 flex flex-col items-center">
+                <div class="font-serif text-base font-bold text-ink">1. Groupes imbriqués</div>
+                <div class="text-[11px] text-slate-500 mb-2">Même centre → K-means échoue</div>
+                <svg viewBox="0 0 260 260" class="w-48 h-48">
+                  <circle cx="130" cy="130" r="102" fill="none" stroke="#EDE9FE" stroke-width="20"/>
+                  <circle cx="130" cy="130" r="102" fill="none" stroke="#7C3AED" stroke-width="2" stroke-dasharray="5 4"/>
+                  <circle cx="130" cy="28" r="7" fill="#7C3AED"/><circle cx="202" cy="58" r="7" fill="#7C3AED"/>
+                  <circle cx="232" cy="130" r="7" fill="#7C3AED"/><circle cx="202" cy="202" r="7" fill="#7C3AED"/>
+                  <circle cx="130" cy="232" r="7" fill="#7C3AED"/><circle cx="58" cy="202" r="7" fill="#7C3AED"/>
+                  <circle cx="28" cy="130" r="7" fill="#7C3AED"/><circle cx="58" cy="58" r="7" fill="#7C3AED"/>
+
+                  <circle cx="130" cy="130" r="46" fill="none" stroke="#FCE7F3" stroke-width="18"/>
+                  <circle cx="130" cy="130" r="46" fill="none" stroke="#DB2777" stroke-width="2" stroke-dasharray="5 4"/>
+                  <circle cx="130" cy="84" r="7" fill="#DB2777"/><circle cx="170" cy="107" r="7" fill="#DB2777"/>
+                  <circle cx="170" cy="153" r="7" fill="#DB2777"/><circle cx="130" cy="176" r="7" fill="#DB2777"/>
+                  <circle cx="90" cy="153" r="7" fill="#DB2777"/><circle cx="90" cy="107" r="7" fill="#DB2777"/>
+                </svg>
+              </div>
+
+              <div class="sm:col-span-1 flex justify-center py-2">
+                <div class="w-9 h-9 rounded-full bg-violet-600 text-white font-bold flex items-center justify-center">→</div>
+              </div>
+
+              <div class="sm:col-span-5 bg-violet-50/70 rounded-2xl border-2 border-violet-500 p-4 flex flex-col justify-between h-full">
+                <div class="text-center">
+                  <div class="font-serif text-base font-bold text-violet-800">2. Démêlés par graphe</div>
+                  <div class="text-[11px] text-violet-700">Chaînes de voisins séparées</div>
+                </div>
+                <div class="space-y-3 my-4">
+                  <div class="bg-violet-100 border border-violet-400 rounded-xl p-3 text-center">
+                    <div class="flex justify-center gap-3 mb-1.5">
+                      <span class="w-3.5 h-3.5 rounded-full bg-violet-600"></span><span class="w-3.5 h-3.5 rounded-full bg-violet-600"></span>
+                      <span class="w-3.5 h-3.5 rounded-full bg-violet-600"></span><span class="w-3.5 h-3.5 rounded-full bg-violet-600"></span>
+                    </div>
+                    <div class="font-display font-extrabold text-[11px] text-violet-900">GROUPE 1 · ANNEAU EXTÉRIEUR</div>
+                  </div>
+                  <div class="border-t-2 border-dashed border-ink"></div>
+                  <div class="bg-pink-100 border border-pink-400 rounded-xl p-3 text-center">
+                    <div class="flex justify-center gap-3 mb-1.5">
+                      <span class="w-3.5 h-3.5 rounded-full bg-pink-600"></span><span class="w-3.5 h-3.5 rounded-full bg-pink-600"></span>
+                      <span class="w-3.5 h-3.5 rounded-full bg-pink-600"></span><span class="w-3.5 h-3.5 rounded-full bg-pink-600"></span>
+                    </div>
+                    <div class="font-display font-extrabold text-[11px] text-pink-900">GROUPE 2 · ANNEAU INTÉRIEUR</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `
+        })
+      },
+
+      // 16 — KNN ET K-MEANS : QUE SIGNIFIE K ?
+      {
+        num: '16',
+        family: 'choix',
+        shortTitle: '16 · KNN vs K-means (K ?)',
+        render: () => `
+          <div class="space-y-8">
+            <header>
+              <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-100 text-amber-800 font-display font-extrabold text-xs tracking-wider uppercase mb-3">
+                <span class="w-2 h-2 rounded-full bg-amber-600"></span>
+                COMPRENDRE · NOTION 16
+              </div>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-ink tracking-tight">KNN et K-means : que signifie la lettre K ?</h2>
+              <p class="mt-3 font-display text-lg sm:text-xl font-semibold text-slate-700">
+                « Même lettre, deux rôles opposés : dans KNN, K compte des voisins qui votent ; dans K-means, K compte des groupes à créer. »
+              </p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <!-- KNN -->
+              <section class="bg-white rounded-3xl border-2 border-rose-200 p-6 sm:p-8 flex flex-col justify-between shadow-2xs">
+                <div>
+                  <span class="inline-block px-3 py-1 rounded-full bg-rose-100 text-rose-800 font-display font-extrabold text-xs uppercase">Classification (Supervisé)</span>
+                  <h3 class="font-serif text-3xl font-bold text-ink mt-3">KNN : <span class="text-rose-600">K = 5 voisins</span></h3>
+                  <p class="text-sm sm:text-base text-slate-600 mt-1">On a déjà les étiquettes connues. On demande leur avis aux K voisins les plus proches d’un nouvel élément.</p>
+                </div>
+                <div class="my-4">
+                  <svg viewBox="0 0 560 280" class="w-full h-auto">
+                    <circle cx="280" cy="140" r="120" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.5" stroke-dasharray="8 6"/>
+                    <line x1="205" y1="80" x2="280" y2="140" stroke="#E11D48" stroke-width="2.5"/><line x1="365" y1="85" x2="280" y2="140" stroke="#E11D48" stroke-width="2.5"/>
+                    <line x1="355" y1="198" x2="280" y2="140" stroke="#E11D48" stroke-width="2.5"/><line x1="200" y1="195" x2="280" y2="140" stroke="#0D9488" stroke-width="2.5"/>
+                    <line x1="180" y1="135" x2="280" y2="140" stroke="#0D9488" stroke-width="2.5"/>
+                    <circle cx="205" cy="80" r="20" fill="#E11D48"/><text x="205" y="84" text-anchor="middle" font-size="10" font-weight="800" fill="#FFF">SPAM</text>
+                    <circle cx="365" cy="85" r="20" fill="#E11D48"/><text x="365" y="89" text-anchor="middle" font-size="10" font-weight="800" fill="#FFF">SPAM</text>
+                    <circle cx="355" cy="198" r="20" fill="#E11D48"/><text x="355" y="202" text-anchor="middle" font-size="10" font-weight="800" fill="#FFF">SPAM</text>
+                    <circle cx="200" cy="195" r="20" fill="#0D9488"/><text x="200" y="199" text-anchor="middle" font-size="10" font-weight="800" fill="#FFF">OK</text>
+                    <circle cx="180" cy="135" r="20" fill="#0D9488"/><text x="180" y="139" text-anchor="middle" font-size="10" font-weight="800" fill="#FFF">OK</text>
+                    <circle cx="280" cy="140" r="35" fill="#0F172A"/>
+                    <text x="280" y="145" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="13" font-weight="800" fill="#FFF">SPAM</text>
+                  </svg>
+                </div>
+                <div class="bg-rose-100 text-rose-900 font-display font-extrabold text-sm sm:text-base px-4 py-3 rounded-2xl text-center">
+                  K = le nombre de témoins consultés pour classer 1 nouveau cas
+                </div>
+              </section>
+
+              <!-- K-means -->
+              <section class="bg-white rounded-3xl border-2 border-violet-200 p-6 sm:p-8 flex flex-col justify-between shadow-2xs">
+                <div>
+                  <span class="inline-block px-3 py-1 rounded-full bg-violet-100 text-violet-800 font-display font-extrabold text-xs uppercase">Clustering (Non supervisé)</span>
+                  <h3 class="font-serif text-3xl font-bold text-ink mt-3">K-means : <span class="text-violet-600">K = 3 groupes</span></h3>
+                  <p class="text-sm sm:text-base text-slate-600 mt-1">Aucune étiquette n’existe. On découpe toutes les données autour de K centres.</p>
+                </div>
+                <div class="my-4">
+                  <svg viewBox="0 0 560 280" class="w-full h-auto">
+                    <circle cx="155" cy="98" r="68" fill="#EDE9FE" stroke="#7C3AED" stroke-width="2" stroke-dasharray="6 4"/>
+                    <circle cx="135" cy="82" r="8" fill="#7C3AED"/><circle cx="175" cy="82" r="8" fill="#7C3AED"/><circle cx="148" cy="122" r="8" fill="#7C3AED"/>
+                    <circle cx="155" cy="98" r="10" fill="#F59E0B" stroke="#0F172A" stroke-width="2"/>
+
+                    <circle cx="405" cy="98" r="68" fill="#E0E7FF" stroke="#4F46E5" stroke-width="2" stroke-dasharray="6 4"/>
+                    <circle cx="385" cy="82" r="8" fill="#4F46E5"/><circle cx="425" cy="86" r="8" fill="#4F46E5"/><circle cx="400" cy="122" r="8" fill="#4F46E5"/>
+                    <circle cx="405" cy="98" r="10" fill="#F59E0B" stroke="#0F172A" stroke-width="2"/>
+
+                    <circle cx="280" cy="202" r="68" fill="#FCE7F3" stroke="#DB2777" stroke-width="2" stroke-dasharray="6 4"/>
+                    <circle cx="260" cy="190" r="8" fill="#DB2777"/><circle cx="300" cy="190" r="8" fill="#DB2777"/><circle cx="280" cy="224" r="8" fill="#DB2777"/>
+                    <circle cx="280" cy="202" r="10" fill="#F59E0B" stroke="#0F172A" stroke-width="2"/>
+                  </svg>
+                </div>
+                <div class="bg-violet-100 text-violet-900 font-display font-extrabold text-sm sm:text-base px-4 py-3 rounded-2xl text-center">
+                  K = le nombre de paquets (et de centres) à former
+                </div>
+              </section>
+            </div>
+          </div>
+        `
+      },
+
+      // 17 — COMMENT CHOISIR UN ALGORITHME ?
+      {
+        num: '17',
+        family: 'choix',
+        shortTitle: '17 · Choisir un algorithme',
+        render: () => `
+          <div class="space-y-8">
+            <header>
+              <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-100 text-amber-800 font-display font-extrabold text-xs tracking-wider uppercase mb-3">
+                <span class="w-2 h-2 rounded-full bg-amber-600"></span>
+                ANTISÈCHE VISUELLE · NOTION 17
+              </div>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-ink tracking-tight">Comment choisir un algorithme ?</h2>
+              <p class="mt-3 font-display text-lg sm:text-xl font-semibold text-slate-700">
+                « Partez toujours du résultat attendu, jamais de l’algorithme le plus compliqué. »
+              </p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <!-- Nombre -->
+              <section class="bg-white rounded-3xl border-2 border-sky-500 overflow-hidden flex flex-col justify-between shadow-2xs">
+                <div class="bg-sky-600 text-white p-6">
+                  <div class="text-[11px] font-display font-extrabold tracking-widest text-sky-200 uppercase">Données étiquetées (Supervisé)</div>
+                  <h3 class="font-serif text-2xl sm:text-3xl font-bold mt-1">1. Je veux un NOMBRE</h3>
+                </div>
+                <div class="p-6 space-y-4 flex-1">
+                  <div>
+                    <div class="font-display font-extrabold text-sm text-ink mb-1">→ Tendance simple et droite ?</div>
+                    <div class="bg-sky-50 border border-sky-200 rounded-xl p-3 flex items-center justify-between">
+                      <span class="font-display font-extrabold text-sky-800">Régression linéaire</span>
+                      <span class="text-[11px] font-bold text-sky-600 bg-white px-2 py-0.5 rounded-full">1er réflexe</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="font-display font-extrabold text-sm text-ink mb-1">→ Beaucoup de variables / tri utile ?</div>
+                    <div class="bg-sky-50 border border-sky-200 rounded-xl p-3">
+                      <div class="font-display font-extrabold text-sky-800">Ridge <span class="font-normal text-xs">(tout calmer)</span> · Lasso <span class="font-normal text-xs">(couper à 0)</span></div>
+                      <div class="text-xs text-sky-700 mt-1">Standardiser les variables avant.</div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="font-display font-extrabold text-sm text-ink mb-1">→ Relation courbe ou paliers ?</div>
+                    <div class="bg-sky-50 border border-sky-200 rounded-xl p-3">
+                      <div class="font-display font-extrabold text-sky-800">Polynomiale · Forêt aléatoire</div>
+                      <div class="text-xs text-sky-700 mt-1">Les arbres découpent bien les paliers.</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-ink text-white p-4 text-center">
+                  <div class="text-[10px] font-display font-extrabold text-sky-400 uppercase tracking-wider">Évaluation adaptée</div>
+                  <div class="font-display font-bold text-sm mt-0.5">MAE · MSE · RMSE · R²</div>
+                </div>
+              </section>
+
+              <!-- Classe -->
+              <section class="bg-white rounded-3xl border-2 border-rose-500 overflow-hidden flex flex-col justify-between shadow-2xs">
+                <div class="bg-rose-600 text-white p-6">
+                  <div class="text-[11px] font-display font-extrabold tracking-widest text-rose-200 uppercase">Données étiquetées (Supervisé)</div>
+                  <h3 class="font-serif text-2xl sm:text-3xl font-bold mt-1">2. Je veux une CLASSE</h3>
+                </div>
+                <div class="p-6 space-y-4 flex-1">
+                  <div>
+                    <div class="font-display font-extrabold text-sm text-ink mb-1">→ Besoin d'expliquer ou d'une probabilité ?</div>
+                    <div class="bg-rose-50 border border-rose-200 rounded-xl p-3">
+                      <div class="font-display font-extrabold text-rose-800">Arbre de décision · Logistique</div>
+                      <div class="text-xs text-rose-700 mt-1">Règles Oui/Non lisibles ou risque 0–100 %.</div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="font-display font-extrabold text-sm text-ink mb-1">→ Texte (e-mails, avis) très rapide ?</div>
+                    <div class="bg-rose-50 border border-rose-200 rounded-xl p-3 flex items-center justify-between">
+                      <span class="font-display font-extrabold text-rose-800">Naive Bayes</span>
+                      <span class="text-[11px] font-bold text-rose-600 bg-white px-2 py-0.5 rounded-full">Texte</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="font-display font-extrabold text-sm text-ink mb-1">→ Tableau complexe, haute précision ?</div>
+                    <div class="bg-rose-50 border border-rose-200 rounded-xl p-3">
+                      <div class="font-display font-extrabold text-rose-800">Forêt aléatoire · SVM · KNN</div>
+                      <div class="text-xs text-rose-700 mt-1">KNN et SVM exigent une mise à l’échelle.</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-ink text-white p-4 text-center">
+                  <div class="text-[10px] font-display font-extrabold text-rose-300 uppercase tracking-wider">Évaluation adaptée</div>
+                  <div class="font-display font-bold text-sm mt-0.5">Matrice · Précision · Rappel · F1</div>
+                </div>
+              </section>
+
+              <!-- Groupes -->
+              <section class="bg-white rounded-3xl border-2 border-violet-600 overflow-hidden flex flex-col justify-between shadow-2xs">
+                <div class="bg-violet-600 text-white p-6">
+                  <div class="text-[11px] font-display font-extrabold tracking-widest text-violet-200 uppercase">Sans étiquettes (Non supervisé)</div>
+                  <h3 class="font-serif text-2xl sm:text-3xl font-bold mt-1">3. Je veux des GROUPES</h3>
+                </div>
+                <div class="p-6 space-y-4 flex-1">
+                  <div>
+                    <div class="font-display font-extrabold text-sm text-ink mb-1">→ Je connais le nombre K de groupes ?</div>
+                    <div class="bg-violet-50 border border-violet-200 rounded-xl p-3">
+                      <div class="font-display font-extrabold text-violet-800">K-means <span class="font-normal text-xs">(ronds)</span> · Spectral <span class="font-normal text-xs">(imbriqués)</span></div>
+                      <div class="text-xs text-violet-700 mt-1">K-means est très rapide sur gros fichiers.</div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="font-display font-extrabold text-sm text-ink mb-1">→ Explorer plusieurs niveaux de découpe ?</div>
+                    <div class="bg-violet-50 border border-violet-200 rounded-xl p-3 flex items-center justify-between">
+                      <span class="font-display font-extrabold text-violet-800">Clustering hiérarchique</span>
+                      <span class="text-[11px] font-bold text-violet-700 bg-white px-2 py-0.5 rounded-full">Arbre</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="font-display font-extrabold text-sm text-ink mb-1">→ Formes courbes ou points isolés (bruit) ?</div>
+                    <div class="bg-violet-50 border border-violet-200 rounded-xl p-3">
+                      <div class="font-display font-extrabold text-violet-800">DBSCAN</div>
+                      <div class="text-xs text-violet-700 mt-1">Pas besoin de fixer K ; isole le bruit.</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-ink text-white p-4 text-center">
+                  <div class="text-[10px] font-display font-extrabold text-violet-300 uppercase tracking-wider">Évaluation adaptée</div>
+                  <div class="font-display font-bold text-sm mt-0.5">Score de silhouette + Sens métier</div>
+                </div>
+              </section>
+            </div>
+          </div>
+        `
+      },
+
+      // 18 — GÉNÉRALISATION ET SURAPPRENTISSAGE
+      {
+        num: '18',
+        family: 'choix',
+        shortTitle: '18 · Généralisation & surapprentissage',
+        render: () => `
+          <div class="space-y-8">
+            <header>
+              <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-100 text-amber-800 font-display font-extrabold text-xs tracking-wider uppercase mb-3">
+                <span class="w-2 h-2 rounded-full bg-amber-600"></span>
+                FONDAMENTAL · NOTION 18
+              </div>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-ink tracking-tight">Généralisation et surapprentissage</h2>
+              <p class="mt-3 font-display text-lg sm:text-xl font-semibold text-slate-700">
+                « Apprendre par cœur les exercices corrigés ne garantit pas de réussir l’examen le jour J. »
+              </p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <section class="bg-white rounded-3xl border-2 border-rose-300 p-6 space-y-4">
+                <div>
+                  <span class="inline-block px-3 py-1 rounded-full bg-rose-100 text-rose-800 font-display font-extrabold text-xs uppercase">Modèle 1 · Surapprentissage</span>
+                  <h3 class="font-serif text-2xl font-bold text-rose-600 mt-2">Il apprend les exemples par cœur</h3>
+                  <p class="text-sm text-slate-600 mt-1">Il zigzague pour toucher chaque point connu, mais se trompe sur un nouveau cas.</p>
+                </div>
+                <div class="bg-rose-50/70 rounded-2xl p-3">
+                  <svg viewBox="0 0 600 190" class="w-full h-auto">
+                    <path d="M 45 145 L 130 68 L 215 140 L 300 55 L 395 130 L 485 45 L 555 98" fill="none" stroke="#E11D48" stroke-width="4" stroke-linejoin="round"/>
+                    <circle cx="45" cy="145" r="7.5" fill="#0284C7"/><circle cx="130" cy="68" r="7.5" fill="#0284C7"/>
+                    <circle cx="215" cy="140" r="7.5" fill="#0284C7"/><circle cx="300" cy="55" r="7.5" fill="#0284C7"/>
+                    <circle cx="395" cy="130" r="7.5" fill="#0284C7"/><circle cx="485" cy="45" r="7.5" fill="#0284C7"/>
+                    <circle cx="555" cy="98" r="7.5" fill="#0284C7"/>
+                    <circle cx="348" cy="86" r="11" fill="#F59E0B" stroke="#0F172A" stroke-width="2.5"/>
+                    <rect x="260" y="148" width="176" height="26" rx="7" fill="#0F172A"/>
+                    <text x="348" y="165" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11" font-weight="800" fill="#FDA4AF">Nouveau cas → Échec ✕</text>
+                  </svg>
+                </div>
+                <div class="font-display font-extrabold text-sm text-rose-700">
+                  Données connues : 99 % &nbsp;·&nbsp; Nouveaux exemples : 58 % ✕
+                </div>
+              </section>
+
+              <section class="bg-white rounded-3xl border-2 border-teal-300 p-6 space-y-4">
+                <div>
+                  <span class="inline-block px-3 py-1 rounded-full bg-teal-100 text-teal-800 font-display font-extrabold text-xs uppercase">Modèle 2 · Bonne généralisation</span>
+                  <h3 class="font-serif text-2xl font-bold text-teal-600 mt-2">Il saisit la tendance de fond</h3>
+                  <p class="text-sm text-slate-600 mt-1">Il ignore le bruit passager et réussit aussi bien sur des exemples jamais vus.</p>
+                </div>
+                <div class="bg-teal-50/70 rounded-2xl p-3">
+                  <svg viewBox="0 0 600 190" class="w-full h-auto">
+                    <path d="M 40 140 Q 300 92 560 55" fill="none" stroke="#0D9488" stroke-width="4.5" stroke-linecap="round"/>
+                    <circle cx="45" cy="145" r="7.5" fill="#0284C7"/><circle cx="130" cy="68" r="7.5" fill="#0284C7"/>
+                    <circle cx="215" cy="140" r="7.5" fill="#0284C7"/><circle cx="300" cy="55" r="7.5" fill="#0284C7"/>
+                    <circle cx="395" cy="130" r="7.5" fill="#0284C7"/><circle cx="485" cy="45" r="7.5" fill="#0284C7"/>
+                    <circle cx="555" cy="98" r="7.5" fill="#0284C7"/>
+                    <circle cx="348" cy="86" r="11" fill="#F59E0B" stroke="#0F172A" stroke-width="2.5"/>
+                    <rect x="252" y="116" width="192" height="26" rx="7" fill="#0F172A"/>
+                    <text x="348" y="133" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11" font-weight="800" fill="#5EEAD4">Nouveau cas → Réussite ✓</text>
+                  </svg>
+                </div>
+                <div class="font-display font-extrabold text-sm text-teal-700">
+                  Données connues : 91 % &nbsp;·&nbsp; Nouveaux exemples : 89 % ✓
+                </div>
+              </section>
+            </div>
+
+            <!-- Entraînement / Validation / Test -->
+            <section class="bg-ink text-white rounded-3xl p-6 sm:p-8 space-y-4">
+              <div class="font-display text-xs font-extrabold tracking-widest text-amber-400 uppercase">
+                Comment vérifier la généralisation ? Le découpage en trois jeux de données
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-slate-800/90 border border-sky-500/50 rounded-2xl p-4">
+                  <div class="font-display font-extrabold text-base text-sky-400">1. Entraînement (~60–70 %)</div>
+                  <p class="text-sm text-slate-200 mt-1">Le cahier d’exercices : le modèle étudie ces exemples pour ajuster ses paramètres.</p>
+                </div>
+                <div class="bg-slate-800/90 border border-amber-500/50 rounded-2xl p-4">
+                  <div class="font-display font-extrabold text-base text-amber-400">2. Validation (~15–20 %)</div>
+                  <p class="text-sm text-slate-200 mt-1">L’examen blanc : sert à comparer plusieurs modèles et régler les paramètres (comme K).</p>
+                </div>
+                <div class="bg-slate-800/90 border-2 border-rose-500 rounded-2xl p-4">
+                  <div class="font-display font-extrabold text-base text-rose-300">3. Jeu de test (~15–20 %) 🔒</div>
+                  <p class="text-sm text-slate-200 mt-1">L’examen final : gardé sous clé. <strong class="text-rose-300">Il ne doit jamais servir à régler le modèle !</strong></p>
+                </div>
+              </div>
+            </section>
+          </div>
+        `
+      },
+
+      // 19 — QUELLE MÉTRIQUE UTILISER ?
+      {
+        num: '19',
+        family: 'evaluation',
+        shortTitle: '19 · Quelle métrique utiliser ?',
+        render: () => `
+          <div class="space-y-8">
+            <header>
+              <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-teal-100 text-teal-800 font-display font-extrabold text-xs tracking-wider uppercase mb-3">
+                <span class="w-2 h-2 rounded-full bg-teal-600"></span>
+                ÉVALUATION · NOTION 19
+              </div>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-ink tracking-tight">Quelle métrique utiliser pour juger mon modèle ?</h2>
+              <p class="mt-3 font-display text-lg sm:text-xl font-semibold text-slate-700">
+                « On ne mesure pas un prix en euros avec le même outil qu’un filtre anti-spam. À chaque résultat sa règle de mesure. »
+              </p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <section class="bg-white rounded-3xl border-2 border-sky-500 overflow-hidden flex flex-col justify-between shadow-2xs">
+                <div class="bg-sky-600 text-white p-6 text-center">
+                  <div class="text-[11px] font-display font-extrabold tracking-widest text-sky-200 uppercase">Je prédis un nombre</div>
+                  <h3 class="font-serif text-2xl font-bold mt-1">Métriques de Régression</h3>
+                </div>
+                <div class="p-6 space-y-3.5 flex-1">
+                  <div class="bg-sky-50 rounded-2xl p-3.5">
+                    <div class="font-display font-extrabold text-base text-sky-700">MAE · Erreur absolue moyenne</div>
+                    <p class="text-sm text-ink mt-0.5">« En moyenne, je me trompe de X euros. »</p>
+                  </div>
+                  <div class="bg-sky-50 rounded-2xl p-3.5">
+                    <div class="font-display font-extrabold text-base text-sky-700">MSE &amp; RMSE · Erreur au carré</div>
+                    <p class="text-sm text-ink mt-0.5">« Je punis plus fort les grosses erreurs. »</p>
+                  </div>
+                  <div class="bg-sky-50 rounded-2xl p-3.5">
+                    <div class="font-display font-extrabold text-base text-sky-700">R² · Variation expliquée</div>
+                    <p class="text-sm text-ink mt-0.5">« Suis-je meilleur que la simple moyenne ? »</p>
+                  </div>
+                </div>
+                <div class="bg-ink text-white p-4 text-center text-xs">
+                  <div class="font-display font-extrabold text-sky-400 uppercase">Exemple maisons (notions 20–21)</div>
+                  <div class="mt-0.5">MAE ≈ 16 700 € · RMSE ≈ 19 100 € · R² ≈ 0,945</div>
+                </div>
+              </section>
+
+              <section class="bg-white rounded-3xl border-2 border-rose-500 overflow-hidden flex flex-col justify-between shadow-2xs">
+                <div class="bg-rose-600 text-white p-6 text-center">
+                  <div class="text-[11px] font-display font-extrabold tracking-widest text-rose-200 uppercase">Je prédis une classe</div>
+                  <h3 class="font-serif text-2xl font-bold mt-1">Métriques de Classification</h3>
+                </div>
+                <div class="p-6 space-y-3.5 flex-1">
+                  <div class="bg-rose-50 rounded-2xl p-3.5">
+                    <div class="font-display font-extrabold text-base text-rose-700">Matrice de confusion (2 × 2)</div>
+                    <p class="text-sm text-ink mt-0.5">« Où le modèle a-t-il raison ou tort ? »</p>
+                  </div>
+                  <div class="bg-rose-50 rounded-2xl p-3.5">
+                    <div class="font-display font-extrabold text-base text-rose-700">Précision &amp; Rappel</div>
+                    <p class="text-sm text-ink mt-0.5">« Alertes fiables vs coupables attrapés. »</p>
+                  </div>
+                  <div class="bg-rose-50 rounded-2xl p-3.5">
+                    <div class="font-display font-extrabold text-base text-rose-700">Exactitude &amp; Score F1</div>
+                    <p class="text-sm text-ink mt-0.5">« Réussite globale vs compromis équilibré. »</p>
+                  </div>
+                </div>
+                <div class="bg-ink text-white p-4 text-center text-xs">
+                  <div class="font-display font-extrabold text-rose-300 uppercase">Exemple 100 e-mails (notions 22–24)</div>
+                  <div class="mt-0.5">Précision = 80 % · Rappel = 60 % · F1 ≈ 69 %</div>
+                </div>
+              </section>
+
+              <section class="bg-white rounded-3xl border-2 border-violet-600 overflow-hidden flex flex-col justify-between shadow-2xs">
+                <div class="bg-violet-600 text-white p-6 text-center">
+                  <div class="text-[11px] font-display font-extrabold tracking-widest text-violet-200 uppercase">Je découvre des groupes</div>
+                  <h3 class="font-serif text-2xl font-bold mt-1">Évaluation du Clustering</h3>
+                </div>
+                <div class="p-6 space-y-3.5 flex-1">
+                  <div class="bg-violet-50 rounded-2xl p-3.5">
+                    <div class="font-display font-extrabold text-base text-violet-700">Score de silhouette (−1 à +1)</div>
+                    <p class="text-sm text-ink mt-0.5">« Les groupes sont-ils compacts et bien séparés ? »</p>
+                  </div>
+                  <div class="bg-violet-50 rounded-2xl p-3.5">
+                    <div class="font-display font-extrabold text-base text-violet-700">Sens métier &amp; interprétation</div>
+                    <p class="text-sm text-ink mt-0.5">« Sans vraie étiquette connue, les groupes découverts sont-ils utiles en pratique ? »</p>
+                  </div>
+                </div>
+                <div class="bg-ink text-white p-4 text-center text-xs">
+                  <div class="font-display font-extrabold text-violet-300 uppercase">Vigilance (notion 25)</div>
+                  <div class="mt-0.5">Silhouette trompeuse sur formes courbes</div>
+                </div>
+              </section>
+            </div>
+          </div>
+        `
+      },
+
+      // 20 — MAE ET MSE (3 MAISONS)
+      {
+        num: '20',
+        family: 'evaluation',
+        shortTitle: '20 · MAE et MSE',
+        render: () => `
+          <div class="space-y-8">
+            <header>
+              <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-sky-100 text-sky-800 font-display font-extrabold text-xs tracking-wider uppercase mb-3">
+                <span class="w-2 h-2 rounded-full bg-sky-600"></span>
+                RÉGRESSION · NOTION 20
+              </div>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-ink tracking-tight">MAE et MSE : mesurer l’erreur d’un nombre</h2>
+              <p class="mt-3 font-display text-lg sm:text-xl font-semibold text-slate-700">
+                « La MAE fait la moyenne simple des erreurs ; la MSE les met au carré pour pénaliser sévèrement les gros écarts. »
+              </p>
+            </header>
+
+            <!-- Les 3 maisons -->
+            <div>
+              <div class="font-display text-xs font-extrabold tracking-widest text-slate-400 uppercase mb-3">Exemple fictif sur 3 maisons évaluées</div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="bg-white rounded-2xl border-2 border-sky-200 p-5">
+                  <div class="font-serif text-xl font-bold text-ink">Maison A</div>
+                  <div class="text-sm text-slate-600 mt-1">Réel : <strong class="text-ink">100 000 €</strong> · Prédit : <strong class="text-sky-600">110 000 €</strong></div>
+                  <div class="mt-3 bg-sky-50 text-sky-900 font-display font-bold text-xs px-3 py-2 rounded-lg">
+                    Erreur : 10 000 € &nbsp;|&nbsp; Au carré : 10² = 100 (k€)²
+                  </div>
+                </div>
+                <div class="bg-white rounded-2xl border-2 border-sky-200 p-5">
+                  <div class="font-serif text-xl font-bold text-ink">Maison B</div>
+                  <div class="text-sm text-slate-600 mt-1">Réel : <strong class="text-ink">200 000 €</strong> · Prédit : <strong class="text-sky-600">210 000 €</strong></div>
+                  <div class="mt-3 bg-sky-50 text-sky-900 font-display font-bold text-xs px-3 py-2 rounded-lg">
+                    Erreur : 10 000 € &nbsp;|&nbsp; Au carré : 10² = 100 (k€)²
+                  </div>
+                </div>
+                <div class="bg-amber-50/70 rounded-2xl border-2 border-amber-400 p-5">
+                  <div class="font-serif text-xl font-bold text-ink">Maison C (grosse erreur)</div>
+                  <div class="text-sm text-slate-600 mt-1">Réel : <strong class="text-ink">300 000 €</strong> · Prédit : <strong class="text-amber-700">270 000 €</strong></div>
+                  <div class="mt-3 bg-amber-100 text-amber-950 font-display font-bold text-xs px-3 py-2 rounded-lg">
+                    Erreur : 30 000 € (3×) &nbsp;|&nbsp; Au carré : 30² = 900 (k€)² (9× !)
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- MAE -->
+              <section class="bg-white rounded-3xl border-2 border-sky-500 p-6 sm:p-7 flex flex-col justify-between space-y-4">
+                <div>
+                  <span class="inline-block px-3 py-1 rounded-full bg-sky-100 text-sky-800 font-display font-extrabold text-xs uppercase">1. MAE · Erreur absolue moyenne</span>
+                  <div class="font-serif text-4xl sm:text-5xl font-bold text-sky-600 mt-2">MAE ≈ 16 700 €</div>
+                  <p class="font-display font-bold text-lg text-ink mt-2">« En moyenne, je me trompe d’environ 16 700 €. »</p>
+                </div>
+                <div>
+                  <div class="text-xs font-display font-extrabold text-slate-400 uppercase mb-2">(10 000 + 10 000 + 30 000) / 3</div>
+                  <div class="flex items-center gap-1.5 h-12">
+                    <div class="w-1/5 h-full bg-sky-400 rounded-xl flex items-center justify-center font-display font-extrabold text-xs text-ink">10 k€</div>
+                    <div class="w-1/5 h-full bg-sky-400 rounded-xl flex items-center justify-center font-display font-extrabold text-xs text-ink">10 k€</div>
+                    <div class="w-3/5 h-full bg-sky-600 rounded-xl flex items-center justify-center font-display font-extrabold text-xs text-white">30 k€ (pèse 3× plus)</div>
+                  </div>
+                </div>
+                <p class="text-sm text-slate-600"><strong>Avantage :</strong> Directement lisible dans l’unité de départ (€).</p>
+              </section>
+
+              <!-- MSE -->
+              <section class="bg-white rounded-3xl border-2 border-amber-500 p-6 sm:p-7 flex flex-col justify-between space-y-4">
+                <div>
+                  <span class="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-display font-extrabold text-xs uppercase">2. MSE · Erreur quadratique moyenne</span>
+                  <div class="font-serif text-4xl sm:text-5xl font-bold text-amber-600 mt-2">MSE ≈ 366,7 (k€)²</div>
+                  <p class="font-display font-bold text-lg text-ink mt-2">« Les grosses erreurs pèsent beaucoup plus lourd. »</p>
+                </div>
+                <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                  <div class="flex items-end gap-4">
+                    <div class="text-center">
+                      <div class="w-10 h-10 bg-sky-400 rounded mx-auto"></div>
+                      <span class="font-mono text-[11px] font-bold text-slate-700 mt-1 block">10²=100</span>
+                    </div>
+                    <div class="text-center">
+                      <div class="w-10 h-10 bg-sky-400 rounded mx-auto"></div>
+                      <span class="font-mono text-[11px] font-bold text-slate-700 mt-1 block">10²=100</span>
+                    </div>
+                    <div class="text-center">
+                      <div class="w-28 h-28 bg-amber-500 rounded-xl flex flex-col items-center justify-center text-white shadow-2xs p-1">
+                        <span class="font-display font-extrabold text-sm">30² = 900</span>
+                        <span class="text-[10px]">Surface 9× plus grande</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="text-xs text-slate-700">
+                    <div class="font-mono font-bold text-ink">(100 + 100 + 900) / 3</div>
+                    <div class="font-mono font-extrabold text-amber-700 text-base mt-0.5">= 366,7 (k€)²</div>
+                    <div class="text-slate-500 mt-0.5">Unité au carré → voir RMSE (21)</div>
+                  </div>
+                </div>
+                <p class="text-sm text-slate-600"><strong>Usage :</strong> Quand une grosse erreur est inacceptable.</p>
+              </section>
+            </div>
+          </div>
+        `
+      },
+
+      // 21 — RMSE ET R² (MÊMES 3 MAISONS)
+      {
+        num: '21',
+        family: 'evaluation',
+        shortTitle: '21 · RMSE et R²',
+        render: () => `
+          <div class="space-y-8">
+            <header>
+              <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-sky-100 text-sky-800 font-display font-extrabold text-xs tracking-wider uppercase mb-3">
+                <span class="w-2 h-2 rounded-full bg-sky-600"></span>
+                RÉGRESSION · NOTION 21
+              </div>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-ink tracking-tight">RMSE et R² : l’unité retrouvée et la note sur 1</h2>
+              <p class="mt-3 font-display text-lg sm:text-xl font-semibold text-slate-700">
+                « Sur nos 3 mêmes maisons : la RMSE remet l’erreur en euros, et le R² mesure la part de variation expliquée. »
+              </p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <!-- RMSE -->
+              <section class="lg:col-span-5 bg-white rounded-3xl border-2 border-sky-500 p-6 sm:p-7 flex flex-col justify-between space-y-5">
+                <div>
+                  <span class="inline-block px-3 py-1 rounded-full bg-sky-100 text-sky-800 font-display font-extrabold text-xs uppercase">1. RMSE · Racine de la MSE</span>
+                  <div class="font-serif text-4xl sm:text-5xl font-bold text-sky-600 mt-2">RMSE ≈ 19 100 €</div>
+                  <p class="font-display font-bold text-lg text-ink mt-2">Valeur interprétable directement dans l’unité de la cible (€).</p>
+                </div>
+                <div class="bg-sky-50 border border-sky-200 rounded-2xl p-4 space-y-2">
+                  <div class="font-mono text-sm font-bold text-slate-700">MSE = 366,7 (k€)² → √366,7 ≈ 19,15 k€</div>
+                  <hr class="border-sky-200" />
+                  <div class="text-sm text-ink"><strong>MAE :</strong> 16 700 € &nbsp;vs&nbsp; <strong class="text-amber-700">RMSE : 19 100 €</strong></div>
+                  <p class="text-xs text-slate-600">La RMSE reste plus élevée que la MAE car l’erreur de 30 000 € sur la Maison C a été mise au carré avant la racine.</p>
+                </div>
+                <div class="bg-ink text-white rounded-2xl p-4 text-sm text-slate-200">
+                  <strong class="text-sky-400 uppercase text-xs block mb-1">En résumé</strong>
+                  La RMSE garde la sévérité contre les grosses erreurs tout en parlant en euros.
+                </div>
+              </section>
+
+              <!-- R² -->
+              <section class="lg:col-span-7 bg-white rounded-3xl border-2 border-ink p-6 sm:p-7 flex flex-col justify-between space-y-5">
+                <div>
+                  <span class="inline-block px-3 py-1 rounded-full bg-slate-200 text-ink font-display font-extrabold text-xs uppercase">2. Coefficient de détermination R²</span>
+                  <div class="font-serif text-4xl sm:text-5xl font-bold text-ink mt-2">R² ≈ 0,945</div>
+                  <p class="font-display font-bold text-lg text-sky-700 mt-2">« Environ 94,5 % de la variation des prix de cet exemple est expliquée par le modèle. »</p>
+                </div>
+
+                <div class="bg-rose-50 border-2 border-rose-300 rounded-2xl p-4">
+                  <div class="font-display font-extrabold text-sm text-rose-800">⚠ Attention : R² = 0,945 ne signifie PAS que 94,5 % des prédictions sont correctes !</div>
+                  <p class="text-xs sm:text-sm text-rose-900 mt-1">Sur nos 3 maisons, aucune prédiction n’est tombée à l’euro près (écarts de 10k, 10k et 30k €).</p>
+                </div>
+
+                <div>
+                  <div class="font-display text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">Comment lire un score R² ?</div>
+                  <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                    <div class="sm:col-span-4 bg-rose-100 border border-rose-300 rounded-xl p-2.5 text-center">
+                      <div class="font-display font-extrabold text-xs text-rose-700">R² &lt; 0 (Négatif)</div>
+                      <div class="text-[11px] text-rose-800">Pire que prédire la moyenne</div>
+                    </div>
+                    <div class="sm:col-span-8 bg-sky-100 rounded-xl p-1 border border-sky-300">
+                      <div class="h-9 bg-sky-600 rounded-lg flex items-center justify-end pr-3 text-white font-display font-extrabold text-xs" style="width:94.5%">
+                        0,945 (Ici)
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex flex-wrap justify-between text-[11px] font-display font-bold text-slate-600 mt-2 gap-1">
+                    <span>← Pire que la moyenne</span>
+                    <span class="text-ink">0 = Prédit toujours la moyenne (200 k€)</span>
+                    <span class="text-teal-700">1 = Parfait</span>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        `
+      },
+
+      // 22 — MATRICE DE CONFUSION (100 E-MAILS)
+      {
+        num: '22',
+        family: 'evaluation',
+        shortTitle: '22 · Matrice de confusion',
+        render: () => `
+          <div class="space-y-8">
+            <header>
+              <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rose-100 text-rose-800 font-display font-extrabold text-xs tracking-wider uppercase mb-3">
+                <span class="w-2 h-2 rounded-full bg-rose-600"></span>
+                CLASSIFICATION · NOTION 22
+              </div>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-ink tracking-tight">La matrice de confusion : lire les 4 cas possibles</h2>
+              <p class="mt-3 font-display text-lg sm:text-xl font-semibold text-slate-700">
+                « Un tableau 2 × 2 qui croise ce que l’e-mail est réellement avec ce que le modèle a prédit (sur 100 e-mails). »
+              </p>
+            </header>
+
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-stretch">
+              <!-- Matrice 2x2 -->
+              <section class="xl:col-span-8 space-y-3">
+                <div class="bg-ink text-white rounded-2xl py-2.5 px-4 text-center font-display font-extrabold text-xs sm:text-sm tracking-widest uppercase">
+                  Prédit par le modèle
+                </div>
+
+                <div class="grid grid-cols-12 gap-3 items-center">
+                  <div class="col-span-3 sm:col-span-3"></div>
+                  <div class="col-span-4 text-center font-display font-extrabold text-sm sm:text-lg text-rose-600">Prédit : SPAM</div>
+                  <div class="col-span-5 text-center font-display font-extrabold text-sm sm:text-lg text-teal-600">Prédit : NORMAL</div>
+                </div>
+
+                <div class="grid grid-cols-12 gap-3 items-stretch">
+                  <div class="col-span-3 flex flex-col justify-around text-right pr-2">
+                    <div>
+                      <div class="font-display font-extrabold text-xs sm:text-sm text-rose-600">Réellement</div>
+                      <div class="font-serif text-xl sm:text-2xl font-bold text-rose-600">SPAM</div>
+                      <div class="text-[11px] text-slate-500">(20 au total)</div>
+                    </div>
+                    <div>
+                      <div class="font-display font-extrabold text-xs sm:text-sm text-teal-600">Réellement</div>
+                      <div class="font-serif text-xl sm:text-2xl font-bold text-teal-600">NORMAL</div>
+                      <div class="text-[11px] text-slate-500">(80 au total)</div>
+                    </div>
+                  </div>
+
+                  <div class="col-span-9 grid grid-cols-2 gap-4">
+                    <div class="bg-teal-100/90 border-2 border-teal-600 rounded-3xl p-5 flex flex-col items-center justify-center text-center">
+                      <span class="px-3 py-0.5 rounded-full bg-teal-600 text-white font-display font-extrabold text-[11px] uppercase">✓ Vrai positif</span>
+                      <div class="font-serif text-5xl sm:text-6xl font-bold text-teal-800 my-1.5">12</div>
+                      <div class="font-display font-extrabold text-sm sm:text-base text-ink">12 vrais spams détectés</div>
+                      <p class="text-xs text-teal-900 mt-0.5">Spam bloqué avec succès.</p>
+                    </div>
+
+                    <div class="bg-rose-100/90 border-2 border-rose-600 rounded-3xl p-5 flex flex-col items-center justify-center text-center">
+                      <span class="px-3 py-0.5 rounded-full bg-rose-600 text-white font-display font-extrabold text-[11px] uppercase">✕ Faux négatif</span>
+                      <div class="font-serif text-5xl sm:text-6xl font-bold text-rose-700 my-1.5">8</div>
+                      <div class="font-display font-extrabold text-sm sm:text-base text-ink">8 vrais spams ratés</div>
+                      <p class="text-xs text-rose-900 mt-0.5">Passés dans la boîte principale.</p>
+                    </div>
+
+                    <div class="bg-amber-100/90 border-2 border-amber-500 rounded-3xl p-5 flex flex-col items-center justify-center text-center">
+                      <span class="px-3 py-0.5 rounded-full bg-amber-600 text-white font-display font-extrabold text-[11px] uppercase">⚠ Faux positif</span>
+                      <div class="font-serif text-5xl sm:text-6xl font-bold text-amber-800 my-1.5">3</div>
+                      <div class="font-display font-extrabold text-sm sm:text-base text-ink">3 fausses alertes</div>
+                      <p class="text-xs text-amber-900 mt-0.5">Messages normaux bloqués à tort.</p>
+                    </div>
+
+                    <div class="bg-teal-100/90 border-2 border-teal-600 rounded-3xl p-5 flex flex-col items-center justify-center text-center">
+                      <span class="px-3 py-0.5 rounded-full bg-teal-600 text-white font-display font-extrabold text-[11px] uppercase">✓ Vrai négatif</span>
+                      <div class="font-serif text-5xl sm:text-6xl font-bold text-teal-800 my-1.5">77</div>
+                      <div class="font-display font-extrabold text-sm sm:text-base text-ink">77 messages normaux reconnus</div>
+                      <p class="text-xs text-teal-900 mt-0.5">Livrés normalement.</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <aside class="xl:col-span-4 bg-white rounded-3xl border border-slate-200 p-6 flex flex-col justify-between space-y-4">
+                <div class="space-y-4">
+                  <div class="font-display text-xs font-extrabold tracking-widest text-slate-400 uppercase">Lecture en 5 secondes</div>
+                  <div class="bg-teal-50 rounded-2xl p-4">
+                    <div class="font-display font-extrabold text-base text-teal-800">✓ La diagonale verte = réussites</div>
+                    <p class="text-sm text-slate-700 mt-1">12 spams bloqués + 77 normaux reconnus = <strong>89 bonnes réponses</strong> sur 100.</p>
+                  </div>
+                  <div class="bg-rose-50 rounded-2xl p-4">
+                    <div class="font-display font-extrabold text-base text-rose-800">✕ Les deux autres cases = erreurs</div>
+                    <p class="text-sm text-slate-700 mt-1"><strong>3 fausses alertes</strong> (gênant) et <strong>8 vrais spams ratés</strong> (dangereux).</p>
+                  </div>
+                </div>
+                <div class="bg-ink text-white rounded-2xl p-5 text-sm text-slate-200">
+                  <strong class="text-rose-300 uppercase text-xs block mb-1">À retenir</strong>
+                  Toutes les métriques des notions 23 et 24 (Précision, Rappel, Exactitude, F1) proviennent directement de ces 4 cases.
+                </div>
+              </aside>
+            </div>
+          </div>
+        `
+      },
+
+      // 23 — PRÉCISION ET RAPPEL (MÊMES 100 E-MAILS)
+      {
+        num: '23',
+        family: 'evaluation',
+        shortTitle: '23 · Précision et rappel',
+        render: () => `
+          <div class="space-y-8">
+            <header>
+              <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rose-100 text-rose-800 font-display font-extrabold text-xs tracking-wider uppercase mb-3">
+                <span class="w-2 h-2 rounded-full bg-rose-600"></span>
+                CLASSIFICATION · NOTION 23
+              </div>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-ink tracking-tight">Précision et Rappel : deux ensembles différents</h2>
+              <p class="mt-3 font-display text-lg sm:text-xl font-semibold text-slate-700">
+                « La Précision regarde les alertes émises par le filtre ; le Rappel regarde tous les vrais spams existants. »
+              </p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- Précision -->
+              <section class="bg-white rounded-3xl border-2 border-indigo-400 p-6 sm:p-7 flex flex-col justify-between space-y-5">
+                <div>
+                  <span class="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 font-display font-extrabold text-xs uppercase">1. La Précision</span>
+                  <div class="flex items-baseline gap-3 mt-2">
+                    <span class="font-serif text-4xl sm:text-5xl font-bold text-indigo-700">80 %</span>
+                    <span class="font-display font-bold text-lg text-slate-500">(12 sur 15)</span>
+                  </div>
+                  <p class="font-display font-bold text-lg text-ink mt-2">« Quand je dis SPAM, j’ai raison 4 fois sur 5. »</p>
+                </div>
+
+                <div class="bg-indigo-50/80 border-2 border-indigo-200 rounded-2xl p-4">
+                  <div class="font-display text-[11px] font-extrabold text-indigo-800 uppercase tracking-wider mb-3">
+                    Ensemble étudié : uniquement les 15 e-mails prédits « SPAM »
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                    <div class="sm:col-span-8">
+                      <div class="text-xs font-bold text-teal-700 mb-1.5">✓ 12 vrais spams détectés</div>
+                      <div class="grid grid-cols-6 gap-1.5">
+                        ${Array(12).fill('<div class="h-8 rounded-md bg-teal-600 text-white font-display font-extrabold text-[10px] flex items-center justify-center">SPAM</div>').join('')}
+                      </div>
+                    </div>
+                    <div class="sm:col-span-4 sm:border-l-2 sm:border-dashed sm:border-indigo-200 sm:pl-3">
+                      <div class="text-xs font-bold text-amber-700 mb-1.5">⚠ 3 fausses alertes</div>
+                      <div class="space-y-1.5">
+                        ${Array(3).fill('<div class="h-6 rounded bg-amber-500 text-white font-display font-extrabold text-[10px] flex items-center justify-center">Normal bloqué</div>').join('')}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <p class="text-sm text-slate-600"><strong>Utile quand :</strong> une fausse alerte coûte cher (bloquer un message important).</p>
+              </section>
+
+              <!-- Rappel -->
+              <section class="bg-white rounded-3xl border-2 border-rose-400 p-6 sm:p-7 flex flex-col justify-between space-y-5">
+                <div>
+                  <span class="inline-block px-3 py-1 rounded-full bg-rose-100 text-rose-800 font-display font-extrabold text-xs uppercase">2. Le Rappel</span>
+                  <div class="flex items-baseline gap-3 mt-2">
+                    <span class="font-serif text-4xl sm:text-5xl font-bold text-rose-600">60 %</span>
+                    <span class="font-display font-bold text-lg text-slate-500">(12 sur 20)</span>
+                  </div>
+                  <p class="font-display font-bold text-lg text-ink mt-2">« Je repère seulement 12 des 20 vrais spams. »</p>
+                </div>
+
+                <div class="bg-rose-50/80 border-2 border-rose-200 rounded-2xl p-4">
+                  <div class="font-display text-[11px] font-extrabold text-rose-800 uppercase tracking-wider mb-3">
+                    Ensemble étudié : uniquement les 20 vrais spams existants
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                    <div class="sm:col-span-8">
+                      <div class="text-xs font-bold text-teal-700 mb-1.5">✓ 12 spams attrapés</div>
+                      <div class="grid grid-cols-6 gap-1.5">
+                        ${Array(12).fill('<div class="h-8 rounded-md bg-teal-600 text-white font-display font-extrabold text-[10px] flex items-center justify-center">SPAM</div>').join('')}
+                      </div>
+                    </div>
+                    <div class="sm:col-span-4 sm:border-l-2 sm:border-dashed sm:border-rose-200 sm:pl-3">
+                      <div class="text-xs font-bold text-rose-700 mb-1.5">✕ 8 spams ratés</div>
+                      <div class="grid grid-cols-2 gap-1">
+                        ${Array(8).fill('<div class="h-6 rounded bg-rose-600 text-white font-display font-extrabold text-[10px] flex items-center justify-center">Raté</div>').join('')}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <p class="text-sm text-slate-600"><strong>Utile quand :</strong> rater un cas positif est grave (maladie, fraude bancaire).</p>
+              </section>
+            </div>
+
+            <div class="bg-ink text-white rounded-2xl p-4 sm:px-6 flex flex-wrap items-center justify-between gap-2 text-sm">
+              <span>Mêmes 100 e-mails (notion 22) : <strong class="text-indigo-300">Précision = 12 / 15 = 80 %</strong> &nbsp;·&nbsp; <strong class="text-rose-300">Rappel = 12 / 20 = 60 %</strong></span>
+              <span class="text-xs font-mono text-slate-400">CLASSIFICATION UNIQUEMENT</span>
+            </div>
+          </div>
+        `
+      },
+
+      // 24 — EXACTITUDE ET F1 (MÊMES 100 E-MAILS)
+      {
+        num: '24',
+        family: 'evaluation',
+        shortTitle: '24 · Exactitude et score F1',
+        render: () => `
+          <div class="space-y-8">
+            <header>
+              <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rose-100 text-rose-800 font-display font-extrabold text-xs tracking-wider uppercase mb-3">
+                <span class="w-2 h-2 rounded-full bg-rose-600"></span>
+                CLASSIFICATION · NOTION 24
+              </div>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-ink tracking-tight">Exactitude et score F1 : attention au mirage global</h2>
+              <p class="mt-3 font-display text-lg sm:text-xl font-semibold text-slate-700">
+                « Un score global de 89 % paraît rassurant, mais il masque que 8 vrais spams sur 20 n’ont pas été arrêtés ! »
+              </p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- Exactitude -->
+              <section class="bg-white rounded-3xl border-2 border-slate-300 p-6 sm:p-7 flex flex-col justify-between space-y-5">
+                <div>
+                  <span class="inline-block px-3 py-1 rounded-full bg-slate-200 text-slate-800 font-display font-extrabold text-xs uppercase">1. Exactitude (Accuracy)</span>
+                  <div class="flex items-baseline gap-3 mt-2">
+                    <span class="font-serif text-4xl sm:text-5xl font-bold text-ink">89 %</span>
+                    <span class="font-display font-bold text-lg text-slate-500">(89 bonnes réponses sur 100)</span>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="text-xs font-display font-extrabold text-slate-400 uppercase mb-2">Répartition réelle des 100 e-mails :</div>
+                  <div class="flex h-14 rounded-2xl overflow-hidden gap-1">
+                    <div class="bg-teal-600 text-white flex flex-col items-center justify-center font-display font-extrabold px-2 text-center" style="width:77%">
+                      <span class="text-sm">77 normaux reconnus</span>
+                    </div>
+                    <div class="bg-sky-600 text-white flex items-center justify-center font-display font-extrabold text-xs" style="width:12%">12</div>
+                    <div class="bg-rose-600 text-white flex items-center justify-center font-display font-extrabold text-xs" style="width:11%">8+3</div>
+                  </div>
+                  <div class="flex justify-between text-xs font-display font-bold mt-2">
+                    <span class="text-teal-700">← 89 bonnes réponses (77 + 12) →</span>
+                    <span class="text-rose-600">11 erreurs (8 ratés + 3 fausses alertes)</span>
+                  </div>
+                </div>
+
+                <div class="bg-rose-50 border-2 border-rose-200 rounded-2xl p-4">
+                  <div class="font-display font-extrabold text-sm text-rose-800">⚠ Pourquoi ce 89 % cache un problème important :</div>
+                  <p class="text-sm text-slate-700 mt-1">
+                    Comme 80 e-mails sur 100 sont normaux, les reconnaître suffit à obtenir un bon score global, même en laissant passer <strong>8 vrais spams sur 20 (40 %)</strong>.
+                  </p>
+                </div>
+              </section>
+
+              <!-- F1 -->
+              <section class="bg-white rounded-3xl border-2 border-teal-500 p-6 sm:p-7 flex flex-col justify-between space-y-5">
+                <div>
+                  <span class="inline-block px-3 py-1 rounded-full bg-teal-100 text-teal-800 font-display font-extrabold text-xs uppercase">2. Le score F1 (Compromis exigeant)</span>
+                  <div class="flex items-baseline gap-3 mt-2">
+                    <span class="font-serif text-4xl sm:text-5xl font-bold text-teal-600">F1 ≈ 69 %</span>
+                    <span class="font-display font-bold text-lg text-slate-500">(68,6 %)</span>
+                  </div>
+                  <p class="font-display font-bold text-lg text-ink mt-2">Compromis entre Précision (80 %) et Rappel (60 %).</p>
+                </div>
+
+                <div class="bg-teal-50/70 border border-teal-200 rounded-2xl p-5">
+                  <div class="grid grid-cols-3 gap-3 items-center text-center">
+                    <div class="bg-indigo-100 rounded-xl p-3">
+                      <div class="text-[11px] font-display font-extrabold text-indigo-800 uppercase">Précision</div>
+                      <div class="font-serif text-3xl font-bold text-indigo-700 mt-1">80 %</div>
+                    </div>
+                    <div class="bg-ink text-white rounded-2xl p-3 shadow-2xs">
+                      <div class="text-[11px] font-display font-extrabold text-teal-300 uppercase">Score F1</div>
+                      <div class="font-serif text-3xl font-bold text-white mt-1">≈ 69 %</div>
+                    </div>
+                    <div class="bg-rose-100 rounded-xl p-3">
+                      <div class="text-[11px] font-display font-extrabold text-rose-800 uppercase">Rappel</div>
+                      <div class="font-serif text-3xl font-bold text-rose-600 mt-1">60 %</div>
+                    </div>
+                  </div>
+                  <p class="text-center text-xs text-slate-600 mt-3">
+                    Il ignore les 77 e-mails normaux faciles et sanctionne immédiatement le rappel faible (60 %).
+                  </p>
+                </div>
+
+                <div class="bg-ink text-white rounded-2xl p-4 text-sm text-slate-200">
+                  <strong class="text-teal-300 uppercase text-xs block mb-1">À retenir</strong>
+                  Dès qu’une classe est minoritaire (spam, fraude, maladie), jugez le modèle avec F1 plutôt qu’avec l’exactitude.
+                </div>
+              </section>
+            </div>
+          </div>
+        `
+      },
+
+      // 25 — ÉVALUER DES GROUPES : SILHOUETTE
+      {
+        num: '25',
+        family: 'evaluation',
+        shortTitle: '25 · Silhouette (Clustering)',
+        render: () => `
+          <div class="space-y-8">
+            <header>
+              <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-violet-100 text-violet-800 font-display font-extrabold text-xs tracking-wider uppercase mb-3">
+                <span class="w-2 h-2 rounded-full bg-violet-600"></span>
+                CLUSTERING · NOTION 25
+              </div>
+              <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-ink tracking-tight">Évaluer des groupes : le score de silhouette</h2>
+              <p class="mt-3 font-display text-lg sm:text-xl font-semibold text-slate-700">
+                « Sans bonnes réponses connues d’avance, on vérifie si chaque individu est serré avec les siens et loin des autres groupes. »
+              </p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <section class="bg-white rounded-3xl border-2 border-violet-500 p-6 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <span class="px-3 py-1 rounded-full bg-violet-100 text-violet-800 font-display font-extrabold text-xs uppercase">1. Groupes compacts et séparés</span>
+                  <span class="font-serif text-2xl font-bold text-teal-600">Silhouette : +0,78</span>
+                </div>
+                <svg viewBox="0 0 560 190" class="w-full h-auto">
+                  <circle cx="140" cy="95" r="65" fill="#EDE9FE" stroke="#7C3AED" stroke-width="2" stroke-dasharray="6 4"/>
+                  <circle cx="122" cy="80" r="8" fill="#7C3AED"/><circle cx="158" cy="78" r="8" fill="#7C3AED"/>
+                  <circle cx="135" cy="115" r="8" fill="#7C3AED"/><circle cx="162" cy="108" r="8" fill="#7C3AED"/>
+                  <line x1="222" y1="95" x2="338" y2="95" stroke="#0D9488" stroke-width="2.5"/>
+                  <text x="280" y="84" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="11.5" font-weight="800" fill="#0D9488">Bien éloignés</text>
+                  <circle cx="420" cy="95" r="65" fill="#FCE7F3" stroke="#DB2777" stroke-width="2" stroke-dasharray="6 4"/>
+                  <circle cx="402" cy="80" r="8" fill="#DB2777"/><circle cx="438" cy="78" r="8" fill="#DB2777"/>
+                  <circle cx="415" cy="115" r="8" fill="#DB2777"/><circle cx="442" cy="108" r="8" fill="#DB2777"/>
+                </svg>
+                <p class="text-sm text-ink font-medium text-center">Chaque point est proche de son groupe et loin du voisin → Score proche de <strong class="text-teal-700">+1</strong>.</p>
+              </section>
+
+              <section class="bg-white rounded-3xl border-2 border-rose-300 p-6 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <span class="px-3 py-1 rounded-full bg-rose-100 text-rose-800 font-display font-extrabold text-xs uppercase">2. Groupes mélangés</span>
+                  <span class="font-serif text-2xl font-bold text-rose-600">Silhouette : −0,08</span>
+                </div>
+                <svg viewBox="0 0 560 190" class="w-full h-auto">
+                  <circle cx="250" cy="95" r="78" fill="#EDE9FE" fill-opacity="0.7" stroke="#7C3AED" stroke-width="2" stroke-dasharray="6 4"/>
+                  <circle cx="310" cy="95" r="78" fill="#FCE7F3" fill-opacity="0.7" stroke="#DB2777" stroke-width="2" stroke-dasharray="6 4"/>
+                  <circle cx="225" cy="78" r="8" fill="#7C3AED"/><circle cx="285" cy="70" r="8" fill="#7C3AED"/>
+                  <circle cx="300" cy="112" r="8" fill="#7C3AED"/><circle cx="260" cy="120" r="8" fill="#7C3AED"/>
+                  <circle cx="275" cy="92" r="8" fill="#DB2777"/><circle cx="335" cy="80" r="8" fill="#DB2777"/>
+                  <circle cx="245" cy="105" r="8" fill="#DB2777"/><circle cx="325" cy="115" r="8" fill="#DB2777"/>
+                </svg>
+                <p class="text-sm text-ink font-medium text-center">Les groupes se chevauchent : plusieurs points sont plus proches de l’autre groupe → Score ≤ <strong class="text-rose-600">0</strong>.</p>
+              </section>
+            </div>
+
+            <!-- Échelle −1 à +1 + Limites scientifiques -->
+            <section class="bg-ink text-white rounded-3xl p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              <div class="lg:col-span-6 space-y-3">
+                <div class="font-display text-xs font-extrabold tracking-widest text-violet-300 uppercase">Échelle du score de silhouette (de −1 à +1)</div>
+                <div class="grid grid-cols-3 gap-2 text-center font-display font-extrabold text-xs sm:text-sm">
+                  <div class="bg-rose-600 py-2.5 px-2 rounded-xl">−1 : Mauvais groupe</div>
+                  <div class="bg-amber-500 text-ink py-2.5 px-2 rounded-xl">0 : Frontière floue</div>
+                  <div class="bg-teal-600 py-2.5 px-2 rounded-xl">+1 : Groupes nets</div>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-300">Sert aussi à comparer plusieurs valeurs de K (ex : K = 2, 3 ou 4) sur K-means.</p>
+              </div>
+
+              <div class="lg:col-span-6 lg:border-l lg:border-slate-700 lg:pl-6 space-y-2.5">
+                <div class="font-display text-xs font-extrabold tracking-widest text-amber-400 uppercase">⚠ Limites importantes à connaître</div>
+                <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                  <strong>1. Trompeur sur formes courbes ou densités variées :</strong> il favorise les groupes ronds et pénalise souvent des groupes courbes (DBSCAN) ou imbriqués (Spectral) pourtant valides.
+                </p>
+                <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                  <strong>2. Le sens métier compte toujours :</strong> un bon score mathématique ne suffit pas si les groupes obtenus n’ont aucune utilité concrète.
+                </p>
+              </div>
+            </section>
+          </div>
+        `
+      }
+    ];
+
+    // =========================================================================
+    // NAVIGATION & INTERACTIVITÉ WEB
+    // =========================================================================
+    // NAVIGATION, RECHERCHE, VUE D'ENSEMBLE & INTERACTIVITÉ WEB
+    // =========================================================================
+    let currentFilter = 'all';
+    let searchQuery = '';
+    let currentNum = '01';
+    let isOverview = false;
+
+    const listEl = document.getElementById('notion-list');
+    const stageEl = document.getElementById('notion-stage');
+    const badgeEl = document.getElementById('progress-badge');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrevBottom = document.getElementById('btn-prev-bottom');
+    const btnNextBottom = document.getElementById('btn-next-bottom');
+    const bottomHint = document.getElementById('bottom-hint');
+    const bottomNav = document.getElementById('bottom-nav');
+    const btnOverview = document.getElementById('btn-overview');
+    const menuBody = document.getElementById('menu-body');
+    const searchInput = document.getElementById('search-input');
+
+    function getVisibleNotions() {
+      return NOTIONS.filter(n => {
+        const matchFam = currentFilter === 'all' || n.family === currentFilter;
+        const matchQuery = !searchQuery || n.shortTitle.toLowerCase().includes(searchQuery) || FAMILIES[n.family].label.toLowerCase().includes(searchQuery);
+        return matchFam && matchQuery;
+      });
+    }
+
+    function renderSidebar() {
+      const visible = getVisibleNotions();
+      if (visible.length === 0) {
+        listEl.innerHTML = `<div class="p-4 text-center text-xs text-slate-400">Aucune notion trouvée pour « ${searchQuery} ».</div>`;
+        return;
+      }
+
+      // Regroupement par famille pour un repérage visuel immédiat
+      const order = ['intro', 'regression', 'classification', 'clustering', 'choix', 'evaluation'];
+      let html = '';
+      order.forEach(famKey => {
+        const group = visible.filter(n => n.family === famKey);
+        if (group.length === 0) return;
+        const fam = FAMILIES[famKey];
+        html += `
+          <div>
+            <div class="px-2.5 mb-1.5 flex items-center gap-1.5 text-[10px] font-display font-extrabold tracking-widest uppercase text-slate-400">
+              <span class="w-1.5 h-1.5 rounded-full ${fam.dot}"></span>
+              ${fam.label}
+            </div>
+            <div class="space-y-0.5">
+              ${group.map(n => {
+                const isActive = !isOverview && n.num === currentNum;
+                return `
+                  <button data-num="${n.num}" class="notion-link w-full text-left px-3 py-2 rounded-xl flex items-center justify-between gap-2 transition ${
+                    isActive
+                      ? 'bg-ink text-white font-display font-bold shadow-2xs'
+                      : 'hover:bg-slate-100 text-slate-700 font-medium'
+                  }">
+                    <span class="truncate text-xs sm:text-[13px]">${n.shortTitle}</span>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      });
+
+      listEl.innerHTML = html;
+
+      document.querySelectorAll('.notion-link').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectNotion(btn.dataset.num);
+          if (window.innerWidth < 1024) menuBody.classList.add('hidden');
+        });
+      });
+    }
+
+    function renderOverview() {
+      isOverview = true;
+      btnOverview.classList.add('bg-ink', 'text-white', 'border-ink');
+      btnOverview.classList.remove('bg-white', 'text-slate-700');
+      bottomNav.classList.add('hidden');
+      badgeEl.textContent = '25 / 25';
+
+      const order = ['intro', 'regression', 'classification', 'clustering', 'choix', 'evaluation'];
+      stageEl.innerHTML = `
+        <div class="space-y-8">
+          <header class="pb-5 border-b border-slate-200/80">
+            <span class="inline-block px-3 py-1 rounded-full bg-slate-200 text-ink font-display font-extrabold text-xs uppercase tracking-wider mb-2">Sommaire visuel</span>
+            <h2 class="font-serif text-3xl sm:text-4xl font-bold text-ink">Les 25 notions du Machine Learning</h2>
+            <p class="text-sm sm:text-base text-slate-600 mt-1">Cliquez sur une notion pour afficher son schéma explicatif interactif.</p>
+          </header>
+          <div class="space-y-8">
+            ${order.map(famKey => {
+              const fam = FAMILIES[famKey];
+              const items = NOTIONS.filter(n => n.family === famKey);
+              return `
+                <section>
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="w-2.5 h-2.5 rounded-full ${fam.dot}"></span>
+                    <h3 class="font-display font-extrabold text-xs tracking-widest uppercase text-slate-500">${fam.label}</h3>
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                    ${items.map(n => `
+                      <button data-pick="${n.num}" class="overview-card text-left bg-white hover:border-ink rounded-2xl border ${fam.border} p-4 transition shadow-2xs flex items-center justify-between gap-3">
+                        <div>
+                          <div class="font-mono text-[11px] font-bold" style="color:${fam.color}">NOTION ${n.num}</div>
+                          <div class="font-display font-bold text-sm sm:text-base text-ink mt-0.5">${n.shortTitle.replace(/^\d+\s*·\s*/, '')}</div>
+                        </div>
+                        <span class="text-slate-400 font-bold">→</span>
+                      </button>
+                    `).join('')}
+                  </div>
+                </section>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+
+      document.querySelectorAll('.overview-card').forEach(card => {
+        card.addEventListener('click', () => selectNotion(card.dataset.pick));
+      });
+      renderSidebar();
+    }
+
+    function bindInteractiveControls(num) {
+      if (num === '02') {
+        const slider = document.getElementById('sim-lin-surface');
+        const label = document.getElementById('sim-lin-label');
+        const vline = document.getElementById('lin-vline');
+        const hline = document.getElementById('lin-hline');
+        const dot = document.getElementById('lin-dot');
+        const callout = document.getElementById('lin-callout');
+        const cTop = document.getElementById('lin-callout-top');
+        const cVal = document.getElementById('lin-callout-val');
+        if (slider) {
+          slider.addEventListener('input', () => {
+            const s = parseInt(slider.value, 10);
+            const price = Math.round((30 + 2.25 * s) * 1000);
+            const x = 115 + ((s - 30) / 100) * 620;
+            const y = 415 - ((price / 1000) * 0.905);
+            const fmtPrice = price.toLocaleString('fr-FR') + ' €';
+            label.textContent = `${s} m² → ${fmtPrice}`;
+            vline.setAttribute('x1', x); vline.setAttribute('x2', x); vline.setAttribute('y2', y);
+            hline.setAttribute('y1', y); hline.setAttribute('y2', y); hline.setAttribute('x2', x);
+            dot.setAttribute('cx', x); dot.setAttribute('cy', y);
+            const boxX = Math.min(Math.max(x - 115, 100), 530);
+            const boxY = Math.max(y - 98, 45);
+            callout.setAttribute('transform', `translate(${boxX}, ${boxY})`);
+            cTop.textContent = `MAISON DE ${s} m²`;
+            cVal.textContent = fmtPrice;
+          });
+        }
+      }
+
+      if (num === '13') {
+        const slider = document.getElementById('sim-cut-height');
+        const label = document.getElementById('sim-cut-label');
+        const group = document.getElementById('dendro-cut-group');
+        const text = document.getElementById('dendro-cut-text');
+        if (slider) {
+          slider.addEventListener('input', () => {
+            const y = parseInt(slider.value, 10);
+            group.setAttribute('transform', `translate(0, ${y})`);
+            let groups = 3;
+            if (y < 142) groups = 2;
+            else if (y > 270) groups = 4;
+            label.textContent = `${groups} groupes`;
+            text.textContent = `✂ COUPE → ${groups} GROUPES`;
+          });
+        }
+      }
+    }
+
+    function selectNotion(num) {
+      isOverview = false;
+      btnOverview.classList.remove('bg-ink', 'text-white', 'border-ink');
+      btnOverview.classList.add('bg-white', 'text-slate-700');
+      bottomNav.classList.remove('hidden');
+
+      const notion = NOTIONS.find(n => n.num === num) || NOTIONS[0];
+      currentNum = notion.num;
+      stageEl.innerHTML = notion.render();
+      badgeEl.textContent = `${notion.num} / 25`;
+      bindInteractiveControls(notion.num);
+
+      const visible = getVisibleNotions();
+      const idx = visible.findIndex(n => n.num === currentNum);
+      const isFirst = idx <= 0;
+      const isLast = idx === -1 || idx >= visible.length - 1;
+
+      btnPrev.disabled = isFirst;
+      btnNext.disabled = isLast;
+      btnPrevBottom.disabled = isFirst;
+      btnNextBottom.disabled = isLast;
+
+      bottomHint.textContent = !isLast
+        ? `À suivre : ${visible[idx + 1].shortTitle}`
+        : 'Vous avez atteint la fin de cette sélection.';
+
+      renderSidebar();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Recherche instantanée
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.trim().toLowerCase();
+      renderSidebar();
+    });
+
+    // Vue d'ensemble
+    btnOverview.addEventListener('click', () => {
+      if (isOverview) selectNotion(currentNum);
+      else renderOverview();
+    });
+
+    // Filtres famille
+    document.querySelectorAll('.fam-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.fam-btn').forEach(b => {
+          b.classList.remove('active', 'bg-ink', 'text-white');
+        });
+        btn.classList.add('active', 'bg-ink', 'text-white');
+        currentFilter = btn.dataset.fam;
+        const visible = getVisibleNotions();
+        if (visible.length > 0) selectNotion(visible[0].num);
+        else renderSidebar();
+      });
+    });
+
+    // Boutons Précédent / Suivant (haut & bas) & Clavier
+    function goPrev() {
+      const visible = getVisibleNotions();
+      const idx = visible.findIndex(n => n.num === currentNum);
+      if (idx > 0) selectNotion(visible[idx - 1].num);
+    }
+    function goNext() {
+      const visible = getVisibleNotions();
+      const idx = visible.findIndex(n => n.num === currentNum);
+      if (idx >= 0 && idx < visible.length - 1) selectNotion(visible[idx + 1].num);
+    }
+
+    btnPrev.addEventListener('click', goPrev);
+    btnNext.addEventListener('click', goNext);
+    btnPrevBottom.addEventListener('click', goPrev);
+    btnNextBottom.addEventListener('click', goNext);
+
+    document.addEventListener('keydown', (e) => {
+      if (document.activeElement === searchInput) return;
+      if (e.key === 'ArrowRight') goNext();
+      if (e.key === 'ArrowLeft') goPrev();
+    });
+
+    // Menu mobile
+    document.getElementById('btn-toggle-menu').addEventListener('click', () => {
+      menuBody.classList.toggle('hidden');
+      menuBody.classList.add('flex');
+    });
+
+    // Démarrage sur la notion 01
+    selectNotion('01');
+  </script>
+</body>
+</html>
