@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guide Visuel &amp; Mémento Code — KNN : Classification</title>
+  <meta property="og:title" content="Guide Visuel &amp; Mémento Code — KNN : Classification" />
+  <meta property="og:description" content="Cours vulgarisé étape par étape avec schémas visuels et tous les codes Python prêts à copier." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Fraunces', 'Georgia', 'serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            ivory: '#FAF8F5',
+            ink: '#0F172A',
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background-color: #FAF8F5;
+      color: #0F172A;
+      font-family: 'Inter', sans-serif;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 999px; }
+
+    input[type="range"].ml-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 8px;
+      border-radius: 999px;
+      background: #CBD5E1;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"].ml-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #2563EB;
+      border: 3px solid #FFFFFF;
+      box-shadow: 0 2px 6px rgba(15,23,42,0.28);
+      cursor: pointer;
+    }
+
+    /* Repère pédagogique commun : question concrète → opération → résultat. */
+    .lesson-route { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem; margin: 1.3rem 0 1.75rem; }
+    .lesson-route-card { background: #fff; border: 1px solid #e2e8f0; border-top: 4px solid #2563eb; border-radius: 18px; padding: 1.1rem 1.2rem; box-shadow: 0 7px 20px rgba(15,23,42,.055); }
+    .lesson-route-card:nth-child(2) { border-top-color: #d97706; }
+    .lesson-route-card:nth-child(3) { border-top-color: #059669; background: #f0fdf7; }
+    .lesson-route-label { display: block; color: #475569; font: 800 .67rem/1.4 'Plus Jakarta Sans', sans-serif; letter-spacing: .055em; text-transform: uppercase; margin-bottom: .55rem; }
+    .lesson-route-card p { color: #172033; font: 600 .88rem/1.55 'Inter', sans-serif; }
+    @media(max-width:720px) { .lesson-route { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col lg:flex-row bg-ivory text-ink">
+
+  <!-- MENU LATÉRAL : NOTIONS + ACTIONS PYTHON -->
+  <aside class="w-full lg:w-80 xl:w-[350px] bg-white border-b lg:border-b-0 lg:border-r border-slate-200/90 flex flex-col lg:h-screen lg:sticky lg:top-0 shrink-0 z-30">
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between gap-2">
+      <div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <a href="index.html" aria-label="Retour à l'accueil" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-display font-bold bg-slate-100 hover:bg-slate-900 text-slate-700 hover:text-white border border-slate-200 transition">
+            ← Accueil
+          </a>
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-display font-extrabold tracking-widest text-white bg-blue-600 uppercase">
+            Cours 05 · Visuel & Code
+          </span>
+        </div>
+        <h1 class="font-serif text-xl font-bold text-ink mt-1.5 leading-tight">KNN : Classification</h1>
+      </div>
+      <button id="btn-toggle-menu" class="lg:hidden px-3 py-2 rounded-xl bg-slate-100 text-xs font-display font-bold text-ink">
+        ☰ Menu
+      </button>
+    </div>
+
+    <div id="menu-body" class="hidden lg:flex flex-col flex-1 overflow-hidden">
+      <div class="p-3.5 border-b border-slate-100 bg-slate-50/70 space-y-2">
+        <div class="relative">
+          <input id="search-input" type="search" placeholder="Chercher une notion ou un code..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-ink placeholder:text-slate-400 focus:outline-none focus:border-slate-400" />
+          <span class="absolute left-2.5 top-1.5 text-slate-400 text-xs">⌕</span>
+        </div>
+        <div class="grid grid-cols-2 gap-1.5">
+          <button id="tab-visual" class="mode-btn active px-2.5 py-1.5 rounded-xl text-xs font-display font-bold bg-ink text-white transition cursor-pointer">
+            1. Comprendre (<span id="count-chapters"></span> étapes)
+          </button>
+          <button id="tab-code" class="mode-btn px-2.5 py-1.5 rounded-xl text-xs font-display font-bold bg-white text-blue-800 border border-blue-200 hover:bg-blue-50 transition cursor-pointer">
+            2. Tous les Codes (<span id="count-codes"></span>)
+          </button>
+        </div>
+      </div>
+
+      <nav id="sidebar-list" class="flex-1 overflow-y-auto p-3 space-y-4"></nav>
+    </div>
+  </aside>
+
+  <!-- CONTENU PRINCIPAL -->
+  <main class="flex-1 flex flex-col min-w-0">
+    <header class="sticky top-0 z-20 bg-ivory/95 backdrop-blur border-b border-slate-200/80 px-5 sm:px-8 lg:px-10 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <button id="btn-prev" class="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-200 text-xs sm:text-sm font-display font-bold text-ink transition cursor-pointer">
+          ← Précédent
+        </button>
+        <button id="btn-next" class="px-3.5 py-2 rounded-xl bg-ink hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-xs sm:text-sm font-display font-bold text-white transition cursor-pointer">
+          Suivant →
+        </button>
+        <button id="btn-cheatsheet" class="ml-1 px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-xs font-display font-bold text-white transition shadow-2xs cursor-pointer">
+          ⌘ Antisèche Code (<span id="count-codes-btn"></span> actions)
+        </button>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span id="progress-badge" class="font-mono text-xs sm:text-sm font-bold px-3.5 py-1 rounded-full bg-white border border-slate-200 text-ink">
+          01 / 08
+        </span>
+      </div>
+    </header>
+
+    <article id="stage" class="flex-1 w-full max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 py-7 sm:py-9"></article>
+
+    <footer id="bottom-nav" class="w-full max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 pb-10 pt-4 flex items-center justify-between gap-4 border-t border-slate-200/70">
+      <button id="btn-prev-bottom" class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-200 text-xs sm:text-sm font-display font-bold text-ink transition cursor-pointer">
+        ← Étape précédente
+      </button>
+      <span id="bottom-hint" class="text-xs text-slate-500 text-center hidden sm:block"></span>
+      <button id="btn-next-bottom" class="px-4 py-2.5 rounded-xl bg-ink hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-xs sm:text-sm font-display font-bold text-white transition cursor-pointer">
+        Étape suivante →
+      </button>
+    </footer>
+  </main>
+
+  <script>
+    function renderCodeCard({ id, badge, title, why, code, tip }) {
+      const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return `
+        <div class="bg-slate-900 text-slate-100 rounded-2xl border border-slate-800 overflow-hidden shadow-2xs">
+          <div class="px-4 py-2.5 bg-slate-950/90 border-b border-slate-800 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="px-2 py-0.5 rounded bg-white/10 text-sky-300 font-mono text-[10px] font-bold uppercase shrink-0">${badge}</span>
+              <span class="font-display font-bold text-xs sm:text-sm text-white truncate">${title}</span>
+            </div>
+            <button data-copy-target="${id}" class="copy-btn px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-emerald-600 text-[11px] font-display font-bold text-slate-200 hover:text-white transition shrink-0 cursor-pointer">
+              Copier
+            </button>
+          </div>
+          <div class="px-4 py-2 bg-slate-900/60 border-b border-slate-800/80 text-xs text-slate-300">
+            <strong class="text-sky-400">À quoi ça sert :</strong> ${why}
+          </div>
+          <pre id="${id}" class="p-4 text-xs sm:text-[13px] font-mono leading-relaxed overflow-x-auto text-emerald-300"><code>${escaped}</code></pre>
+          ${tip ? `<div class="px-4 py-2.5 bg-amber-950/50 border-t border-amber-800/50 text-xs text-amber-200">💡 <strong>À retenir :</strong> ${tip}</div>` : ''}
+        </div>
+      `;
+    }
+
+    const CODE_ACTIONS = [
+  {
+    id: 'kc-01', num: 'A01', group: '1. Nettoyer & Encoder',
+    title: 'Charger le Titanic et supprimer les manquants AVANT d’encoder',
+    why: '177 âges manquent : dropna() doit passer avant factorize() sinon les manquants deviennent -1.',
+    code: `import pandas as pd
+import seaborn as sns
+
+titanic = sns.load_dataset("titanic")
+titanic = titanic[["survived", "pclass", "sex", "age", "embark_town"]].dropna()`,
+    tip: 'Toujours nettoyer les NaN avant toute numérisation de colonnes texte.'
+  },
+  {
+    id: 'kc-02', num: 'A02', group: '1. Nettoyer & Encoder',
+    title: '2 catégories → factorize() · 3+ catégories → get_dummies()',
+    why: 'Éviter que k-NN invente une distance double entre Southampton (0) et Queenstown (2).',
+    code: `# 2 valeurs : factorize() donne 0 et 1 -> aucun ordre inventé
+titanic["sex"] = titanic["sex"].factorize()[0]
+
+# 3 valeurs : get_dummies() met toutes les villes à égale distance
+titanic = pd.get_dummies(titanic, columns=["embark_town"])
+
+X = titanic.drop(columns="survived")
+y = titanic["survived"]`,
+    tip: 'Règle d’or : 2 catégories = factorize suffit ; 3 ou plus = get_dummies obligatoire.'
+  },
+  {
+    id: 'kc-03', num: 'A03', group: '1. Nettoyer & Encoder',
+    title: 'Vérifier l’équilibre des classes avant tout modèle',
+    why: 'Connaître le score du modèle naïf (ici ~60 % de non-survivants sur le Titanic).',
+    code: `print(y.value_counts(normalize=True) * 100)`,
+    tip: 'Si 60 % des passagers meurent, atteindre 60 % d’exactitude veut dire 0 apprentissage.'
+  },
+  {
+    id: 'kc-04', num: 'A04', group: '2. Split & Mise à l’échelle',
+    title: 'Séparer Train/Test PUIS appliquer StandardScaler sans fuite',
+    why: 'Ramener toutes les colonnes à moyenne 0 et écart-type 1 pour que l’âge (0-80) n’écrase pas le sexe (0-1).',
+    code: `from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42, stratify=y
+)
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)   # fit_transform sur Train
+X_test_scaled  = scaler.transform(X_test)        # transform SEUL sur Test`,
+    tip: 'Ne jamais appeler fit_transform() sur X_test : cela provoquerait une fuite de données.'
+  },
+  {
+    id: 'kc-05', num: 'A05', group: '3. Modèle & Réglage de k',
+    title: 'Construire la référence puis entraîner k-NN',
+    why: 'Vérifier que k-NN bat largement la prédiction bête de la classe majoritaire.',
+    code: `from sklearn.neighbors import KNeighborsClassifier
+from sklearn.dummy import DummyClassifier
+
+reference = DummyClassifier(strategy="most_frequent").fit(X_train_scaled, y_train)
+modelKNN = KNeighborsClassifier(n_neighbors=5).fit(X_train_scaled, y_train)
+
+print(f"Référence : {reference.score(X_test_scaled, y_test):.3f}")
+print(f"k-NN      : {modelKNN.score(X_test_scaled, y_test):.3f}")`,
+    tip: 'fit() est instantané avec k-NN (modèle paresseux) ; tout le calcul se fait lors de predict().'
+  },
+  {
+    id: 'kc-06', num: 'A06', group: '3. Modèle & Réglage de k',
+    title: 'Tester plusieurs valeurs impaires de k',
+    why: 'Observer le surapprentissage à k=1 et comprendre l’effet de k. Le choix final doit se faire par validation sur l’entraînement.',
+    code: `from sklearn.metrics import f1_score
+
+for k in [1, 3, 5, 9, 15, 21]:
+    m = KNeighborsClassifier(n_neighbors=k).fit(X_train_scaled, y_train)
+    print(f"k={k:2d} | train={m.score(X_train_scaled, y_train):.3f} | test={m.score(X_test_scaled, y_test):.3f} | F1={f1_score(y_test, m.predict(X_test_scaled)):.3f}")`,
+    tip: 'Ce tableau Train/Test illustre le phénomène ; ne choisis pas ton k définitif sur le jeu de test. Utilise la validation croisée (A10).'
+  },
+  {
+    id: 'kc-07', num: 'A07', group: '3. Modèle & Réglage de k',
+    title: 'Pondérer le vote par la distance (weights="distance")',
+    why: 'Donner plus de poids aux voisins très proches qu’aux voisins en bordure du cercle.',
+    code: `modelKNN = KNeighborsClassifier(
+    n_neighbors=5,
+    weights="distance",   # ou "uniform" par défaut
+    metric="euclidean"    # ou "manhattan"
+).fit(X_train_scaled, y_train)`,
+    tip: 'Très utile quand un voisin est collé au point à classer.'
+  },
+  {
+    id: 'kc-08', num: 'A08', group: '4. Évaluer & Prédire',
+    title: 'Afficher la matrice de confusion étiquetée et le rapport',
+    why: 'Lire Précision, Rappel, F1 et support classe par classe.',
+    code: `from sklearn.metrics import confusion_matrix, classification_report
+
+y_pred = modelKNN.predict(X_test_scaled)
+print(pd.DataFrame(
+    confusion_matrix(y_test, y_pred),
+    index=[f"{c} réel" for c in modelKNN.classes_],
+    columns=[f"{c} prédit" for c in modelKNN.classes_]
+))
+print(classification_report(y_test, y_pred))`,
+    tip: 'Dans classification_report, vérifie toujours la colonne support (effectif réel de chaque classe).'
+  },
+  {
+    id: 'kc-09', num: 'A09', group: '4. Évaluer & Prédire',
+    title: 'Prédire un seul nouveau passager après standardisation',
+    why: 'Appliquer le même scaler déjà ajusté sur un nouveau cas au format 2D.',
+    code: `my_data = pd.DataFrame([[2, 1, 21, 0, 0, 1]], columns=X.columns)
+my_data_scaled = scaler.transform(my_data)   # transform() seul !
+print("Survie prédite :", modelKNN.predict(my_data_scaled))`,
+    tip: 'L’ordre des colonnes et le codage du sexe/port doivent correspondre exactement à X. Oublier scaler.transform() fausse la distance.'
+  },
+  {
+    id: 'kc-10', num: 'A10', group: '4. Évaluer & Comparer',
+    title: 'Choisir k par validation croisée sans toucher au test final',
+    why: 'Tester les valeurs de k sur les seuls passagers d’entraînement ; conserver le jeu de test pour le bilan honnête.',
+    code: `from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import f1_score
+
+# X_train et X_test viennent du découpage A04, AVANT standardisation.
+pipeline = make_pipeline(StandardScaler(), KNeighborsClassifier())
+recherche = GridSearchCV(
+    pipeline,
+    {"kneighborsclassifier__n_neighbors": [1, 3, 5, 9, 15, 21]},
+    scoring="f1", cv=5
+)
+recherche.fit(X_train, y_train)
+print("Meilleur k :", recherche.best_params_)
+
+# Un seul bilan final sur les passagers mis de côté.
+y_pred_final = recherche.predict(X_test)
+print("F1 final :", f1_score(y_test, y_pred_final))`,
+    tip: 'Bonus de méthode : la Pipeline applique StandardScaler à chaque pli sans faire fuiter les données de validation. Le test reste intact.'
+  }
+];
+    const CHAPTERS = [
+  {
+    num: '01', group: '1. Le Principe', shortTitle: '01 · « Dis-moi qui est ton voisin... »',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-blue-600"></span>MODÈLE PARESSEUX · ÉTAPE 01
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            k-NN : classer en demandant l’avis des k voisins les plus proches
+          </h2>
+          <div class="mt-3 flex items-start sm:items-center gap-3">
+            <span class="w-1.5 h-6 rounded-full bg-blue-600 shrink-0 mt-1 sm:mt-0"></span>
+            <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+              « Contrairement aux autres modèles, k-NN n’apprend aucune formule pendant fit() : il garde tout en mémoire et calcule les distances au moment de prédire. »
+            </p>
+          </div>
+        </header>
+
+        <!-- Comparaison visuelle : Modèle classique vs Lazy Learner -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm">
+          <section class="bg-slate-50 rounded-2xl border border-slate-200 p-5 space-y-3">
+            <span class="px-3 py-1 rounded-full bg-slate-800 text-white font-display font-extrabold text-[11px] uppercase">Modèle classique (ex : Régression, Arbre)</span>
+            <div class="flex items-center gap-2 font-mono text-xs pt-1">
+              <div class="flex-1 bg-amber-100 border border-amber-300 text-amber-950 p-3 rounded-xl font-bold text-center">🐢 fit() : Long<br><span class="font-sans font-normal text-[11px]">Calcule une formule</span></div>
+              <span class="text-slate-400 font-bold">→</span>
+              <div class="flex-1 bg-emerald-100 border border-emerald-300 text-emerald-950 p-3 rounded-xl font-bold text-center">⚡ predict() : Instantané<br><span class="font-sans font-normal text-[11px]">Applique la formule</span></div>
+            </div>
+          </section>
+
+          <section class="bg-blue-50/70 rounded-2xl border-2 border-blue-400 p-5 space-y-3">
+            <span class="px-3 py-1 rounded-full bg-blue-600 text-white font-display font-extrabold text-[11px] uppercase">k-NN (Lazy Learner · Modèle paresseux)</span>
+            <div class="flex items-center gap-2 font-mono text-xs pt-1">
+              <div class="flex-1 bg-emerald-100 border border-emerald-300 text-emerald-950 p-3 rounded-xl font-bold text-center">⚡ fit() : 0 seconde<br><span class="font-sans font-normal text-[11px]">Mémorise juste les points</span></div>
+              <span class="text-blue-500 font-bold">→</span>
+              <div class="flex-1 bg-amber-100 border border-amber-300 text-amber-950 p-3 rounded-xl font-bold text-center">🐢 predict() : Plus lent<br><span class="font-sans font-normal text-[11px]">Mesure toutes les distances</span></div>
+            </div>
+          </section>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-slate-200 p-6">
+          <div class="font-display text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-3">Un seul mécanisme, 5 usages concrets</div>
+          <div class="grid grid-cols-1 sm:grid-cols-5 gap-3 text-xs">
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200"><strong class="text-ink block mb-1">🎬 Streaming</strong>Profils proches → films aimés</div>
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200"><strong class="text-ink block mb-1">💳 Banque</strong>Montant, heure → fraude ?</div>
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200"><strong class="text-ink block mb-1">🩺 Santé</strong>Analyses proches → traitement ?</div>
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200"><strong class="text-ink block mb-1">🌿 Plantes</strong>Couleur, taches → maladie ?</div>
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200"><strong class="text-ink block mb-1">🏠 Immobilier</strong>Surface, quartier → gamme de prix</div>
+          </div>
+        </div>
+      </div>
+    `
+  },
+  {
+    num: '02', group: '1. Le Principe', shortTitle: '02 · Simulateur k & Vote pondéré',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-blue-600"></span>CHOIX DE K ET POIDS · ÉTAPE 02
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            La valeur de k (et weights) change la réponse !
+          </h2>
+          <div class="mt-3 flex items-start sm:items-center gap-3">
+            <span class="w-1.5 h-6 rounded-full bg-blue-600 shrink-0 mt-1 sm:mt-0"></span>
+            <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+              « Trop petit (k=1), le modèle suit le bruit (100 % Train, 73 % Test). Trop grand, il lisse tout et répond la classe majoritaire. »
+            </p>
+          </div>
+        </header>
+
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 grid grid-cols-1 xl:grid-cols-12 gap-6 items-center">
+          <div class="xl:col-span-6">
+            <svg viewBox="0 0 380 250" class="w-full h-auto bg-slate-50 rounded-2xl border border-slate-200">
+              <circle id="k-c5" cx="190" cy="130" r="96" fill="#2563EB" fill-opacity="0.05" stroke="#2563EB" stroke-width="1.5" stroke-dasharray="5 5"/>
+              <circle id="k-c3" cx="190" cy="130" r="56" fill="#E11D48" fill-opacity="0.06" stroke="#0F172A" stroke-width="2"/>
+              <circle id="k-c1" cx="190" cy="130" r="30" fill="none" stroke="#2563EB" stroke-width="2" opacity="0"/>
+              <rect x="158" y="122" width="16" height="16" rx="3" fill="#2563EB"/>
+              <text x="135" y="115" font-size="9.5" fill="#1E40AF" font-weight="bold">V1 (Très proche)</text>
+              <polygon points="222,102 213,118 231,118" fill="#E11D48"/>
+              <polygon points="206,158 197,174 215,174" fill="#E11D48"/>
+              <rect x="115" y="86" width="16" height="16" rx="3" fill="#2563EB"/>
+              <rect x="205" y="48" width="16" height="16" rx="3" fill="#2563EB"/>
+              <circle cx="190" cy="130" r="15" fill="#10B981" stroke="#FFF" stroke-width="2.5"/>
+              <text x="190" y="135" text-anchor="middle" fill="#FFF" font-weight="bold" font-size="14">?</text>
+            </svg>
+          </div>
+          <div class="xl:col-span-6 space-y-4 text-xs">
+            <div>
+              <div class="font-display font-bold text-slate-500 uppercase mb-1.5">1. Nombre de voisins (n_neighbors) :</div>
+              <div class="grid grid-cols-3 gap-2">
+                <button id="sim-k1" class="k-btn py-2 px-2 rounded-xl bg-white border border-slate-300 font-bold cursor-pointer">k = 1</button>
+                <button id="sim-k3" class="k-btn py-2 px-2 rounded-xl bg-ink text-white border border-ink font-bold cursor-pointer">k = 3</button>
+                <button id="sim-k5" class="k-btn py-2 px-2 rounded-xl bg-white border border-slate-300 font-bold cursor-pointer">k = 5</button>
+              </div>
+            </div>
+            <div>
+              <div class="font-display font-bold text-slate-500 uppercase mb-1.5">2. Poids des votes (weights) :</div>
+              <div class="grid grid-cols-2 gap-2">
+                <button id="sim-wu" class="py-2 px-2 rounded-xl bg-ink text-white font-bold cursor-pointer">uniform (1 voisin = 1 voix)</button>
+                <button id="sim-wd" class="py-2 px-2 rounded-xl bg-white border border-slate-300 font-bold cursor-pointer">distance (+ proche = + fort)</button>
+              </div>
+            </div>
+            <div id="sim-k-out" class="p-4 rounded-2xl bg-rose-50 border border-rose-200">
+              <div class="font-serif text-lg font-bold text-rose-950">▲ Triangle Rouge (2 voix contre 1)</div>
+              <p class="text-rose-900 mt-1">Dans le cercle plein (k=3), 2 triangles rouges battent 1 carré bleu. Passe à k=5 ou weights="distance" pour voir le verdict basculer !</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          ${renderCodeCard(CODE_ACTIONS[5])}
+          ${renderCodeCard(CODE_ACTIONS[6])}
+        </div>
+      </div>
+    `
+  },
+  {
+    num: '03', group: '2. Distances & Échelles', shortTitle: '03 · Distances (Euclidienne, Manhattan, Globe)',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-blue-600"></span>GÉOMÉTRIE EN N DIMENSIONS · ÉTAPE 03
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            Comment l’ordinateur mesure la distance entre deux cas
+          </h2>
+          <div class="mt-3 flex items-start sm:items-center gap-3">
+            <span class="w-1.5 h-6 rounded-full bg-blue-600 shrink-0 mt-1 sm:mt-0"></span>
+            <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+              « Qu’il s’agisse de météo (température vs pluie) ou de passagers en 6 dimensions, l’ordinateur calcule une diagonale grâce à l’algèbre linéaire. »
+            </p>
+          </div>
+        </header>
+
+        <!-- Schémas SVG des 3 distances -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs sm:text-sm">
+          <div class="bg-white rounded-3xl border-2 border-blue-300 p-5 space-y-3">
+            <span class="px-2.5 py-0.5 rounded bg-blue-100 text-blue-800 font-mono text-xs font-bold">metric="euclidean"</span>
+            <svg viewBox="0 0 220 120" class="w-full h-auto bg-slate-50 rounded-xl border border-slate-200">
+              <line x1="35" y1="95" x2="185" y2="95" stroke="#94A3B8" stroke-width="2" stroke-dasharray="4 3"/>
+              <line x1="185" y1="95" x2="185" y2="25" stroke="#94A3B8" stroke-width="2" stroke-dasharray="4 3"/>
+              <line x1="35" y1="95" x2="185" y2="25" stroke="#2563EB" stroke-width="4" stroke-linecap="round"/>
+              <circle cx="35" cy="95" r="7" fill="#0F172A"/><text x="20" y="112" font-size="11" font-weight="bold">A</text>
+              <circle cx="185" cy="25" r="7" fill="#2563EB"/><text x="193" y="25" font-size="11" font-weight="bold">B</text>
+              <text x="105" y="50" text-anchor="middle" fill="#1D4ED8" font-size="11" font-weight="bold" transform="rotate(-25 105 50)">Diagonale</text>
+            </svg>
+            <h3 class="font-serif text-lg font-bold text-ink">1. Euclidienne (à vol d’oiseau)</h3>
+            <p class="text-slate-600 text-xs">Pythagore généralisé à <em>n</em> colonnes : <code class="font-mono">√(Δx² + Δy²)</code>.</p>
+          </div>
+
+          <div class="bg-white rounded-3xl border-2 border-amber-300 p-5 space-y-3">
+            <span class="px-2.5 py-0.5 rounded bg-amber-100 text-amber-800 font-mono text-xs font-bold">metric="manhattan"</span>
+            <svg viewBox="0 0 220 120" class="w-full h-auto bg-slate-50 rounded-xl border border-slate-200">
+              <path d="M 35 95 L 110 95 L 110 60 L 185 60 L 185 25" fill="none" stroke="#D97706" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="35" cy="95" r="7" fill="#0F172A"/><text x="20" y="112" font-size="11" font-weight="bold">A</text>
+              <circle cx="185" cy="25" r="7" fill="#D97706"/><text x="193" y="25" font-size="11" font-weight="bold">B</text>
+              <text x="115" y="112" text-anchor="middle" fill="#B45309" font-size="11" font-weight="bold">Rues en damier</text>
+            </svg>
+            <h3 class="font-serif text-lg font-bold text-ink">2. Manhattan (Taxi New York)</h3>
+            <p class="text-slate-600 text-xs">Trajet en escalier le long des rues : <code class="font-mono">|Δx| + |Δy|</code>.</p>
+          </div>
+
+          <div class="bg-white rounded-3xl border-2 border-purple-300 p-5 space-y-3">
+            <span class="px-2.5 py-0.5 rounded bg-purple-100 text-purple-800 font-mono text-xs font-bold">Minkowski &amp; Globe</span>
+            <svg viewBox="0 0 220 120" class="w-full h-auto bg-slate-50 rounded-xl border border-slate-200">
+              <circle cx="110" cy="65" r="42" fill="#EDE9FE" stroke="#8B5CF6" stroke-width="2"/>
+              <path d="M 75 45 Q 110 10 145 45" fill="none" stroke="#7C3AED" stroke-width="3.5" stroke-dasharray="5 3"/>
+              <circle cx="75" cy="45" r="5" fill="#0F172A"/>
+              <circle cx="145" cy="45" r="5" fill="#7C3AED"/>
+              <text x="110" y="115" text-anchor="middle" fill="#5B21B6" font-size="11" font-weight="bold">Arc de cercle (Avion)</text>
+            </svg>
+            <h3 class="font-serif text-lg font-bold text-ink">3. Minkowski (p) &amp; Globe</h3>
+            <p class="text-slate-600 text-xs">Hermann Minkowski a unifié ces distances via <code class="font-mono">p</code>. Sur Terre, un avion suit un arc.</p>
+          </div>
+        </div>
+      </div>
+    `
+  },
+  {
+    num: '04', group: '2. Distances & Échelles', shortTitle: '04 · Le piège des échelles (Emily Rugg)',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-rose-600"></span>PIÈGE SILENCIEUX N°1 · ÉTAPE 04
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            Pourquoi l’âge (0 à 80) écrase le sexe (0 ou 1) sans StandardScaler
+          </h2>
+          <div class="mt-3 flex items-start sm:items-center gap-3">
+            <span class="w-1.5 h-6 rounded-full bg-rose-600 shrink-0 mt-1 sm:mt-0"></span>
+            <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+              « k-NN ne lève aucune erreur, mais ne regarde plus que la colonne à la plus grande amplitude. Corriger cela rapporte +12 points de F1 ! »
+            </p>
+          </div>
+        </header>
+
+        <!-- Barres d'amplitude visuelles -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-5 space-y-2.5 text-xs">
+          <div class="font-display font-extrabold text-slate-500 uppercase">Comparaison des amplitudes brutes sur le Titanic :</div>
+          <div class="flex items-center gap-3"><span class="w-24 font-mono font-bold">sex (0..1)</span><div class="flex-1 bg-slate-100 h-3 rounded-full"><div class="bg-rose-500 h-full rounded-full" style="width:2%"></div></div><span class="font-mono">Amplitude = 1</span></div>
+          <div class="flex items-center gap-3"><span class="w-24 font-mono font-bold">pclass (1..3)</span><div class="flex-1 bg-slate-100 h-3 rounded-full"><div class="bg-sky-500 h-full rounded-full" style="width:4%"></div></div><span class="font-mono">Amplitude = 2</span></div>
+          <div class="flex items-center gap-3"><span class="w-24 font-mono font-bold">age (0..80)</span><div class="flex-1 bg-slate-100 h-3 rounded-full"><div class="bg-blue-600 h-full rounded-full" style="width:100%"></div></div><span class="font-mono font-bold text-blue-700">Amplitude = 80 (40× plus grand !)</span></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm">
+          <section class="bg-rose-50/70 rounded-3xl border-2 border-rose-300 p-6 space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="font-display font-extrabold text-xs uppercase text-rose-800">❌ Données brutes</span>
+              <span class="font-mono font-bold bg-rose-200 text-rose-900 px-2.5 py-0.5 rounded">Exactitude 0,74 / F1 0,59</span>
+            </div>
+            <p class="text-slate-700">Cherchons le plus proche voisin d’<strong>Emily Rugg</strong> (Femme, 21 ans, 2e classe, survivante) :</p>
+            <div class="bg-white rounded-2xl p-3.5 border border-rose-200 space-y-1.5">
+              <div>• <strong>Ambrose Hood Jr</strong> (Homme, 21 ans) → <strong class="font-mono text-rose-700">dist = 1,00</strong> (seul le sexe diffère : 1)</div>
+              <div>• <strong>Sylvia Caldwell</strong> (Femme, 22 ans) → <strong class="font-mono text-rose-700">dist = 1,00</strong> (seul l’âge diffère : +1 an)</div>
+            </div>
+            <p class="text-rose-900 font-bold">Égalité absurde ! Un an d’âge pèse autant qu’un changement de sexe.</p>
+          </section>
+
+          <section class="bg-emerald-50/70 rounded-3xl border-2 border-emerald-400 p-6 space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="font-display font-extrabold text-xs uppercase text-emerald-800">✅ Après StandardScaler</span>
+              <span class="font-mono font-bold bg-emerald-200 text-emerald-900 px-2.5 py-0.5 rounded">Exactitude 0,79 / F1 0,71</span>
+            </div>
+            <p class="text-slate-700">Chaque colonne est ramenée en écarts-types (moyenne = 0, écart-type = 1) :</p>
+            <div class="bg-white rounded-2xl p-3.5 border border-emerald-200 space-y-1.5">
+              <div>• <strong>Ambrose Hood Jr</strong> (Homme, 21 ans) → <strong class="font-mono">dist = 2,08</strong></div>
+              <div>• <strong>Sylvia Caldwell</strong> (Femme, 22 ans) → <strong class="font-mono text-emerald-700">dist = 0,07</strong> (30× plus proche !)</div>
+            </div>
+            <p class="text-emerald-900 font-bold">Rappel : un arbre de décision s’en moque, mais pour k-NN c’est vital.</p>
+          </section>
+        </div>
+
+        ${renderCodeCard(CODE_ACTIONS[3])}
+      </div>
+    `
+  },
+  {
+    num: '05', group: '3. Préparer les Catégories', shortTitle: '05 · factorize() vs get_dummies()',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-blue-600"></span>ENCODAGE DU TEXTE · ÉTAPE 05
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            2 catégories → factorize() · 3+ catégories → get_dummies()
+          </h2>
+          <div class="mt-3 flex items-start sm:items-center gap-3">
+            <span class="w-1.5 h-6 rounded-full bg-blue-600 shrink-0 mt-1 sm:mt-0"></span>
+            <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+              « Numéroter Chien=0, Chat=1, Souris=2 fait croire à k-NN que le chien est deux fois plus loin de la souris que du chat ! »
+            </p>
+          </div>
+        </header>
+
+        <!-- Schéma SVG Règle graduée vs Triangle équilatéral -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm">
+          <section class="bg-rose-50/60 rounded-3xl border-2 border-rose-300 p-6 space-y-3">
+            <span class="px-2.5 py-0.5 rounded bg-rose-200 text-rose-900 font-display font-extrabold text-xs">❌ factorize() sur 3 catégories</span>
+            <svg viewBox="0 0 320 110" class="w-full h-auto bg-white rounded-xl border border-rose-200">
+              <line x1="40" y1="65" x2="280" y2="65" stroke="#0F172A" stroke-width="2.5"/>
+              <circle cx="40" cy="65" r="7" fill="#E11D48"/><text x="40" y="90" text-anchor="middle" font-size="11" font-weight="bold">🐶 0</text>
+              <circle cx="160" cy="65" r="7" fill="#E11D48"/><text x="160" y="90" text-anchor="middle" font-size="11" font-weight="bold">🐱 1</text>
+              <circle cx="280" cy="65" r="7" fill="#E11D48"/><text x="280" y="90" text-anchor="middle" font-size="11" font-weight="bold">🐭 2</text>
+              <path d="M 40 45 Q 160 10 280 45" fill="none" stroke="#E11D48" stroke-width="2" stroke-dasharray="4 3"/>
+              <text x="160" y="24" text-anchor="middle" fill="#BE123C" font-size="10" font-weight="bold">Distance = 2 (2× plus loin !)</text>
+            </svg>
+            <p class="text-slate-700 text-xs">Avec 2 catégories (<code class="font-mono">sex</code> : 0 et 1), <code class="font-mono">factorize()[0]</code> suffit car il n’y a qu’une seule distance.</p>
+          </section>
+
+          <section class="bg-emerald-50/60 rounded-3xl border-2 border-emerald-400 p-6 space-y-3">
+            <span class="px-2.5 py-0.5 rounded bg-emerald-200 text-emerald-950 font-display font-extrabold text-xs">✅ pd.get_dummies() sur 3+ catégories</span>
+            <svg viewBox="0 0 320 110" class="w-full h-auto bg-white rounded-xl border border-emerald-200">
+              <polygon points="160,20 85,88 235,88" fill="#ECFDF5" stroke="#10B981" stroke-width="2.5"/>
+              <circle cx="160" cy="20" r="6" fill="#059669"/><text x="180" y="24" font-size="10" font-weight="bold">🐶 (1,0,0)</text>
+              <circle cx="85" cy="88" r="6" fill="#059669"/><text x="48" y="103" font-size="10" font-weight="bold">🐱 (0,1,0)</text>
+              <circle cx="235" cy="88" r="6" fill="#059669"/><text x="220" y="103" font-size="10" font-weight="bold">🐭 (0,0,1)</text>
+              <text x="160" y="65" text-anchor="middle" fill="#065F46" font-size="10" font-weight="bold">Toutes à égale distance (√2)</text>
+            </svg>
+            <p class="text-slate-700 text-xs">Crée une colonne binaire par ville (<code class="font-mono">embark_town</code>). Attention toutefois au <strong>fléau de la dimension</strong> si on multiplie trop les colonnes.</p>
+          </section>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          ${renderCodeCard(CODE_ACTIONS[0])}
+          ${renderCodeCard(CODE_ACTIONS[1])}
+        </div>
+      </div>
+    `
+  },
+  {
+    num: '06', group: '4. Évaluer & Comparer', shortTitle: '06 · Matrice, Référence & Comparatif Modèles',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-100 text-teal-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-teal-600"></span>BILAN &amp; COMPARAISON · ÉTAPE 06
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            Face-à-face : k-NN vs Régression Logistique vs Arbre
+          </h2>
+          <div class="mt-3 flex items-start sm:items-center gap-3">
+            <span class="w-1.5 h-6 rounded-full bg-teal-600 shrink-0 mt-1 sm:mt-0"></span>
+            <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+              « Sur le Titanic, k-NN standardisé atteint 0,79 d’exactitude (contre 0,80 pour la logistique et l’arbre). Ce qui les départage, ce sont leurs contraintes ! »
+            </p>
+          </div>
+        </header>
+
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 overflow-x-auto">
+          <table class="w-full text-xs sm:text-sm text-left border-collapse">
+            <thead>
+              <tr class="border-b-2 border-slate-200 text-slate-500 font-display uppercase text-xs">
+                <th class="py-2.5">Critère</th>
+                <th class="py-2.5 text-blue-700">k-NN</th>
+                <th class="py-2.5">Régression Logistique</th>
+                <th class="py-2.5">Arbre de Décision</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr><td class="py-2.5 font-bold">Explicabilité</td><td>Aucune (pas de règle)</td><td>Coefficients lisibles</td><td>Chemin de décision lisible</td></tr>
+              <tr><td class="py-2.5 font-bold">Entraînement (fit)</td><td>Instantané</td><td>Rapide</td><td>Rapide</td></tr>
+              <tr><td class="py-2.5 font-bold">Prédiction (predict)</td><td>Lente (croît avec N)</td><td>Instantanée</td><td>Instantanée</td></tr>
+              <tr><td class="py-2.5 font-bold">Mise à l’échelle</td><td class="font-bold text-rose-700">Indispensable</td><td>Utile</td><td>Inutile</td></tr>
+              <tr><td class="py-2.5 font-bold">Hypothèse frontière</td><td>Aucune</td><td>Frontière linéaire</td><td>Découpages rectangulaires</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          ${renderCodeCard(CODE_ACTIONS[4])}
+          ${renderCodeCard(CODE_ACTIONS[7])}
+        </div>
+      </div>
+    `
+  },
+  {
+    num: '07', group: '4. Évaluer & Comparer', shortTitle: '07 · Quiz express & Prédiction individuelle',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-amber-600"></span>AUTO-ÉVALUATION · ÉTAPE 07
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            Quiz express &amp; Prédiction sur un cas isolé
+          </h2>
+        </header>
+
+        <div class="space-y-3.5">
+          ${[
+            {
+              q: '1. Pourquoi k-NN exige-t-il une mise à l’échelle, contrairement à un arbre de décision ?',
+              a: 'Parce qu’il décide à partir de distances : une colonne à grande amplitude (comme l’âge de 0 à 80) écrase les autres (comme le sexe 0/1) dans le calcul.'
+            },
+            {
+              q: '2. Avec n_neighbors=1, le score d’entraînement est de 100 %. Pourquoi ?',
+              a: 'Parce que le plus proche voisin d’un point d’entraînement est ce point lui-même (distance = 0). C’est du surapprentissage pur.'
+            },
+            {
+              q: '3. Tu dois numériser une colonne à 3 catégories pour un k-NN. Que choisis-tu ?',
+              a: 'pd.get_dummies(), parce que factorize() placerait la première catégorie (0) deux fois plus loin de la troisième (2) que de la deuxième (1).'
+            },
+            {
+              q: '4. Quelle est la différence entre exactitude (accuracy) et précision (precision) ?',
+              a: 'L’exactitude est la proportion de bonnes réponses toutes classes confondues ; la précision ne concerne que les cas annoncés positifs par le modèle.'
+            },
+            {
+              q: '5. Ton modèle atteint 60 % d’exactitude alors que 60 % des passagers sont décédés. Est-ce suffisant ?',
+              a: 'Non : un modèle naïf qui répond toujours « décédé » fait aussi bien. Je compare au DummyClassifier et je lis le F1.'
+            },
+            {
+              q: '6. Dans classification_report, que signifie support ?',
+              a: 'Le nombre de vrais exemples de chaque classe dans le jeu évalué. Il permet de savoir si une métrique repose sur peu de cas.'
+            },
+            {
+              q: '7. Pourquoi ne faut-il pas ajuster StandardScaler sur le jeu de test ?',
+              a: 'Parce que les statistiques des données réservées au contrôle influenceraient alors le modèle : c’est une fuite de données.'
+            }
+          ].map(item => `
+            <details class="bg-white rounded-2xl border border-slate-200 p-5">
+              <summary class="font-display font-bold text-sm sm:text-base text-ink cursor-pointer list-none flex items-center justify-between gap-4">
+                <span>${item.q}</span>
+                <span class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold shrink-0">Voir la réponse</span>
+              </summary>
+              <p class="mt-3 pt-3 border-t border-slate-100 text-sm text-slate-700 leading-relaxed">${item.a}</p>
+            </details>
+          `).join('')}
+        </div>
+
+        ${renderCodeCard(CODE_ACTIONS[8])}
+      </div>
+    `
+  }
+];
+
+    const LESSON_ROUTES = [
+      ["Le Titanic contient des passagers déjà étiquetés survivant ou décédé.", "Pour un nouveau passager, k-NN cherche les cas les plus proches.", "La classe qui gagne le vote des voisins devient la prédiction."],
+      ["Je peux interroger 1, 3 ou 5 voisins.", "Le modèle compte leurs votes ; je peux donner plus de poids aux plus proches.", "Changer k ou la pondération peut inverser la prédiction : teste les boutons."],
+      ["Deux passagers diffèrent par plusieurs colonnes numériques.", "Euclidienne prend la diagonale, Manhattan additionne les écarts.", "Le choix de la distance peut modifier les voisins retenus."],
+      ["L'âge varie beaucoup plus que le sexe codé 0 ou 1.", "StandardScaler équilibre les amplitudes, ajusté sur l'entraînement seulement.", "Les voisins reflètent plusieurs caractéristiques plutôt que l'âge seul."],
+      ["k-NN ne sait mesurer une distance qu'entre des nombres.", "Je code les catégories binaires en 0/1 et les catégories non ordonnées en colonnes indicatrices.", "J'évite de créer un faux ordre entre les ports ou les animaux."],
+      ["Un score élevé peut simplement refléter la classe majoritaire.", "Je compare à DummyClassifier et lis matrice de confusion, F1 et support.", "Je juge sur le test final et garde ce test de côté pour la sélection du modèle."],
+      ["Le défi Titanic commence volontairement avec un modèle imparfait.", "Je prépare, mesure puis teste plusieurs améliorations sans mélanger entraînement et test.", "J'explique quel changement aide vraiment et pourquoi."]
+    ];
+    function renderLessonRoute(idx) {
+      const labels = ['1 · CE QUE JE VOIS', '2 · CE QUE FAIT LE MODÈLE', '3 · CE QUE JE RETIENS'];
+      return `<section class="lesson-route" aria-label="Comprendre cette notion en trois temps">${LESSON_ROUTES[idx].map((value, i) => `<div class="lesson-route-card"><span class="lesson-route-label">${labels[i]}</span><p>${value}</p></div>`).join('')}</section>`;
+    }
+
+    function renderChallengeKit() {
+      return `<section class="mt-8 bg-gradient-to-br from-blue-50 to-white border-2 border-blue-200 rounded-3xl p-5 sm:p-7 space-y-5">
+        <div><span class="text-xs font-display font-extrabold tracking-wider uppercase text-blue-700">CHALLENGE DU COURS · K-NN TITANIC</span>
+          <h3 class="font-serif text-2xl sm:text-3xl font-bold mt-2">D'abord constater l'erreur, puis la corriger</h3>
+          <p class="text-sm text-slate-600 mt-2">Le notebook comporte 5 parties : les quatre premières construisent volontairement un modèle imparfait ; la cinquième t'invite à chiffrer trois pistes d'amélioration. Ne saute pas directement à la solution.</p></div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+          ${[['1', 'Construire', 'Nettoyage, catégories, séparation Train/Test et première référence'], ['2', 'Constater', 'k-NN brut, matrice de confusion et métriques insuffisantes'], ['3', 'Améliorer', 'Mise à l’échelle, choix de k et votes pondérés : mesurer le gain']].map(([n,title,why]) => `<div class="bg-white rounded-2xl border border-blue-200 p-4"><span class="w-8 h-8 rounded-full bg-blue-600 text-white font-mono font-extrabold inline-flex items-center justify-center">${n}</span><h4 class="font-display font-bold mt-2">${title}</h4><p class="text-xs text-slate-600 mt-1">${why}</p></div>`).join('')}
+        </div>
+        <p class="text-sm text-slate-700"><strong>À vérifier avant le rendu :</strong> équilibre des classes, référence <code>DummyClassifier</code>, scores train/test, matrice de confusion lue case par case, <code>classification_report</code>, les 3 améliorations chiffrées et les <strong>7 blocs de réflexion rédigés</strong>. Explique pourquoi k=1 risque de surapprendre. Pour choisir les réglages, réserve le test final et valide sur l'entraînement (code A10).</p>
+        <p class="text-sm text-slate-700"><strong>Fichier de rendu :</strong> <code>Prénom_Nom_knn.ipynb</code>, partagé en lecture et déposé dans le dossier demandé par le cours.</p>
+        <a href="https://colab.research.google.com/drive/1a_EdpqmAi23HuY1lK9XYxkX77vmlBlYR?usp=sharing" target="_blank" rel="noopener noreferrer" class="inline-flex rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-display font-bold text-sm px-5 py-3">Ouvrir le notebook du challenge ↗</a>
+        <p class="text-xs text-slate-500">Dans Colab : Fichier → Enregistrer une copie dans Drive. Partage ensuite ton notebook en lecture pour le rendu.</p>
+      </section>`;
+    }
+
+    document.getElementById('count-chapters').textContent = CHAPTERS.length;
+    document.getElementById('count-codes').textContent = CODE_ACTIONS.length;
+    document.getElementById('count-codes-btn').textContent = CODE_ACTIONS.length;
+
+    let viewMode = 'visual';
+    let currentIdx = 0;
+    let searchQuery = '';
+
+    const sidebarList = document.getElementById('sidebar-list');
+    const stage = document.getElementById('stage');
+    const badge = document.getElementById('progress-badge');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrevBottom = document.getElementById('btn-prev-bottom');
+    const btnNextBottom = document.getElementById('btn-next-bottom');
+    const bottomNav = document.getElementById('bottom-nav');
+    const bottomHint = document.getElementById('bottom-hint');
+    const searchInput = document.getElementById('search-input');
+    const menuBody = document.getElementById('menu-body');
+
+    function bindCopyButtons() {
+      document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const pre = document.getElementById(btn.dataset.copyTarget);
+          if (!pre) return;
+          const ta = document.createElement('textarea');
+          ta.value = pre.textContent;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          const old = btn.textContent;
+          btn.textContent = '✓ Copié !';
+          btn.classList.add('bg-emerald-600', 'text-white');
+          setTimeout(() => {
+            btn.textContent = old;
+            btn.classList.remove('bg-emerald-600', 'text-white');
+          }, 1500);
+        });
+      });
+    }
+
+    function bindSimulators() {
+      
+  let simK = 3, simW = 'uniform';
+  const bK1 = document.getElementById('sim-k1');
+  if (bK1) {
+    const refreshKnnSim = () => {
+      document.querySelectorAll('.k-btn').forEach(b => b.className = 'k-btn py-2 px-2 rounded-xl bg-white border border-slate-300 font-bold cursor-pointer');
+      document.getElementById('sim-k' + simK).className = 'k-btn py-2 px-2 rounded-xl bg-ink text-white border border-ink font-bold cursor-pointer';
+      document.getElementById('sim-wu').className = simW === 'uniform' ? 'py-2 px-2 rounded-xl bg-ink text-white font-bold cursor-pointer' : 'py-2 px-2 rounded-xl bg-white border border-slate-300 font-bold cursor-pointer';
+      document.getElementById('sim-wd').className = simW === 'distance' ? 'py-2 px-2 rounded-xl bg-ink text-white font-bold cursor-pointer' : 'py-2 px-2 rounded-xl bg-white border border-slate-300 font-bold cursor-pointer';
+      ['sim-k1', 'sim-k3', 'sim-k5'].forEach(id => document.getElementById(id).setAttribute('aria-pressed', id === 'sim-k' + simK ? 'true' : 'false'));
+      ['sim-wu', 'sim-wd'].forEach(id => document.getElementById(id).setAttribute('aria-pressed', id === (simW === 'uniform' ? 'sim-wu' : 'sim-wd') ? 'true' : 'false'));
+      document.getElementById('k-c1').setAttribute('opacity', simK === 1 ? '1' : '0');
+      document.getElementById('k-c3').setAttribute('opacity', simK === 3 ? '1' : '0.25');
+      document.getElementById('k-c5').setAttribute('opacity', simK === 5 ? '1' : '0.25');
+      const out = document.getElementById('sim-k-out');
+      // Distances fictives cohérentes avec le dessin : seul le vote change.
+      const all = [
+        { name: 'V1', group: 'bleu', distance: 0.20 },
+        { name: 'V2', group: 'rouge', distance: 0.70 },
+        { name: 'V3', group: 'rouge', distance: 0.85 },
+        { name: 'V4', group: 'bleu', distance: 1.45 },
+        { name: 'V5', group: 'bleu', distance: 1.55 }
+      ];
+      const included = all.slice(0, simK);
+      const weight = item => simW === 'distance' ? 1 / item.distance : 1;
+      const blueScore = included.filter(item => item.group === 'bleu').reduce((sum, item) => sum + weight(item), 0);
+      const redScore = included.filter(item => item.group === 'rouge').reduce((sum, item) => sum + weight(item), 0);
+      const isBlue = blueScore > redScore;
+      out.className = isBlue ? 'p-4 rounded-2xl bg-blue-50 border border-blue-200' : 'p-4 rounded-2xl bg-rose-50 border border-rose-200';
+      out.setAttribute('aria-live', 'polite');
+      out.innerHTML = `<div class="font-serif text-xl font-bold ${isBlue ? 'text-blue-950' : 'text-rose-950'}">${isBlue ? '■ Carré bleu' : '▲ Triangle rouge'} gagne le vote</div>
+        <p class="font-display text-sm font-bold mt-1">Bleus : ${blueScore.toFixed(2)} · Rouges : ${redScore.toFixed(2)} ${simW === 'uniform' ? '(1 voix chacun)' : '(poids = 1 / distance)'}</p>
+        <div class="flex flex-wrap gap-1.5 mt-3">${included.map(item => `<span class="px-2 py-1 rounded-lg text-[11px] font-mono font-bold ${item.group === 'bleu' ? 'bg-blue-200 text-blue-950' : 'bg-rose-200 text-rose-950'}">${item.name} ${item.group === 'bleu' ? '■' : '▲'} · d=${item.distance.toFixed(2)}</span>`).join('')}</div>
+        <p class="text-xs text-slate-600 mt-2">Exemple fictif : k=1 peut suivre le bruit ; à k=3 le vote uniforme choisit rouge, mais un voisin bleu très proche peut inverser le vote pondéré.</p>`;
+    };
+    bK1.addEventListener('click', () => { simK = 1; refreshKnnSim(); });
+    document.getElementById('sim-k3').addEventListener('click', () => { simK = 3; refreshKnnSim(); });
+    document.getElementById('sim-k5').addEventListener('click', () => { simK = 5; refreshKnnSim(); });
+    document.getElementById('sim-wu').addEventListener('click', () => { simW = 'uniform'; refreshKnnSim(); });
+    document.getElementById('sim-wd').addEventListener('click', () => { simW = 'distance'; refreshKnnSim(); });
+    refreshKnnSim();
+  }
+
+    }
+
+    function renderSidebar() {
+      if (viewMode === 'visual') {
+        const filtered = CHAPTERS.filter(c =>
+          !searchQuery || c.shortTitle.toLowerCase().includes(searchQuery) || c.group.toLowerCase().includes(searchQuery)
+        );
+        const groups = [...new Set(filtered.map(c => c.group))];
+        sidebarList.innerHTML = groups.map(g => `
+          <div>
+            <div class="px-2.5 mb-1.5 text-[10px] font-display font-extrabold tracking-widest uppercase text-slate-400">${g}</div>
+            <div class="space-y-0.5">
+              ${filtered.filter(c => c.group === g).map(c => {
+                const realIdx = CHAPTERS.findIndex(x => x.num === c.num);
+                const active = realIdx === currentIdx;
+                return `
+                  <button data-idx="${realIdx}" class="chap-btn w-full text-left px-3 py-2 rounded-xl text-xs sm:text-[13px] transition cursor-pointer ${
+                    active ? 'bg-ink text-white font-display font-bold' : 'hover:bg-slate-100 text-slate-700 font-medium'
+                  }">${c.shortTitle}</button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `).join('');
+
+        document.querySelectorAll('.chap-btn').forEach(b => {
+          b.addEventListener('click', () => {
+            showChapter(parseInt(b.dataset.idx, 10));
+            if (window.innerWidth < 1024) menuBody.classList.add('hidden');
+          });
+        });
+      } else {
+        const filtered = CODE_ACTIONS.filter(a =>
+          !searchQuery || a.title.toLowerCase().includes(searchQuery) || a.code.toLowerCase().includes(searchQuery) || a.group.toLowerCase().includes(searchQuery)
+        );
+        const groups = [...new Set(filtered.map(a => a.group))];
+        sidebarList.innerHTML = groups.map(g => `
+          <div>
+            <div class="px-2.5 mb-1.5 text-[10px] font-display font-extrabold tracking-widest uppercase text-blue-800">${g}</div>
+            <div class="space-y-0.5">
+              ${filtered.filter(a => a.group === g).map(a => `
+                <a href="#card-${a.id}" class="block px-3 py-2 rounded-xl text-xs text-slate-700 hover:bg-slate-100 font-medium transition truncate">
+                  <span class="font-mono text-[11px] font-bold text-blue-800 mr-1">${a.num}</span> ${a.title}
+                </a>
+              `).join('')}
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function showChapter(idx) {
+      viewMode = 'visual';
+      currentIdx = Math.max(0, Math.min(idx, CHAPTERS.length - 1));
+      document.getElementById('tab-visual').classList.add('bg-ink', 'text-white');
+      document.getElementById('tab-visual').classList.remove('bg-white', 'text-slate-700');
+      document.getElementById('tab-code').classList.remove('bg-ink', 'text-white');
+      document.getElementById('tab-code').classList.add('bg-white', 'text-blue-800');
+
+      bottomNav.classList.remove('hidden');
+      const ch = CHAPTERS[currentIdx];
+      stage.innerHTML = ch.render();
+      stage.querySelector('header')?.insertAdjacentHTML('afterend', renderLessonRoute(currentIdx));
+      if (currentIdx === 6) stage.insertAdjacentHTML('beforeend', renderChallengeKit());
+      badge.textContent = `${ch.num} / ${String(CHAPTERS.length).padStart(2, '0')}`;
+
+      btnPrev.disabled = currentIdx === 0;
+      btnNext.disabled = currentIdx === CHAPTERS.length - 1;
+      btnPrevBottom.disabled = currentIdx === 0;
+      btnNextBottom.disabled = currentIdx === CHAPTERS.length - 1;
+      bottomHint.textContent = currentIdx < CHAPTERS.length - 1
+        ? `À suivre : ${CHAPTERS[currentIdx + 1].shortTitle}`
+        : `Vous avez parcouru tout le cours ! Consultez l’antisèche des ${CODE_ACTIONS.length} codes.`;
+
+      bindCopyButtons();
+      bindSimulators();
+      renderSidebar();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showCodeCheatsheet() {
+      viewMode = 'code';
+      document.getElementById('tab-code').classList.add('bg-ink', 'text-white');
+      document.getElementById('tab-code').classList.remove('bg-white', 'text-blue-800');
+      document.getElementById('tab-visual').classList.remove('bg-ink', 'text-white');
+      document.getElementById('tab-visual').classList.add('bg-white', 'text-slate-700');
+
+      bottomNav.classList.add('hidden');
+      badge.textContent = `${CODE_ACTIONS.length} CODES`;
+
+      const filtered = CODE_ACTIONS.filter(a =>
+        !searchQuery || a.title.toLowerCase().includes(searchQuery) || a.code.toLowerCase().includes(searchQuery) || a.why.toLowerCase().includes(searchQuery)
+      );
+
+      stage.innerHTML = `
+        <div class="space-y-7">
+          <header class="pb-5 border-b border-slate-200/80">
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-200/70 text-ink font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+              MÉMENTO PYTHON &amp; SCIKIT-LEARN
+            </span>
+            <h2 class="font-serif text-3xl sm:text-4xl font-bold text-ink">Les ${CODE_ACTIONS.length} codes à retenir action par action</h2>
+            <p class="text-sm sm:text-base text-slate-600 mt-1">Chaque action du cours isolée, expliquée en français simple et prête à copier.</p>
+          </header>
+
+          <div class="space-y-6">
+            ${filtered.map(a => `
+              <div id="card-${a.id}" class="scroll-mt-20">
+                ${renderCodeCard({
+                  id: a.id,
+                  badge: `${a.num} · ${a.group}`,
+                  title: a.title,
+                  why: a.why,
+                  code: a.code,
+                  tip: a.tip
+                })}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      bindCopyButtons();
+      renderSidebar();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('tab-visual').addEventListener('click', () => showChapter(currentIdx));
+    document.getElementById('tab-code').addEventListener('click', showCodeCheatsheet);
+    document.getElementById('btn-cheatsheet').addEventListener('click', showCodeCheatsheet);
+
+    btnPrev.addEventListener('click', () => showChapter(currentIdx - 1));
+    btnNext.addEventListener('click', () => showChapter(currentIdx + 1));
+    btnPrevBottom.addEventListener('click', () => showChapter(currentIdx - 1));
+    btnNextBottom.addEventListener('click', () => showChapter(currentIdx + 1));
+
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.trim().toLowerCase();
+      if (viewMode === 'code') showCodeCheatsheet();
+      else renderSidebar();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (document.activeElement === searchInput || viewMode !== 'visual') return;
+      if (e.key === 'ArrowRight') showChapter(currentIdx + 1);
+      if (e.key === 'ArrowLeft') showChapter(currentIdx - 1);
+    });
+
+    document.getElementById('btn-toggle-menu').addEventListener('click', () => {
+      menuBody.classList.toggle('hidden');
+      menuBody.classList.add('flex');
+    });
+
+    showChapter(0);
+  </script>
+</body>
+</html>

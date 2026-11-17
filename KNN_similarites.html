@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guide Visuel &amp; Mémento Code — KNN & Similarités</title>
+  <meta property="og:title" content="Guide Visuel &amp; Mémento Code — KNN & Similarités" />
+  <meta property="og:description" content="Cours vulgarisé étape par étape avec schémas visuels et tous les codes Python prêts à copier." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Fraunces', 'Georgia', 'serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            ivory: '#FAF8F5',
+            ink: '#0F172A',
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background-color: #FAF8F5;
+      color: #0F172A;
+      font-family: 'Inter', sans-serif;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 999px; }
+
+    input[type="range"].ml-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 8px;
+      border-radius: 999px;
+      background: #CBD5E1;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"].ml-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #7C3AED;
+      border: 3px solid #FFFFFF;
+      box-shadow: 0 2px 6px rgba(15,23,42,0.28);
+      cursor: pointer;
+    }
+
+    /* Repère pédagogique commun : question concrète → opération → résultat. */
+    .lesson-route { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem; margin: 1.3rem 0 1.75rem; }
+    .lesson-route-card { background: #fff; border: 1px solid #e2e8f0; border-top: 4px solid #2563eb; border-radius: 18px; padding: 1.1rem 1.2rem; box-shadow: 0 7px 20px rgba(15,23,42,.055); }
+    .lesson-route-card:nth-child(2) { border-top-color: #d97706; }
+    .lesson-route-card:nth-child(3) { border-top-color: #059669; background: #f0fdf7; }
+    .lesson-route-label { display: block; color: #475569; font: 800 .67rem/1.4 'Plus Jakarta Sans', sans-serif; letter-spacing: .055em; text-transform: uppercase; margin-bottom: .55rem; }
+    .lesson-route-card p { color: #172033; font: 600 .88rem/1.55 'Inter', sans-serif; }
+    @media(max-width:720px) { .lesson-route { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col lg:flex-row bg-ivory text-ink">
+
+  <!-- MENU LATÉRAL : NOTIONS + ACTIONS PYTHON -->
+  <aside class="w-full lg:w-80 xl:w-[350px] bg-white border-b lg:border-b-0 lg:border-r border-slate-200/90 flex flex-col lg:h-screen lg:sticky lg:top-0 shrink-0 z-30">
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between gap-2">
+      <div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <a href="index.html" aria-label="Retour à l'accueil" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-display font-bold bg-slate-100 hover:bg-slate-900 text-slate-700 hover:text-white border border-slate-200 transition">
+            ← Accueil
+          </a>
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-display font-extrabold tracking-widest text-white bg-purple-600 uppercase">
+            Cours 06 · Visuel & Code
+          </span>
+        </div>
+        <h1 class="font-serif text-xl font-bold text-ink mt-1.5 leading-tight">KNN & Similarités</h1>
+      </div>
+      <button id="btn-toggle-menu" class="lg:hidden px-3 py-2 rounded-xl bg-slate-100 text-xs font-display font-bold text-ink">
+        ☰ Menu
+      </button>
+    </div>
+
+    <div id="menu-body" class="hidden lg:flex flex-col flex-1 overflow-hidden">
+      <div class="p-3.5 border-b border-slate-100 bg-slate-50/70 space-y-2">
+        <div class="relative">
+          <input id="search-input" type="search" placeholder="Chercher une notion ou un code..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-ink placeholder:text-slate-400 focus:outline-none focus:border-slate-400" />
+          <span class="absolute left-2.5 top-1.5 text-slate-400 text-xs">⌕</span>
+        </div>
+        <div class="grid grid-cols-2 gap-1.5">
+          <button id="tab-visual" class="mode-btn active px-2.5 py-1.5 rounded-xl text-xs font-display font-bold bg-ink text-white transition cursor-pointer">
+            1. Comprendre (<span id="count-chapters"></span> étapes)
+          </button>
+          <button id="tab-code" class="mode-btn px-2.5 py-1.5 rounded-xl text-xs font-display font-bold bg-white text-purple-800 border border-purple-200 hover:bg-purple-50 transition cursor-pointer">
+            2. Tous les Codes (<span id="count-codes"></span>)
+          </button>
+        </div>
+      </div>
+
+      <nav id="sidebar-list" class="flex-1 overflow-y-auto p-3 space-y-4"></nav>
+    </div>
+  </aside>
+
+  <!-- CONTENU PRINCIPAL -->
+  <main class="flex-1 flex flex-col min-w-0">
+    <header class="sticky top-0 z-20 bg-ivory/95 backdrop-blur border-b border-slate-200/80 px-5 sm:px-8 lg:px-10 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <button id="btn-prev" class="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-200 text-xs sm:text-sm font-display font-bold text-ink transition cursor-pointer">
+          ← Précédent
+        </button>
+        <button id="btn-next" class="px-3.5 py-2 rounded-xl bg-ink hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-xs sm:text-sm font-display font-bold text-white transition cursor-pointer">
+          Suivant →
+        </button>
+        <button id="btn-cheatsheet" class="ml-1 px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-xs font-display font-bold text-white transition shadow-2xs cursor-pointer">
+          ⌘ Antisèche Code (<span id="count-codes-btn"></span> actions)
+        </button>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span id="progress-badge" class="font-mono text-xs sm:text-sm font-bold px-3.5 py-1 rounded-full bg-white border border-slate-200 text-ink">
+          01 / 08
+        </span>
+      </div>
+    </header>
+
+    <article id="stage" class="flex-1 w-full max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 py-7 sm:py-9"></article>
+
+    <footer id="bottom-nav" class="w-full max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 pb-10 pt-4 flex items-center justify-between gap-4 border-t border-slate-200/70">
+      <button id="btn-prev-bottom" class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-200 text-xs sm:text-sm font-display font-bold text-ink transition cursor-pointer">
+        ← Étape précédente
+      </button>
+      <span id="bottom-hint" class="text-xs text-slate-500 text-center hidden sm:block"></span>
+      <button id="btn-next-bottom" class="px-4 py-2.5 rounded-xl bg-ink hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-xs sm:text-sm font-display font-bold text-white transition cursor-pointer">
+        Étape suivante →
+      </button>
+    </footer>
+  </main>
+
+  <script>
+    function renderCodeCard({ id, badge, title, why, code, tip }) {
+      const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return `
+        <div class="bg-slate-900 text-slate-100 rounded-2xl border border-slate-800 overflow-hidden shadow-2xs">
+          <div class="px-4 py-2.5 bg-slate-950/90 border-b border-slate-800 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="px-2 py-0.5 rounded bg-white/10 text-sky-300 font-mono text-[10px] font-bold uppercase shrink-0">${badge}</span>
+              <span class="font-display font-bold text-xs sm:text-sm text-white truncate">${title}</span>
+            </div>
+            <button data-copy-target="${id}" class="copy-btn px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-emerald-600 text-[11px] font-display font-bold text-slate-200 hover:text-white transition shrink-0 cursor-pointer">
+              Copier
+            </button>
+          </div>
+          <div class="px-4 py-2 bg-slate-900/60 border-b border-slate-800/80 text-xs text-slate-300">
+            <strong class="text-sky-400">À quoi ça sert :</strong> ${why}
+          </div>
+          <pre id="${id}" class="p-4 text-xs sm:text-[13px] font-mono leading-relaxed overflow-x-auto text-emerald-300"><code>${escaped}</code></pre>
+          ${tip ? `<div class="px-4 py-2.5 bg-amber-950/50 border-t border-amber-800/50 text-xs text-amber-200">💡 <strong>À retenir :</strong> ${tip}</div>` : ''}
+        </div>
+      `;
+    }
+
+    const CODE_ACTIONS = [
+  {
+    id: 'ks-01', num: 'A01', group: '1. Import & Distances à la main',
+    title: 'Lire un Google Sheet directement en CSV avec pandas',
+    why: 'Remplacer la fin de l’URL (/edit...) par /export?format=csv pour charger le fichier sans le télécharger.',
+    code: `import pandas as pd
+
+url = "https://docs.google.com/spreadsheets/d/1gdPM1zWxSFXAYdjkh02ykAD2VvI5dJb56UANSpOPEm8/export?format=csv"
+pokemon = pd.read_csv(url)
+print(pokemon.shape)`,
+    tip: 'Fonctionne immédiatement sur Google Colab comme dans VS Code.'
+  },
+  {
+    id: 'ks-02', num: 'A02', group: '1. Import & Distances à la main',
+    title: 'Calculer la distance euclidienne et récupérer les k indices',
+    why: 'Utiliser np.argsort(distances)[:k] pour obtenir les positions des k éléments les plus proches.',
+    code: `import numpy as np
+
+# Huit livres fictifs : [pages, année de publication].
+livres = np.array([
+    [200, 1990], [150, 2005], [300, 1985], [250, 2000],
+    [180, 2010], [220, 1995], [280, 2015], [190, 1980],
+])
+livre_cible = np.array([230, 2005])
+
+def distance_euclidienne(p1, p2):
+    return np.sqrt(np.sum((p1 - p2) ** 2))
+
+distances = [distance_euclidienne(livre_cible, livre) for livre in livres]
+indices_plus_proches = np.argsort(distances)[:3]
+for i in indices_plus_proches:
+    print(f"Livre {i} : distance = {distances[i]:.2f}")`,
+    tip: 'Attendu : Livre 5 (14,14), Livre 3 (20,62), Livre 0 (33,54). np.argsort renvoie des positions, pas les distances elles-mêmes.'
+  },
+  {
+    id: 'ks-03', num: 'A03', group: '2. NearestNeighbors',
+    title: 'Mettre les caractéristiques à la même échelle (StandardScaler)',
+    why: 'Empêcher qu’une variable à grande amplitude (ex : poids 8g → 1000g) écrase le sucre (2 → 13).',
+    code: `import pandas as pd
+from sklearn.preprocessing import StandardScaler
+
+# Même exemple complet que dans le PDF du cours.
+df_fruits = pd.DataFrame([
+    {"nom": "Pomme",  "poids": 150,  "sucre": 10, "acidite": 3},
+    {"nom": "Poire",  "poids": 170,  "sucre": 9,  "acidite": 4},
+    {"nom": "Orange", "poids": 160,  "sucre": 8,  "acidite": 7},
+    {"nom": "Citron", "poids": 100,  "sucre": 2,  "acidite": 9},
+    {"nom": "Fraise", "poids": 20,   "sucre": 7,  "acidite": 5},
+    {"nom": "Banane", "poids": 120,  "sucre": 12, "acidite": 2},
+    {"nom": "Ananas", "poids": 1000, "sucre": 13, "acidite": 6},
+    {"nom": "Cerise", "poids": 8,    "sucre": 8,  "acidite": 4},
+])
+
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(df_fruits[["poids", "sucre", "acidite"]])
+print(pd.DataFrame(X_scaled, columns=["poids", "sucre", "acidite"], index=df_fruits["nom"]))`,
+    tip: 'Ce qui domine une distance, c’est l’amplitude des écarts, pas le nombre de chiffres des valeurs.'
+  },
+  {
+    id: 'ks-04', num: 'A04', group: '2. NearestNeighbors',
+    title: 'Voisins d’un élément DÉJÀ dans fit() (règle du [1:])',
+    why: 'Demander n_neighbors = k + 1 et écarter l’indice 0 car l’élément est à distance 0 de lui-même.',
+    code: `from sklearn.neighbors import NearestNeighbors
+
+nn = NearestNeighbors(n_neighbors=4, metric="euclidean").fit(X_scaled)
+pomme_idx = df_fruits[df_fruits["nom"] == "Pomme"].index[0]
+
+distances, indices = nn.kneighbors(X_scaled[pomme_idx].reshape(1, -1))
+for d, idx in zip(distances[0][1:], indices[0][1:]):
+    print(f"{df_fruits['nom'].iloc[idx]} : distance = {d:.2f}")`,
+    tip: 'Avec une requête explicite contenant déjà la pomme, elle revient à distance 0 ; en cas de doublons parfaits, retire la cible par son index plutôt que de supposer que [1:] suffit toujours.'
+  },
+  {
+    id: 'ks-05', num: 'A05', group: '2. NearestNeighbors',
+    title: 'Chercher pour un élément EXTERNE à fit() (sans [1:])',
+    why: 'Entraîner sur les non-légendaires uniquement et chercher les remplaçants d’un Pokémon légendaire.',
+    code: `from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import NearestNeighbors
+
+# pokemon a été chargé dans l'action A01.
+stats_cols = ["HP", "Attack", "Defense", "Sp. Atk", "Sp. Def", "Speed"]
+non_leg = pokemon[pokemon["Legendary"] == False].reset_index(drop=True)
+mewtwo = pokemon.loc[pokemon["Name"].eq("Mewtwo"), stats_cols]
+if mewtwo.empty:
+    raise ValueError("Mewtwo est absent du fichier chargé")
+
+scaler = StandardScaler()
+X_base_s = scaler.fit_transform(non_leg[stats_cols])
+
+nn = NearestNeighbors(n_neighbors=3, metric="euclidean").fit(X_base_s)
+
+# Le légendaire n'est PAS dans fit() -> on applique transform() et PAS de [1:] !
+cible_s = scaler.transform(mewtwo[stats_cols])
+distances, indices = nn.kneighbors(cible_s)`,
+    tip: 'Les indices de kneighbors désignent des positions : utilise iloc, pas loc. reset_index simplifie le suivi mais n’est pas indispensable pour iloc.'
+  },
+  {
+    id: 'ks-06', num: 'A06', group: '2. NearestNeighbors',
+    title: 'Chercher tous les voisins dans un rayon (radius_neighbors)',
+    why: 'Récupérer tous les voisins situés à moins de 1,5 écart-type, triés par distance.',
+    code: `nn_rad = NearestNeighbors(radius=1.5, metric="euclidean").fit(X_scaled)
+distances, indices = nn_rad.radius_neighbors(
+    X_scaled[pomme_idx].reshape(1, -1),
+    return_distance=True,
+    sort_results=True
+)`,
+    tip: 'Sans sort_results=True, radius_neighbors() renvoie les résultats dans le désordre (et peut en renvoyer 0).'
+  },
+  {
+    id: 'ks-07', num: 'A07', group: '3. Visualisation PCA',
+    title: 'Projeter en 2D avec PCA pour dessiner les voisins',
+    why: 'Réduire 3 ou 6 dimensions sur un plan 2D pour illustrer les proches voisins.',
+    code: `from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+
+plt.scatter(X_pca[:, 0], X_pca[:, 1], c="lightgray")
+for i, nom in enumerate(df_fruits["nom"]):
+    plt.annotate(nom, (X_pca[i, 0], X_pca[i, 1]))
+plt.show()`,
+    tip: 'Dans ce cours, la PCA sert à dessiner : calcule tes voisins dans l’espace complet X_scaled pour ne pas perdre d’information.'
+  },
+  {
+    id: 'ks-08', num: 'A08', group: '1. Import & Distances à la main',
+    title: 'Voir deux métriques donner deux voisins différents',
+    why: 'Comprendre par des nombres simples pourquoi le candidat préféré change entre Euclidienne et Manhattan.',
+    code: `import numpy as np
+
+cible = np.array([0.0, 0.0])
+candidats = {"X": np.array([4.0, 0.0]),
+             "Y": np.array([2.5, 2.5])}
+
+for metric in ["euclidean", "manhattan"]:
+    distances = {
+        nom: (np.linalg.norm(point - cible) if metric == "euclidean"
+              else np.abs(point - cible).sum())
+        for nom, point in candidats.items()
+    }
+    print(metric, distances, "→ plus proche :", min(distances, key=distances.get))`,
+    tip: 'Euclidienne : Y (3,54 < 4). Manhattan : X (4 < 5). Un changement de métrique peut inverser le classement.'
+  }
+];
+    const CHAPTERS = [
+  {
+    num: '01', group: '1. Le Principe', shortTitle: '01 · Classification vs Recherche de Similarités',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-purple-600"></span>RECOMMANDATION SANS CIBLE · ÉTAPE 01
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            Même calcul de distance, mais on s’arrête AVANT le vote
+          </h2>
+          <div class="mt-3 flex items-start sm:items-center gap-3">
+            <span class="w-1.5 h-6 rounded-full bg-purple-600 shrink-0 mt-1 sm:mt-0"></span>
+            <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+              « Pour recommander un film sur Netflix ou remplacer un Pokémon légendaire, il n’y a aucune colonne cible y : on utilise NearestNeighbors. »
+            </p>
+          </div>
+        </header>
+
+        <!-- Schéma visuel de comparaison -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 overflow-x-auto">
+          <svg viewBox="0 0 760 185" class="w-full min-w-[580px] h-auto mx-auto">
+            <!-- Top path: Classification -->
+            <rect x="10" y="12" width="160" height="58" rx="12" fill="#EFF6FF" stroke="#93C5FD" stroke-width="2"/>
+            <text x="90" y="37" text-anchor="middle" font-size="11" font-weight="bold" fill="#1E3A8A">1. Calcul des distances</text>
+            <text x="90" y="54" text-anchor="middle" font-size="10" fill="#3B82F6">KNeighborsClassifier</text>
+            <path d="M 170 41 L 215 41" stroke="#3B82F6" stroke-width="2.5"/>
+            <rect x="215" y="12" width="175" height="58" rx="12" fill="#EFF6FF" stroke="#93C5FD" stroke-width="2"/>
+            <text x="302" y="37" text-anchor="middle" font-size="11" font-weight="bold" fill="#1E3A8A">2. Trouver les k voisins</text>
+            <text x="302" y="54" text-anchor="middle" font-size="10" fill="#3B82F6">Indices + distances</text>
+            <path d="M 390 41 L 435 41" stroke="#3B82F6" stroke-width="2.5"/>
+            <rect x="435" y="12" width="310" height="58" rx="12" fill="#2563EB"/>
+            <text x="590" y="37" text-anchor="middle" font-size="11" font-weight="bold" fill="#FFF">3. Vote sur la cible y (Survécu / Décédé)</text>
+            <text x="590" y="54" text-anchor="middle" font-size="10" fill="#DBEAFE">Évalué avec F1, Matrice de confusion</text>
+
+            <!-- Bottom path: Similarity -->
+            <rect x="10" y="105" width="160" height="62" rx="12" fill="#F5F3FF" stroke="#C4B5FD" stroke-width="2"/>
+            <text x="90" y="131" text-anchor="middle" font-size="11" font-weight="bold" fill="#4C1D95">1. Calcul des distances</text>
+            <text x="90" y="149" text-anchor="middle" font-size="10" fill="#7C3AED">NearestNeighbors</text>
+            <path d="M 170 136 L 215 136" stroke="#7C3AED" stroke-width="3"/>
+            <rect x="215" y="105" width="305" height="62" rx="12" fill="#7C3AED"/>
+            <text x="367" y="131" text-anchor="middle" font-size="12" font-weight="bold" fill="#FFF">2. STOP ! On renvoie directement les k sosies</text>
+            <text x="367" y="149" text-anchor="middle" font-size="10" fill="#EDE9FE">Aucune colonne cible y · Aucun split train/test</text>
+            <path d="M 520 136 L 555 136" stroke="#94A3B8" stroke-width="2" stroke-dasharray="4 4"/>
+            <rect x="555" y="105" width="190" height="62" rx="12" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="5 4"/>
+            <text x="650" y="131" text-anchor="middle" font-size="11" font-weight="bold" fill="#64748B">Pas de vote ni F1</text>
+            <text x="650" y="149" text-anchor="middle" font-size="10" fill="#94A3B8">Relecture métier + distances</text>
+          </svg>
+        </div>
+      </div>
+    `
+  },
+  {
+    num: '02', group: '1. Le Principe', shortTitle: '02 · Euclidienne, Manhattan & Chebyshev',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-purple-600"></span>TROIS MÉTRIQUES DE PROXIMITÉ · ÉTAPE 02
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            Changer de métrique peut aussi changer le meilleur voisin
+          </h2>
+          <div class="mt-3 flex items-start sm:items-center gap-3">
+            <span class="w-1.5 h-6 rounded-full bg-purple-600 shrink-0 mt-1 sm:mt-0"></span>
+            <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+              « La distance n'a pas la même unité selon la métrique. Ce sont les candidats retenus qu'on compare : le gagnant peut changer ! »
+            </p>
+          </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs sm:text-sm">
+          <div class="bg-white rounded-3xl border-2 border-sky-300 p-6">
+            <span class="px-2.5 py-0.5 rounded bg-sky-100 text-sky-800 font-mono text-xs font-bold">euclidean</span>
+            <h3 class="font-serif text-xl font-bold text-ink mt-3">1. Euclidienne (Diagonale)</h3>
+            <p class="text-slate-600 mt-1.5">Élève les écarts au carré : elle <strong>pénalise lourdement un gros écart</strong> sur une seule variable et pardonne plusieurs petits écarts.</p>
+          </div>
+          <div class="bg-white rounded-3xl border-2 border-amber-300 p-6">
+            <span class="px-2.5 py-0.5 rounded bg-amber-100 text-amber-800 font-mono text-xs font-bold">manhattan</span>
+            <h3 class="font-serif text-xl font-bold text-ink mt-3">2. Manhattan (Damier)</h3>
+            <p class="text-slate-600 mt-1.5">Additionne les valeurs absolues des écarts sans distinction. Produit toujours des nombres plus grands.</p>
+          </div>
+          <div class="bg-white rounded-3xl border-2 border-purple-300 p-6">
+            <span class="px-2.5 py-0.5 rounded bg-purple-100 text-purple-800 font-mono text-xs font-bold">chebyshev</span>
+            <h3 class="font-serif text-xl font-bold text-ink mt-3">3. Chebyshev (Écart max)</h3>
+            <p class="text-slate-600 mt-1.5">Ne retient que <strong>la plus grande différence</strong> parmi toutes les colonnes. Plus sensible si une seule variable diverge.</p>
+          </div>
+        </div>
+
+        ${renderCodeCard(CODE_ACTIONS[1])}
+      </div>
+    `
+  },
+  {
+    num: '03', group: '2. Mise à l’échelle & Fruits', shortTitle: '03 · L’exemple des fruits & StandardScaler',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-purple-600"></span>ÉQUILIBRER LES AXES · ÉTAPE 03
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            Pourquoi l’Ananas (1 000 g) écrase le sucre sans StandardScaler
+          </h2>
+          <div class="mt-3 flex items-start sm:items-center gap-3">
+            <span class="w-1.5 h-6 rounded-full bg-purple-600 shrink-0 mt-1 sm:mt-0"></span>
+            <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+              « Entre une cerise (8 g) et un ananas (1 000 g), l’écart de poids vaut 992 contre 5 pour le sucre : sans mise à l’échelle, le sucre n’existe plus ! »
+            </p>
+          </div>
+        </header>
+
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="inline-flex rounded-xl bg-slate-100 p-1">
+              <button id="f-raw" class="px-4 py-1.5 rounded-lg text-xs font-display font-bold bg-rose-600 text-white cursor-pointer">❌ Avant StandardScaler</button>
+              <button id="f-std" class="px-4 py-1.5 rounded-lg text-xs font-display font-bold text-slate-700 cursor-pointer">✅ Après StandardScaler</button>
+            </div>
+            <span id="f-badge" class="font-mono text-xs font-bold px-3 py-1 rounded-lg bg-rose-100 text-rose-900">Le poids décide seul</span>
+          </div>
+
+          <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-center">
+            <div class="xl:col-span-7">
+              <svg viewBox="0 0 460 225" class="w-full h-auto bg-slate-50 rounded-2xl border border-slate-200">
+                <line x1="45" y1="195" x2="430" y2="195" stroke="#94A3B8" stroke-width="1.5"/>
+                <line x1="45" y1="20" x2="45" y2="195" stroke="#94A3B8" stroke-width="1.5"/>
+                <g id="fp-pomme"><circle cx="105" cy="65" r="8" fill="#E11D48"/><text x="115" y="63" font-size="11" font-weight="bold" fill="#E11D48">🍎 Pomme</text></g>
+                <g id="fp-poire"><circle cx="112" cy="79" r="7" fill="#10B981"/><text x="122" y="82" font-size="10" font-weight="bold" fill="#065F46">🍐 Poire</text></g>
+                <g id="fp-banane"><circle cx="95" cy="40" r="7" fill="#10B981"/><text x="105" y="38" font-size="10" font-weight="bold" fill="#065F46">🍌 Banane</text></g>
+                <g id="fp-orange"><circle cx="109" cy="94" r="6" fill="#64748B"/><text x="119" y="98" font-size="10" fill="#475569">🍊 Orange</text></g>
+                <g id="fp-cerise"><circle cx="54" cy="94" r="6" fill="#64748B"/><text x="60" y="108" font-size="10" fill="#475569">🍒 Cerise</text></g>
+                <g id="fp-citron"><circle cx="85" cy="175" r="6" fill="#64748B"/><text x="95" y="178" font-size="10" fill="#475569">🍋 Citron</text></g>
+                <g id="fp-ananas"><circle cx="410" cy="30" r="8" fill="#7C3AED"/><text x="330" y="24" font-size="10" font-weight="bold" fill="#5B21B6">🍍 Ananas (1000g)</text></g>
+              </svg>
+            </div>
+            <div id="f-expl" class="xl:col-span-5 bg-rose-50 border border-rose-200 rounded-2xl p-4 text-xs sm:text-sm space-y-2">
+              <strong class="text-rose-950 block">Sans mise à l’échelle :</strong>
+              <p class="text-slate-700">Tous les fruits légers sont écrasés à gauche. L’ananas étire l’axe horizontal à plus de 2,5 écarts-types et domine tout le calcul.</p>
+            </div>
+          </div>
+        </div>
+
+        ${renderCodeCard(CODE_ACTIONS[2])}
+      </div>
+    `
+  },
+  {
+    num: '04', group: '3. NearestNeighbors & Pièges', shortTitle: '04 · NearestNeighbors & La règle du [1:]',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-amber-600"></span>ERREUR SILENCIEUSE N°1 · ÉTAPE 04
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            Quand mettre [1:] (interne) vs quand ne PAS le mettre (externe)
+          </h2>
+          <div class="mt-3 flex items-start sm:items-center gap-3">
+            <span class="w-1.5 h-6 rounded-full bg-amber-600 shrink-0 mt-1 sm:mt-0"></span>
+            <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+              « La pomme est à distance 0,00 d’elle-même en première position : n_neighbors=3 renvoie la pomme + 2 voisins ! »
+            </p>
+          </div>
+        </header>
+
+        <!-- Règle graduée visuelle du [1:] -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-6">
+          <div class="font-display text-xs font-extrabold text-slate-400 uppercase mb-4">Pourquoi [1:] sur la Pomme (élément interne) :</div>
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center text-xs">
+            <div class="p-3 rounded-2xl bg-rose-50 border-2 border-rose-400">
+              <span class="px-2 py-0.5 rounded bg-rose-600 text-white font-mono font-bold">Indice 0</span>
+              <div class="font-bold text-rose-950 mt-2">🍎 Pomme (Elle-même)</div>
+              <div class="font-mono text-rose-700">dist = 0.00</div>
+              <div class="text-[10px] font-bold text-rose-800 mt-1">Écartée par [1:]</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-emerald-50 border-2 border-emerald-400">
+              <span class="px-2 py-0.5 rounded bg-emerald-600 text-white font-mono font-bold">Indice 1</span>
+              <div class="font-bold text-emerald-950 mt-2">🍐 Poire</div>
+              <div class="font-mono text-emerald-700">dist = 0.57</div>
+              <div class="text-[10px] font-bold text-emerald-800 mt-1">Reco #1</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-emerald-50 border-2 border-emerald-400">
+              <span class="px-2 py-0.5 rounded bg-emerald-600 text-white font-mono font-bold">Indice 2</span>
+              <div class="font-bold text-emerald-950 mt-2">🍌 Banane</div>
+              <div class="font-mono text-emerald-700">dist = 0.80</div>
+              <div class="text-[10px] font-bold text-emerald-800 mt-1">Reco #2</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+              <span class="px-2 py-0.5 rounded bg-slate-600 text-white font-mono font-bold">Indice 3</span>
+              <div class="font-bold text-slate-800 mt-2">🍒 Cerise</div>
+              <div class="font-mono text-slate-500">dist = 0.92</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+              <span class="px-2 py-0.5 rounded bg-slate-500 text-white font-mono font-bold">Indice 4</span>
+              <div class="font-bold text-slate-700 mt-2">🍓 Fraise</div>
+              <div class="font-mono text-slate-500">dist = 1.41</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm">
+          <section class="bg-amber-50/70 rounded-3xl border-2 border-amber-300 p-6 space-y-2">
+            <span class="px-2.5 py-0.5 rounded bg-amber-200 text-amber-950 font-display font-extrabold text-xs">Cas 1 · Élément DÉJÀ dans fit() (ex : Pomme)</span>
+            <p class="text-slate-700 pt-1">Il se retrouve lui-même en indice 0 (distance 0.00). Pour 3 recommandations, demande <code class="font-mono font-bold">n_neighbors=4</code> et saute le premier avec <code class="font-mono font-bold">[1:]</code>.</p>
+          </section>
+
+          <section class="bg-purple-50/70 rounded-3xl border-2 border-purple-300 p-6 space-y-2">
+            <span class="px-2.5 py-0.5 rounded bg-purple-200 text-purple-950 font-display font-extrabold text-xs">Cas 2 · Élément EXTERNE à fit() (ex : Mewtwo)</span>
+            <p class="text-slate-700 pt-1">Le modèle est entraîné uniquement sur les <em>non-légendaires</em>. Mewtwo n’en fait pas partie : il n’est donc pas son propre voisin → <strong>PAS de <code class="font-mono">[1:]</code></strong> !</p>
+          </section>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          ${renderCodeCard(CODE_ACTIONS[3])}
+          ${renderCodeCard(CODE_ACTIONS[4])}
+        </div>
+      </div>
+    `
+  },
+  {
+    num: '05', group: '3. NearestNeighbors & Pièges', shortTitle: '05 · kneighbors vs radius_neighbors & PCA',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-purple-600"></span>OPTIONS &amp; VISUALISATION 2D · ÉTAPE 05
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            Rayon fixe (radius_neighbors) et projection 2D par PCA
+          </h2>
+          <div class="mt-3 flex items-start sm:items-center gap-3">
+            <span class="w-1.5 h-6 rounded-full bg-purple-600 shrink-0 mt-1 sm:mt-0"></span>
+            <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+              « radius_neighbors ne trie pas ses résultats par défaut, et la PCA sert uniquement à dessiner en 2D — jamais à calculer les distances. »
+            </p>
+          </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm">
+          <div class="bg-rose-50/60 rounded-3xl border-2 border-rose-200 p-6 space-y-2">
+            <strong class="text-rose-950 block text-base">⚠ Piège de radius_neighbors(radius=1.5)</strong>
+            <p class="text-slate-700">Le rayon s’exprime en écarts-types (après StandardScaler) et peut renvoyer 0 ou 50 voisins, <strong>dans le désordre</strong>. Ajoute toujours <code class="font-mono bg-white px-1 rounded">return_distance=True, sort_results=True</code>.</p>
+          </div>
+          <div class="bg-amber-50/60 rounded-3xl border-2 border-amber-200 p-6 space-y-2">
+            <strong class="text-amber-950 block text-base">⚠ Règle stricte sur la PCA(n_components=2)</strong>
+            <p class="text-slate-700">Réduire 6 stats Pokémon à 2 axes perd de l’information. Calcule toujours tes voisins sur <code class="font-mono bg-white px-1 rounded">X_scaled</code>, et utilise <code class="font-mono bg-white px-1 rounded">X_pca</code> uniquement pour illustrer le graphique.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          ${renderCodeCard(CODE_ACTIONS[5])}
+          ${renderCodeCard(CODE_ACTIONS[6])}
+        </div>
+      </div>
+    `
+  },
+  {
+    num: '06', group: '4. Valider sans Score', shortTitle: '06 · Juger sans score & Challenge Pokémon',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-purple-600"></span>VALIDATION MÉTIER &amp; QUIZ · ÉTAPE 06
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            Comment juger une recommandation sans score F1 ni R² ?
+          </h2>
+          <div class="mt-3 flex items-start sm:items-center gap-3">
+            <span class="w-1.5 h-6 rounded-full bg-purple-600 shrink-0 mt-1 sm:mt-0"></span>
+            <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+              « Un moteur de recommandation peut renvoyer une liste qui a l’air crédible, même si elle est mauvaise. Voici 4 vérifications indispensables. »
+            </p>
+          </div>
+        </header>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+          <div class="bg-white rounded-2xl border border-slate-200 p-4">
+            <span class="px-2 py-0.5 rounded bg-slate-900 text-white font-bold">1. Distances</span>
+            <p class="text-slate-600 mt-2">Une distance de 0,57 peut être plus proche qu'une distance de 3,29 dans le même espace. Ces nombres n'ont pas de seuil universel de qualité.</p>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200 p-4">
+            <span class="px-2 py-0.5 rounded bg-slate-900 text-white font-bold">2. Stabilité</span>
+            <p class="text-slate-600 mt-2">Change <code class="font-mono">k</code> ou passe d’euclidienne à Manhattan : si les mêmes candidats reviennent, le résultat est solide.</p>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200 p-4">
+            <span class="px-2 py-0.5 rounded bg-slate-900 text-white font-bold">3. Relecture métier</span>
+            <p class="text-slate-600 mt-2">Un expert repère en 1 seconde les subtilités (ex : Giratina Altered vs Origin, ou les formes Mega non-légendaires).</p>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200 p-4">
+            <span class="px-2 py-0.5 rounded bg-slate-900 text-white font-bold">4. Test réel</span>
+            <p class="text-slate-600 mt-2">Mettre les recommandations entre les mains des utilisateurs et observer leurs choix réels.</p>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          ${[
+            {
+              q: '1. Tu veux 3 recommandations pour un élément déjà présent dans fit(). Quelle valeur donnes-tu à n_neighbors ?',
+              a: 'Avec l’appel du cours kneighbors(X_cible), je demande 4 résultats pour écarter le point cible. Cela suppose qu’il apparaît bien en premier : si des doublons ont distance zéro, j’exclus plutôt explicitement son index.'
+            },
+            {
+              q: '2. Pourquoi ne peux-tu pas calculer un F1-score sur une recherche de similarités ?',
+              a: 'Parce qu’il n’y a pas de colonne cible y : sans bonne réponse connue, il n’existe ni vrai positif ni faux positif.'
+            },
+            {
+              q: '3. Quelle différence entre KNeighborsClassifier et NearestNeighbors ?',
+              a: 'Le premier prédit une classe par vote avec une cible y. Le second donne les voisins eux-mêmes, sans classe à prédire.'
+            },
+            {
+              q: '4. Que renvoie np.argsort(distances) ?',
+              a: 'Les positions des éléments dans l’ordre des distances croissantes. Ce ne sont pas les valeurs des distances.'
+            },
+            {
+              q: '5. Dans quel ordre kneighbors renvoie-t-il ses deux tableaux ?',
+              a: 'D’abord les distances, ensuite les indices. Le deuxième tableau permet de retrouver les noms avec iloc.'
+            },
+            {
+              q: '6. Pourquoi standardiser poids, sucre et acidité ?',
+              a: 'Sinon le poids varie de 8 à 1 000 et masque les écarts des autres caractéristiques dans le calcul des voisins.'
+            },
+            {
+              q: '7. Quel est le rôle de la PCA dans notre exercice ?',
+              a: 'Projeter les fruits ou les Pokémon en 2D pour expliquer visuellement les recommandations. On garde les dimensions complètes pour calculer les distances.'
+            },
+            {
+              q: '8. Différence entre kneighbors et radius_neighbors ?',
+              a: 'kneighbors renvoie un nombre choisi de voisins ; radius_neighbors renvoie tous ceux à l’intérieur d’un rayon, éventuellement aucun.'
+            },
+            {
+              q: '9. Pour un Pokémon absent de la base d’entraînement, dois-tu supprimer le premier voisin avec [1:] ?',
+              a: 'Non. S’il est exclu des données de fit, le premier voisin renvoyé est bien une recommandation potentielle.'
+            }
+          ].map(item => `
+            <details class="bg-white rounded-2xl border border-slate-200 p-5">
+              <summary class="font-display font-bold text-sm sm:text-base text-ink cursor-pointer list-none flex items-center justify-between gap-4">
+                <span>${item.q}</span>
+                <span class="px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 text-xs font-bold shrink-0">Voir la réponse</span>
+              </summary>
+              <p class="mt-3 pt-3 border-t border-slate-100 text-sm text-slate-700 leading-relaxed">${item.a}</p>
+            </details>
+          `).join('')}
+        </div>
+
+        ${renderCodeCard(CODE_ACTIONS[0])}
+      </div>
+    `
+  }
+];
+
+    const LESSON_ROUTES = [
+      ["Je veux trouver des livres, films ou Pokémon qui se ressemblent.", "NearestNeighbors mesure des distances sans chercher une classe à prédire.", "Il renvoie les éléments proches, sans vote et sans colonne cible y."],
+      ["Deux objets diffèrent sur plusieurs caractéristiques.", "Euclidienne, Manhattan et Chebyshev combinent différemment les écarts.", "Le classement peut changer : je regarde les voisins, pas les distances entre métriques."],
+      ["Poids, sucre et acidité sont exprimés dans des unités différentes.", "StandardScaler ramène leurs écarts sur une échelle comparable.", "Un voisin proche n'est plus choisi uniquement parce qu'il pèse le même poids."],
+      ["La pomme est déjà dans les exemples mémorisés.", "Avec une requête explicite, elle peut se retrouver elle-même à distance zéro.", "J'exclus son index ; pour une cible extérieure comme Mewtwo, je ne saute personne."],
+      ["Je peux vouloir exactement k voisins ou seulement les vraiment proches.", "kneighbors fixe le nombre ; radius_neighbors fixe le rayon ; PCA projette pour dessiner.", "Les distances de référence restent calculées dans l'espace complet, pas sur le dessin PCA."],
+      ["Sans bonne réponse connue, je ne peux pas compter les faux positifs.", "J'examine distances, stabilité, avis métier et essais réels.", "Je justifie six remplaçants Pokémon en expliquant les caractéristiques choisies."]
+    ];
+    function renderLessonRoute(idx) {
+      const labels = ['1 · CE QUE JE VOIS', '2 · CE QUE FAIT LE MODÈLE', '3 · CE QUE JE RETIENS'];
+      return `<section class="lesson-route" aria-label="Comprendre cette notion en trois temps">${LESSON_ROUTES[idx].map((value, i) => `<div class="lesson-route-card"><span class="lesson-route-label">${labels[i]}</span><p>${value}</p></div>`).join('')}</section>`;
+    }
+
+    function renderBookLab() {
+      const books = [[200,1990],[150,2005],[300,1985],[250,2000],[180,2010],[220,1995],[280,2015],[190,1980]];
+      const ranked = books.map(([pages, year], id) => ({ id, pages, year, distance: Math.hypot(230-pages, 2005-year) })).sort((a,b) => a.distance-b.distance);
+      const max = Math.max(...ranked.map(book => book.distance));
+      return `<section class="mt-8 bg-white border-2 border-purple-200 rounded-3xl p-5 sm:p-7 space-y-5">
+        <div><span class="text-xs font-display font-extrabold tracking-wider uppercase text-purple-700">EXEMPLE COMPLET DU PDF · LES 8 LIVRES</span>
+          <h3 class="font-serif text-2xl sm:text-3xl font-bold mt-2">Quels livres ressemblent le plus à notre livre cible ?</h3>
+          <p class="text-sm text-slate-600 mt-2">Livre cible : <strong>230 pages, publié en 2005</strong>. On mesure pour chaque livre l'écart en pages et en années. Les barres courtes correspondent aux petites distances.</p></div>
+        <div class="space-y-2.5">${ranked.map((book, i) => `<div class="flex items-center gap-3 text-xs sm:text-sm">
+          <div class="w-[8.5rem] sm:w-[13rem] shrink-0 font-display font-bold text-slate-800">${i < 3 ? '🏅 ' : ''}Livre ${book.id} <span class="text-slate-500 font-normal">${book.pages} p · ${book.year}</span></div>
+          <div class="flex-1 bg-slate-100 h-5 rounded-md overflow-hidden"><div style="width:${Math.max(2,book.distance/max*100).toFixed(1)}%" class="h-full rounded-md ${i < 3 ? 'bg-emerald-500' : 'bg-slate-400'}"></div></div>
+          <strong class="w-12 text-right font-mono ${i < 3 ? 'text-emerald-700' : 'text-slate-600'}">${book.distance.toFixed(1)}</strong>
+        </div>`).join('')}</div>
+        <p class="rounded-xl bg-emerald-50 border border-emerald-200 p-3.5 font-display font-semibold text-sm text-emerald-950">Les 3 plus proches sont les livres 5, 3 et 0. Exemple : pour le livre 5, √(10² + 10²) = 14,14.</p>
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-950">⚠ Les deux axes ont des amplitudes différentes : dans les données brutes, 150 pages d'écart pèsent plus que 35 ans d'écart. C'est pourquoi l'étape StandardScaler est importante dans la suite du cours.</div>
+        ${renderCodeCard(CODE_ACTIONS[1])}
+      </section>`;
+    }
+
+    function renderMetricLab() {
+      return `<section id="metric-lab" class="mt-8 bg-white border-2 border-indigo-200 rounded-3xl p-5 sm:p-7 space-y-5">
+        <div><span class="text-xs font-display font-extrabold tracking-wider uppercase text-indigo-700">DÉMONSTRATION INTERACTIVE · DEUX CANDIDATS</span>
+          <h3 class="font-serif text-2xl sm:text-3xl font-bold mt-2">Change la distance : le gagnant peut s'inverser !</h3>
+          <p class="text-sm text-slate-600 mt-2">La cible est (0,0). X est à (4,0) et Y à (2,5 ; 2,5). Les points ne bougent pas : seul le calcul de distance change.</p></div>
+        <div class="flex gap-2 flex-wrap" role="group" aria-label="Choisir la métrique">
+          <button type="button" data-metric="euclidean" class="px-4 py-2 rounded-xl bg-indigo-700 text-white text-sm font-bold">Euclidienne</button>
+          <button type="button" data-metric="manhattan" class="px-4 py-2 rounded-xl bg-slate-100 border border-slate-300 text-slate-800 text-sm font-bold">Manhattan</button>
+          <button type="button" data-metric="chebyshev" class="px-4 py-2 rounded-xl bg-slate-100 border border-slate-300 text-slate-800 text-sm font-bold">Chebyshev</button>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 items-center">
+          <svg viewBox="0 0 340 320" class="w-full max-w-[370px] mx-auto bg-slate-50 border border-slate-200 rounded-2xl" role="img" aria-label="Cible à zéro, candidat X à quatre sur l'axe horizontal, candidat Y à deux virgule cinq sur les deux axes">
+            <path d="M50 25 V270 H315" fill="none" stroke="#94A3B8" stroke-width="2"/>
+            <path id="metric-line-x" d="M50 270 L290 270" stroke="#0284C7" stroke-width="4" fill="none"/>
+            <path id="metric-line-y" d="M50 270 L200 120" stroke="#7C3AED" stroke-width="4" fill="none"/>
+            <circle cx="50" cy="270" r="12" fill="#0F172A"/><text x="54" y="300" font-size="13" fill="#0F172A" font-weight="bold">Cible (0,0)</text>
+            <circle cx="290" cy="270" r="12" fill="#0284C7"/><text x="278" y="300" font-size="13" fill="#0369A1" font-weight="bold">X (4,0)</text>
+            <circle cx="200" cy="120" r="12" fill="#7C3AED"/><text x="215" y="112" font-size="13" fill="#6D28D9" font-weight="bold">Y (2,5 ; 2,5)</text>
+          </svg>
+          <div id="metric-expl" aria-live="polite" class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-slate-800"></div>
+        </div>
+        ${renderCodeCard(CODE_ACTIONS[7])}
+      </section>`;
+    }
+
+    function renderChallengeKit() {
+      return `<section class="mt-8 bg-gradient-to-br from-purple-50 to-white border-2 border-purple-200 rounded-3xl p-5 sm:p-7 space-y-5">
+        <div><span class="text-xs font-display font-extrabold tracking-wider uppercase text-purple-700">CHALLENGE OFFICIEL · RECOMMANDATION POKÉMON</span>
+          <h3 class="font-serif text-2xl sm:text-3xl font-bold mt-2">Remplacer six légendaires par des Pokémon comparables</h3>
+          <p class="text-sm text-slate-600 mt-2">Le jeu du cours contient 800 Pokémon, dont 65 légendaires. Le champion cherche des remplaçants non légendaires pour <strong>Mewtwo, Lugia, Rayquaza, Giratina, Dialga et Palkia</strong>.</p></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+          ${[
+            ['1', 'Explorer', '800 lignes, 12 colonnes : info(), describe() et choix des statistiques utiles'],
+            ['2', 'Préparer', 'Séparer les légendaires ; ajuster StandardScaler sur les candidats uniquement'],
+            ['3', 'Apprendre', 'Entraîner NearestNeighbors sur les non-légendaires et choisir k'],
+            ['4', 'Rechercher', 'Interroger les 6 légendaires sans supprimer le premier voisin'],
+            ['5', 'Présenter', 'Lister les recommandations triées et expliquer leurs statistiques'],
+            ['6', 'Analyser', 'Tester l’effet de k, des colonnes et vérifier la cohérence métier']
+          ].map(([n,title,description]) => `<div class="bg-white border border-purple-200 rounded-2xl p-4"><span class="inline-flex bg-purple-600 text-white w-8 h-8 rounded-full items-center justify-center font-mono font-bold">${n}</span><h4 class="font-display font-bold mt-2">${title}</h4><p class="text-xs text-slate-600 mt-1">${description}</p></div>`).join('')}
+        </div>
+        <p class="rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-950">⚠ Giratina possède deux formes dans le fichier. Les formes Mega sont parfois rangées parmi les non-légendaires. Vérifie que ces choix respectent le règlement du défi.</p>
+        <p class="text-sm text-slate-700"><strong>Rendu du challenge :</strong> 6 parties de notebook et 7 blocs de réflexion à compléter. La qualité ne se juge pas avec F1 : examine distances, stabilité des recommandations, cohérence métier puis retour réel si possible. <strong>Bonus :</strong> projette les voisins avec PCA ou t-SNE, puis compare plusieurs distances.</p>
+        <div class="flex flex-wrap gap-3">
+          <a href="https://colab.research.google.com/drive/1J4rvTUxXRuQiloRF29sddHfG5e5MtbGs?usp=sharing" target="_blank" rel="noopener noreferrer" class="inline-flex bg-purple-600 hover:bg-purple-700 text-white font-display font-bold rounded-xl px-4 py-3 text-sm">Ouvrir le notebook du challenge ↗</a>
+          <a href="https://docs.google.com/spreadsheets/d/1gdPM1zWxSFXAYdjkh02ykAD2VvI5dJb56UANSpOPEm8/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="inline-flex bg-white border border-purple-300 hover:bg-purple-50 text-purple-900 font-display font-bold rounded-xl px-4 py-3 text-sm">Voir les données Pokémon ↗</a>
+        </div>
+        <p class="text-xs text-slate-500">Les liens proviennent du PDF fourni. Leur disponibilité en ligne n'a pas été validée. Dans Colab, enregistre d'abord une copie dans ton Drive.</p>
+      </section>`;
+    }
+
+    document.getElementById('count-chapters').textContent = CHAPTERS.length;
+    document.getElementById('count-codes').textContent = CODE_ACTIONS.length;
+    document.getElementById('count-codes-btn').textContent = CODE_ACTIONS.length;
+
+    let viewMode = 'visual';
+    let currentIdx = 0;
+    let searchQuery = '';
+
+    const sidebarList = document.getElementById('sidebar-list');
+    const stage = document.getElementById('stage');
+    const badge = document.getElementById('progress-badge');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrevBottom = document.getElementById('btn-prev-bottom');
+    const btnNextBottom = document.getElementById('btn-next-bottom');
+    const bottomNav = document.getElementById('bottom-nav');
+    const bottomHint = document.getElementById('bottom-hint');
+    const searchInput = document.getElementById('search-input');
+    const menuBody = document.getElementById('menu-body');
+
+    function bindCopyButtons() {
+      document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const pre = document.getElementById(btn.dataset.copyTarget);
+          if (!pre) return;
+          const ta = document.createElement('textarea');
+          ta.value = pre.textContent;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          const old = btn.textContent;
+          btn.textContent = '✓ Copié !';
+          btn.classList.add('bg-emerald-600', 'text-white');
+          setTimeout(() => {
+            btn.textContent = old;
+            btn.classList.remove('bg-emerald-600', 'text-white');
+          }, 1500);
+        });
+      });
+    }
+
+    function bindSimulators() {
+      
+  const fRaw = document.getElementById('f-raw');
+  const fStd = document.getElementById('f-std');
+  if (fRaw && fStd) {
+    const moveFruit = (id, cx, cy, tx, ty) => {
+      const g = document.getElementById(id);
+      if (!g) return;
+      g.querySelector('circle').setAttribute('cx', cx);
+      g.querySelector('circle').setAttribute('cy', cy);
+      g.querySelector('text').setAttribute('x', tx);
+      g.querySelector('text').setAttribute('y', ty);
+    };
+    fRaw.addEventListener('click', () => {
+      fRaw.className = 'px-4 py-1.5 rounded-lg text-xs font-display font-bold bg-rose-600 text-white cursor-pointer';
+      fStd.className = 'px-4 py-1.5 rounded-lg text-xs font-display font-bold text-slate-700 cursor-pointer';
+      document.getElementById('f-badge').className = 'font-mono text-xs font-bold px-3 py-1 rounded-lg bg-rose-100 text-rose-900';
+      document.getElementById('f-badge').textContent = 'Le poids décide seul';
+      moveFruit('fp-pomme',105,65,115,63); moveFruit('fp-poire',112,79,122,82); moveFruit('fp-banane',95,40,105,38);
+      moveFruit('fp-orange',109,94,119,98); moveFruit('fp-cerise',54,94,60,108); moveFruit('fp-citron',85,175,95,178); moveFruit('fp-ananas',410,30,330,24);
+      document.getElementById('f-expl').className = 'xl:col-span-5 bg-rose-50 border border-rose-200 rounded-2xl p-4 text-xs sm:text-sm space-y-2';
+      document.getElementById('f-expl').innerHTML = '<strong class="text-rose-950 block">Sans mise à l’échelle :</strong><p class="text-slate-700">Tous les fruits légers sont écrasés à gauche. Le sucre et l’acidité ne pèsent plus rien.</p>';
+    });
+    fStd.addEventListener('click', () => {
+      fStd.className = 'px-4 py-1.5 rounded-lg text-xs font-display font-bold bg-emerald-600 text-white cursor-pointer';
+      fRaw.className = 'px-4 py-1.5 rounded-lg text-xs font-display font-bold text-slate-700 cursor-pointer';
+      document.getElementById('f-badge').className = 'font-mono text-xs font-bold px-3 py-1 rounded-lg bg-emerald-100 text-emerald-900';
+      document.getElementById('f-badge').textContent = 'Axes équilibrés (écart-type = 1)';
+      moveFruit('fp-pomme',170,76,182,73); moveFruit('fp-poire',182,95,194,98); moveFruit('fp-banane',152,45,164,43);
+      moveFruit('fp-orange',175,115,187,118); moveFruit('fp-cerise',95,115,62,108); moveFruit('fp-citron',145,182,155,185); moveFruit('fp-ananas',400,34,325,28);
+      document.getElementById('f-expl').className = 'xl:col-span-5 bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-xs sm:text-sm space-y-2';
+      document.getElementById('f-expl').innerHTML = '<strong class="text-emerald-950 block">Après StandardScaler :</strong><p class="text-slate-700">Les 3 critères pèsent à égalité : les plus proches voisins de la Pomme sont désormais <strong>Poire (0,57)</strong> et <strong>Banane (0,80)</strong> !</p>';
+    });
+  }
+
+  const metricLab = document.getElementById('metric-lab');
+  if (metricLab) {
+    const display = metric => {
+      const distances = {
+        euclidean: { x: 4, y: Math.sqrt(2.5 ** 2 + 2.5 ** 2), title: 'Diagonale : Y gagne', explain: 'Y cumule deux petits écarts ; sa diagonale (3,54) est plus courte que celle de X (4).' },
+        manhattan: { x: 4, y: 5, title: 'Rues en damier : X gagne', explain: 'En additionnant tous les écarts, X vaut 4 contre 5 pour Y. Le classement est inversé !' },
+        chebyshev: { x: 4, y: 2.5, title: 'Plus grand écart : Y gagne', explain: 'On ne garde que le plus grand écart sur une caractéristique : 4 pour X, 2,5 pour Y.' }
+      }[metric];
+      metricLab.querySelectorAll('[data-metric]').forEach(btn => {
+        const active = btn.dataset.metric === metric;
+        btn.className = active
+          ? 'px-4 py-2 rounded-xl bg-indigo-700 text-white text-sm font-bold'
+          : 'px-4 py-2 rounded-xl bg-slate-100 border border-slate-300 text-slate-800 text-sm font-bold';
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+      const winner = distances.x < distances.y ? 'X' : 'Y';
+      metricLab.querySelector('#metric-line-y').setAttribute('d', metric === 'manhattan' ? 'M50 270 L200 270 L200 120' : 'M50 270 L200 120');
+      metricLab.querySelector('#metric-line-x').setAttribute('stroke-width', winner === 'X' ? '7' : '3');
+      metricLab.querySelector('#metric-line-y').setAttribute('stroke-width', winner === 'Y' ? '7' : '3');
+      metricLab.querySelector('#metric-expl').innerHTML = `
+        <span class="text-xs uppercase font-display font-extrabold text-indigo-700">${metric}</span>
+        <h4 class="font-serif text-xl font-bold mt-2">${distances.title}</h4>
+        <div class="grid grid-cols-2 gap-3 mt-4">
+          <div class="rounded-xl bg-white border border-sky-200 p-3"><span class="block text-xs text-slate-500">Candidat X</span><strong class="font-mono text-2xl text-sky-700">${distances.x.toFixed(2)}</strong></div>
+          <div class="rounded-xl bg-white border border-purple-200 p-3"><span class="block text-xs text-slate-500">Candidat Y</span><strong class="font-mono text-2xl text-purple-700">${distances.y.toFixed(2)}</strong></div>
+        </div>
+        <p class="mt-4 leading-relaxed">${distances.explain}</p>
+        <p class="mt-3 text-xs font-bold text-emerald-800">✓ Le plus proche : candidat ${winner}</p>`;
+    };
+    metricLab.querySelectorAll('[data-metric]').forEach(btn => btn.addEventListener('click', () => display(btn.dataset.metric)));
+    display('euclidean');
+  }
+
+    }
+
+    function renderSidebar() {
+      if (viewMode === 'visual') {
+        const filtered = CHAPTERS.filter(c =>
+          !searchQuery || c.shortTitle.toLowerCase().includes(searchQuery) || c.group.toLowerCase().includes(searchQuery)
+        );
+        const groups = [...new Set(filtered.map(c => c.group))];
+        sidebarList.innerHTML = groups.map(g => `
+          <div>
+            <div class="px-2.5 mb-1.5 text-[10px] font-display font-extrabold tracking-widest uppercase text-slate-400">${g}</div>
+            <div class="space-y-0.5">
+              ${filtered.filter(c => c.group === g).map(c => {
+                const realIdx = CHAPTERS.findIndex(x => x.num === c.num);
+                const active = realIdx === currentIdx;
+                return `
+                  <button data-idx="${realIdx}" class="chap-btn w-full text-left px-3 py-2 rounded-xl text-xs sm:text-[13px] transition cursor-pointer ${
+                    active ? 'bg-ink text-white font-display font-bold' : 'hover:bg-slate-100 text-slate-700 font-medium'
+                  }">${c.shortTitle}</button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `).join('');
+
+        document.querySelectorAll('.chap-btn').forEach(b => {
+          b.addEventListener('click', () => {
+            showChapter(parseInt(b.dataset.idx, 10));
+            if (window.innerWidth < 1024) menuBody.classList.add('hidden');
+          });
+        });
+      } else {
+        const filtered = CODE_ACTIONS.filter(a =>
+          !searchQuery || a.title.toLowerCase().includes(searchQuery) || a.code.toLowerCase().includes(searchQuery) || a.group.toLowerCase().includes(searchQuery)
+        );
+        const groups = [...new Set(filtered.map(a => a.group))];
+        sidebarList.innerHTML = groups.map(g => `
+          <div>
+            <div class="px-2.5 mb-1.5 text-[10px] font-display font-extrabold tracking-widest uppercase text-purple-800">${g}</div>
+            <div class="space-y-0.5">
+              ${filtered.filter(a => a.group === g).map(a => `
+                <a href="#card-${a.id}" class="block px-3 py-2 rounded-xl text-xs text-slate-700 hover:bg-slate-100 font-medium transition truncate">
+                  <span class="font-mono text-[11px] font-bold text-purple-800 mr-1">${a.num}</span> ${a.title}
+                </a>
+              `).join('')}
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function showChapter(idx) {
+      viewMode = 'visual';
+      currentIdx = Math.max(0, Math.min(idx, CHAPTERS.length - 1));
+      document.getElementById('tab-visual').classList.add('bg-ink', 'text-white');
+      document.getElementById('tab-visual').classList.remove('bg-white', 'text-slate-700');
+      document.getElementById('tab-code').classList.remove('bg-ink', 'text-white');
+      document.getElementById('tab-code').classList.add('bg-white', 'text-purple-800');
+
+      bottomNav.classList.remove('hidden');
+      const ch = CHAPTERS[currentIdx];
+      stage.innerHTML = ch.render();
+      stage.querySelector('header')?.insertAdjacentHTML('afterend', renderLessonRoute(currentIdx));
+      if (currentIdx === 0) stage.insertAdjacentHTML('beforeend', renderBookLab());
+      if (currentIdx === 1) stage.insertAdjacentHTML('beforeend', renderMetricLab());
+      if (currentIdx === 5) stage.insertAdjacentHTML('beforeend', renderChallengeKit());
+      badge.textContent = `${ch.num} / ${String(CHAPTERS.length).padStart(2, '0')}`;
+
+      btnPrev.disabled = currentIdx === 0;
+      btnNext.disabled = currentIdx === CHAPTERS.length - 1;
+      btnPrevBottom.disabled = currentIdx === 0;
+      btnNextBottom.disabled = currentIdx === CHAPTERS.length - 1;
+      bottomHint.textContent = currentIdx < CHAPTERS.length - 1
+        ? `À suivre : ${CHAPTERS[currentIdx + 1].shortTitle}`
+        : `Vous avez parcouru tout le cours ! Consultez l’antisèche des ${CODE_ACTIONS.length} codes.`;
+
+      bindCopyButtons();
+      bindSimulators();
+      renderSidebar();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showCodeCheatsheet() {
+      viewMode = 'code';
+      document.getElementById('tab-code').classList.add('bg-ink', 'text-white');
+      document.getElementById('tab-code').classList.remove('bg-white', 'text-purple-800');
+      document.getElementById('tab-visual').classList.remove('bg-ink', 'text-white');
+      document.getElementById('tab-visual').classList.add('bg-white', 'text-slate-700');
+
+      bottomNav.classList.add('hidden');
+      badge.textContent = `${CODE_ACTIONS.length} CODES`;
+
+      const filtered = CODE_ACTIONS.filter(a =>
+        !searchQuery || a.title.toLowerCase().includes(searchQuery) || a.code.toLowerCase().includes(searchQuery) || a.why.toLowerCase().includes(searchQuery)
+      );
+
+      stage.innerHTML = `
+        <div class="space-y-7">
+          <header class="pb-5 border-b border-slate-200/80">
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-200/70 text-ink font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+              MÉMENTO PYTHON &amp; SCIKIT-LEARN
+            </span>
+            <h2 class="font-serif text-3xl sm:text-4xl font-bold text-ink">Les ${CODE_ACTIONS.length} codes à retenir action par action</h2>
+            <p class="text-sm sm:text-base text-slate-600 mt-1">Chaque action du cours isolée, expliquée en français simple et prête à copier.</p>
+          </header>
+
+          <div class="space-y-6">
+            ${filtered.map(a => `
+              <div id="card-${a.id}" class="scroll-mt-20">
+                ${renderCodeCard({
+                  id: a.id,
+                  badge: `${a.num} · ${a.group}`,
+                  title: a.title,
+                  why: a.why,
+                  code: a.code,
+                  tip: a.tip
+                })}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      bindCopyButtons();
+      renderSidebar();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('tab-visual').addEventListener('click', () => showChapter(currentIdx));
+    document.getElementById('tab-code').addEventListener('click', showCodeCheatsheet);
+    document.getElementById('btn-cheatsheet').addEventListener('click', showCodeCheatsheet);
+
+    btnPrev.addEventListener('click', () => showChapter(currentIdx - 1));
+    btnNext.addEventListener('click', () => showChapter(currentIdx + 1));
+    btnPrevBottom.addEventListener('click', () => showChapter(currentIdx - 1));
+    btnNextBottom.addEventListener('click', () => showChapter(currentIdx + 1));
+
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.trim().toLowerCase();
+      if (viewMode === 'code') showCodeCheatsheet();
+      else renderSidebar();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (document.activeElement === searchInput || viewMode !== 'visual') return;
+      if (e.key === 'ArrowRight') showChapter(currentIdx + 1);
+      if (e.key === 'ArrowLeft') showChapter(currentIdx - 1);
+    });
+
+    document.getElementById('btn-toggle-menu').addEventListener('click', () => {
+      menuBody.classList.toggle('hidden');
+      menuBody.classList.add('flex');
+    });
+
+    showChapter(0);
+  </script>
+</body>
+</html>
