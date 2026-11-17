@@ -1,7 +1,7 @@
 # Guides visuels — Machine Learning
 
-**Version de prévisualisation : 1.1.0-preview (17 novembre 2026)**  
-**Statut : non publiée sur GitHub — validation de Julien en attente.**
+**Version de prévisualisation : 1.1.1-preview (17 novembre 2026)**  
+**Statut : correctif local non publié sur GitHub — validation de Julien en attente.**
 
 Application pédagogique statique comprenant **6 cours HTML**. Elle s'ouvre par un double-clic sur `index.html` et permet de naviguer entre les cours sans serveur ni compte.
 
@@ -26,6 +26,8 @@ Application pédagogique statique comprenant **6 cours HTML**. Elle s'ouvre par 
 
 Les six pages de cours utilisent le **même bouton Accueil** ; le contenu des trois premiers cours n'a été modifié **que pour ajouter ce bouton et son conteneur de mise en page**. La page `index.html` du lot transmis est inchangée.
 
+**Correctif 1.1.1-preview :** dans les cours 04, 05 et 06, les badges des blocs Python affichent le numéro d'action et le thème au lieu de « UNDEFINED ». L'antisèche conserve son fonctionnement. Les autres contenus HTML sont ceux de la version 1.1.0-preview déjà publiée.
+
 ## Vérifier les fichiers
 
 Les tests fournis se trouvent dans `tests/` :
@@ -37,7 +39,7 @@ node .\tests\check_interactions.js
 python .\tests\check_python_snippets.py
 ```
 
-- `verify-guides.js` : navigation, empreintes d'origine des trois premiers cours, syntaxe JavaScript, présence des ateliers et notions clés.
+- `verify-guides.js` : navigation, empreintes d'origine des trois premiers cours, syntaxe JavaScript, badges des blocs Python dans les deux modes, présence des ateliers et notions clés.
 - `check_interactions.js` : calculs et réactions des trois nouveaux simulateurs, sans navigateur.
 - `check_python_snippets.py` : analyse des 30 exemples Python et exécution hors réseau de 6 groupes représentatifs, si `numpy`, `pandas`, `matplotlib` et `scikit-learn` sont installés.
 - `TESTS.md` : résultats obtenus, scénarios de recette manuelle et limites.
@@ -49,4 +51,4 @@ python .\tests\check_python_snippets.py
 - `CHANGELOG.md` : modifications détaillées de la préversion.
 - `TESTS.md` : contrôles et réserves de validation.
 - Les PDF officiels ont servi à vérifier les notions et challenges ; ils ne sont pas recopiés dans cette archive de code.
-- **Aucun commit, push, changement de branche ni publication GitHub n'a été effectué.** La publication vers `JulienLecomteGit/Guides_ML` fera l'objet d'un accord distinct.
+- **Aucun nouveau commit, push ni publication GitHub pour le correctif 1.1.1-preview.** La version 1.1.0-preview est déjà en ligne sur `JulienLecomteGit/Guides_ML` ; ce correctif fera l'objet d'un accord distinct.

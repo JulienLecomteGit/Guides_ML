@@ -146,13 +146,14 @@
   </main>
 
   <script>
-    function renderCodeCard({ id, badge, title, why, code, tip }) {
+    function renderCodeCard({ id, badge, num, group, title, why, code, tip }) {
       const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const badgeText = badge || [num, group].filter(Boolean).join(' · ') || 'CODE';
       return `
         <div class="bg-slate-900 text-slate-100 rounded-2xl border border-slate-800 overflow-hidden shadow-2xs">
           <div class="px-4 py-2.5 bg-slate-950/90 border-b border-slate-800 flex items-center justify-between gap-2">
             <div class="flex items-center gap-2 min-w-0">
-              <span class="px-2 py-0.5 rounded bg-white/10 text-sky-300 font-mono text-[10px] font-bold uppercase shrink-0">${badge}</span>
+              <span class="px-2 py-0.5 rounded bg-white/10 text-sky-300 font-mono text-[10px] font-bold uppercase shrink-0">${badgeText}</span>
               <span class="font-display font-bold text-xs sm:text-sm text-white truncate">${title}</span>
             </div>
             <button data-copy-target="${id}" class="copy-btn px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-emerald-600 text-[11px] font-display font-bold text-slate-200 hover:text-white transition shrink-0 cursor-pointer">
