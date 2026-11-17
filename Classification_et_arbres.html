@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guide Visuel &amp; Mémento Code — Classification & Arbres</title>
+  <meta property="og:title" content="Guide Visuel &amp; Mémento Code — Classification & Arbres" />
+  <meta property="og:description" content="Cours vulgarisé étape par étape avec schémas visuels et tous les codes Python prêts à copier." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Fraunces', 'Georgia', 'serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            ivory: '#FAF8F5',
+            ink: '#0F172A',
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background-color: #FAF8F5;
+      color: #0F172A;
+      font-family: 'Inter', sans-serif;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 999px; }
+
+    input[type="range"].ml-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 8px;
+      border-radius: 999px;
+      background: #CBD5E1;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"].ml-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #E11D48;
+      border: 3px solid #FFFFFF;
+      box-shadow: 0 2px 6px rgba(15,23,42,0.28);
+      cursor: pointer;
+    }
+
+    /* Repère pédagogique commun : question concrète → opération → résultat. */
+    .lesson-route { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem; margin: 1.3rem 0 1.75rem; }
+    .lesson-route-card { background: #fff; border: 1px solid #e2e8f0; border-top: 4px solid #2563eb; border-radius: 18px; padding: 1.1rem 1.2rem; box-shadow: 0 7px 20px rgba(15,23,42,.055); }
+    .lesson-route-card:nth-child(2) { border-top-color: #d97706; }
+    .lesson-route-card:nth-child(3) { border-top-color: #059669; background: #f0fdf7; }
+    .lesson-route-label { display: block; color: #475569; font: 800 .67rem/1.4 'Plus Jakarta Sans', sans-serif; letter-spacing: .055em; text-transform: uppercase; margin-bottom: .55rem; }
+    .lesson-route-card p { color: #172033; font: 600 .88rem/1.55 'Inter', sans-serif; }
+    @media(max-width:720px) { .lesson-route { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col lg:flex-row bg-ivory text-ink">
+
+  <!-- MENU LATÉRAL : NOTIONS + ACTIONS PYTHON -->
+  <aside class="w-full lg:w-80 xl:w-[350px] bg-white border-b lg:border-b-0 lg:border-r border-slate-200/90 flex flex-col lg:h-screen lg:sticky lg:top-0 shrink-0 z-30">
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between gap-2">
+      <div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <a href="index.html" aria-label="Retour à l'accueil" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-display font-bold bg-slate-100 hover:bg-slate-900 text-slate-700 hover:text-white border border-slate-200 transition">
+            ← Accueil
+          </a>
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-display font-extrabold tracking-widest text-white bg-rose-600 uppercase">
+            Cours 04 · Visuel & Code
+          </span>
+        </div>
+        <h1 class="font-serif text-xl font-bold text-ink mt-1.5 leading-tight">Classification & Arbres</h1>
+      </div>
+      <button id="btn-toggle-menu" class="lg:hidden px-3 py-2 rounded-xl bg-slate-100 text-xs font-display font-bold text-ink">
+        ☰ Menu
+      </button>
+    </div>
+
+    <div id="menu-body" class="hidden lg:flex flex-col flex-1 overflow-hidden">
+      <div class="p-3.5 border-b border-slate-100 bg-slate-50/70 space-y-2">
+        <div class="relative">
+          <input id="search-input" type="search" placeholder="Chercher une notion ou un code..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-ink placeholder:text-slate-400 focus:outline-none focus:border-slate-400" />
+          <span class="absolute left-2.5 top-1.5 text-slate-400 text-xs">⌕</span>
+        </div>
+        <div class="grid grid-cols-2 gap-1.5">
+          <button id="tab-visual" class="mode-btn active px-2.5 py-1.5 rounded-xl text-xs font-display font-bold bg-ink text-white transition cursor-pointer">
+            1. Comprendre (<span id="count-chapters"></span> étapes)
+          </button>
+          <button id="tab-code" class="mode-btn px-2.5 py-1.5 rounded-xl text-xs font-display font-bold bg-white text-rose-800 border border-rose-200 hover:bg-rose-50 transition cursor-pointer">
+            2. Tous les Codes (<span id="count-codes"></span>)
+          </button>
+        </div>
+      </div>
+
+      <nav id="sidebar-list" class="flex-1 overflow-y-auto p-3 space-y-4"></nav>
+    </div>
+  </aside>
+
+  <!-- CONTENU PRINCIPAL -->
+  <main class="flex-1 flex flex-col min-w-0">
+    <header class="sticky top-0 z-20 bg-ivory/95 backdrop-blur border-b border-slate-200/80 px-5 sm:px-8 lg:px-10 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <button id="btn-prev" class="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-200 text-xs sm:text-sm font-display font-bold text-ink transition cursor-pointer">
+          ← Précédent
+        </button>
+        <button id="btn-next" class="px-3.5 py-2 rounded-xl bg-ink hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-xs sm:text-sm font-display font-bold text-white transition cursor-pointer">
+          Suivant →
+        </button>
+        <button id="btn-cheatsheet" class="ml-1 px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-xs font-display font-bold text-white transition shadow-2xs cursor-pointer">
+          ⌘ Antisèche Code (<span id="count-codes-btn"></span> actions)
+        </button>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span id="progress-badge" class="font-mono text-xs sm:text-sm font-bold px-3.5 py-1 rounded-full bg-white border border-slate-200 text-ink">
+          01 / 08
+        </span>
+      </div>
+    </header>
+
+    <article id="stage" class="flex-1 w-full max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 py-7 sm:py-9"></article>
+
+    <footer id="bottom-nav" class="w-full max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 pb-10 pt-4 flex items-center justify-between gap-4 border-t border-slate-200/70">
+      <button id="btn-prev-bottom" class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-200 text-xs sm:text-sm font-display font-bold text-ink transition cursor-pointer">
+        ← Étape précédente
+      </button>
+      <span id="bottom-hint" class="text-xs text-slate-500 text-center hidden sm:block"></span>
+      <button id="btn-next-bottom" class="px-4 py-2.5 rounded-xl bg-ink hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-xs sm:text-sm font-display font-bold text-white transition cursor-pointer">
+        Étape suivante →
+      </button>
+    </footer>
+  </main>
+
+  <script>
+    function renderCodeCard({ id, badge, title, why, code, tip }) {
+      const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return `
+        <div class="bg-slate-900 text-slate-100 rounded-2xl border border-slate-800 overflow-hidden shadow-2xs">
+          <div class="px-4 py-2.5 bg-slate-950/90 border-b border-slate-800 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="px-2 py-0.5 rounded bg-white/10 text-sky-300 font-mono text-[10px] font-bold uppercase shrink-0">${badge}</span>
+              <span class="font-display font-bold text-xs sm:text-sm text-white truncate">${title}</span>
+            </div>
+            <button data-copy-target="${id}" class="copy-btn px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-emerald-600 text-[11px] font-display font-bold text-slate-200 hover:text-white transition shrink-0 cursor-pointer">
+              Copier
+            </button>
+          </div>
+          <div class="px-4 py-2 bg-slate-900/60 border-b border-slate-800/80 text-xs text-slate-300">
+            <strong class="text-sky-400">À quoi ça sert :</strong> ${why}
+          </div>
+          <pre id="${id}" class="p-4 text-xs sm:text-[13px] font-mono leading-relaxed overflow-x-auto text-emerald-300"><code>${escaped}</code></pre>
+          ${tip ? `<div class="px-4 py-2.5 bg-amber-950/50 border-t border-amber-800/50 text-xs text-amber-200">💡 <strong>À retenir :</strong> ${tip}</div>` : ''}
+        </div>
+      `;
+    }
+
+    const CODE_ACTIONS = [
+  {
+    id: 'c-01', num: 'A01', group: '1. Préparer & Découper',
+    title: 'Charger le Titanic et nettoyer les colonnes inutiles',
+    why: 'Supprimer la colonne quasi vide deck puis les lignes incomplètes, et convertir sex en 0 et 1.',
+    code: `import pandas as pd
+import seaborn as sns
+
+titanic = sns.load_dataset("titanic").drop("deck", axis=1).dropna()
+titanic["sex"] = titanic["sex"].map({"male": 1, "female": 0})
+
+X = titanic[["pclass", "sex", "age"]]
+y = titanic["survived"]`,
+    tip: 'Le modèle ne lit que des nombres : toute colonne texte doit être encodée avant fit().'
+  },
+  {
+    id: 'c-02', num: 'A02', group: '1. Préparer & Découper',
+    title: 'Séparer Train / Test en conservant les proportions (stratify=y)',
+    why: 'Imposer au jeu de test exactement la même proportion de survivants que le jeu complet.',
+    code: `from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42, stratify=y
+)`,
+    tip: 'En classification, stratify=y n’est pas une option : il évite un tirage malchanceux où une classe est sous-représentée.'
+  },
+  {
+    id: 'c-03', num: 'A03', group: '1. Préparer & Découper',
+    title: 'Construire le modèle de référence (DummyClassifier)',
+    why: 'Mesurer le score d’un modèle naïf qui répond toujours la classe majoritaire (« Décédé »).',
+    code: `from sklearn.dummy import DummyClassifier
+
+reference = DummyClassifier(strategy="most_frequent")
+reference.fit(X_train, y_train)
+print(f"Modèle de référence exactitude : {reference.score(X_test, y_test):.2%}")`,
+    tip: 'Si ton modèle ne bat pas nettement cette barre de référence, il n’apporte rien.'
+  },
+  {
+    id: 'c-04', num: 'A04', group: '2. Régression Logistique',
+    title: 'Entraîner et prédire avec LogisticRegression',
+    why: 'Prédire une classe binaire (0 ou 1) avec un modèle linéaire rapide et interprétable.',
+    code: `from sklearn.linear_model import LogisticRegression
+
+lr = LogisticRegression(random_state=42)
+lr.fit(X_train, y_train)
+y_pred = lr.predict(X_test)`,
+    tip: 'Ajoute class_weight="balanced" si la classe positive est très rare (ex : fraude bancaire).'
+  },
+  {
+    id: 'c-05', num: 'A05', group: '2. Régression Logistique',
+    title: 'Lire les probabilités avec predict_proba()',
+    why: 'Obtenir la probabilité exacte de décès (colonne 0) et de survie (colonne 1) pour un passager.',
+    code: `nouveau = pd.DataFrame([[1, 1, 45]], columns=X.columns)
+prediction = lr.predict(nouveau)[0]
+proba = lr.predict_proba(nouveau)[0]
+
+print(f"Survie prédite        : {'Oui' if prediction == 1 else 'Non'}")
+print(f"Probabilité de décès  : {proba[0]:.2%}")
+print(f"Probabilité de survie : {proba[1]:.2%}")`,
+    tip: 'predict_proba() renvoie toujours un tableau à 2 colonnes : [proba_classe_0, proba_classe_1].'
+  },
+  {
+    id: 'c-06', num: 'A06', group: '2. Régression Logistique',
+    title: 'Déplacer le seuil de décision (sans réentraîner)',
+    why: 'Abaisser le seuil de 0,50 à 0,30 pour attraper plus de survivants (Rappel ↑, Précision ↓).',
+    code: `probas = lr.predict_proba(X_test)[:, 1]
+y_pred_seuil_030 = (probas >= 0.30).astype(int)`,
+    tip: 'Le seuil est une règle externe appliquée aux probabilités : inutile de relancer fit().'
+  },
+  {
+    id: 'c-07', num: 'A07', group: '3. Arbres & Forêts',
+    title: 'Créer et dessiner un Arbre de Décision (plot_tree)',
+    why: 'Visualiser l’organigramme des questions posées par l’arbre sur les passagers.',
+    code: `import matplotlib.pyplot as plt
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+
+arbre = DecisionTreeClassifier(random_state=42)
+arbre.fit(X_train, y_train)
+
+plt.figure(figsize=(16, 9))
+plot_tree(arbre, max_depth=3, filled=True, rounded=True,
+          feature_names=X.columns, class_names=["Décédé", "Survivant"])
+plt.show()`,
+    tip: 'Limite max_depth=3 dans plot_tree() pour garder un dessin lisible.'
+  },
+  {
+    id: 'c-08', num: 'A08', group: '3. Arbres & Forêts',
+    title: 'Élaguer l’arbre pour éviter le surapprentissage',
+    why: 'Empêcher l’arbre d’apprendre le bruit par cœur en limitant sa profondeur et la taille des feuilles.',
+    code: `dt_controle = DecisionTreeClassifier(
+    max_depth=3,          # au plus 3 niveaux de questions
+    min_samples_leaf=5,   # au moins 5 échantillons par feuille
+    random_state=42
+)
+dt_controle.fit(X_train, y_train)
+print(f"Score Train : {dt_controle.score(X_train, y_train):.2%}")
+print(f"Score Test  : {dt_controle.score(X_test, y_test):.2%}")`,
+    tip: 'Compare toujours Train et Test : 100 % Train / 72 % Test = par cœur ; 78 % Train / 76 % Test = généralisation.'
+  },
+  {
+    id: 'c-09', num: 'A09', group: '3. Arbres & Forêts',
+    title: 'Entraîner une Forêt Aléatoire et un Gradient Boosting',
+    why: 'Combiner 200 arbres en parallèle (Forêt) ou en série correctrice (Boosting) pour gagner en précision.',
+    code: `from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+
+foret = RandomForestClassifier(n_estimators=200, random_state=42)
+foret.fit(X_train, y_train)
+
+boosting = GradientBoostingClassifier(n_estimators=200, random_state=42)
+boosting.fit(X_train, y_train)`,
+    tip: 'Sur une forêt, augmenter n_estimators ne fait jamais surapprendre. Sur un boosting, trop d’arbres mène au surapprentissage.'
+  },
+  {
+    id: 'c-10', num: 'A10', group: '4. Feature Importance',
+    title: 'Lire les poids des variables (LogReg standardisée vs Arbre)',
+    why: 'Identifier quelles variables pèsent le plus dans les décisions du modèle.',
+    code: `from sklearn.preprocessing import StandardScaler
+
+# 1. Régression logistique : standardisation OBLIGATOIRE
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+lr_std = LogisticRegression(random_state=42).fit(X_train_scaled, y_train)
+print(pd.DataFrame({"Feature": X.columns, "Coef": lr_std.coef_[0]}))
+
+# 2. Arbre de décision : pas de standardisation (somme = 1)
+print(pd.DataFrame({"Feature": X.columns, "Importance": arbre.feature_importances_}))`,
+    tip: 'Sans standardisation, comparer le coefficient de l’âge (0-80) et du sexe (0-1) n’a aucun sens.'
+  },
+  {
+    id: 'c-11', num: 'A11', group: '5. Évaluer la Classification',
+    title: 'Extraire VN, FP, FN, VP avec confusion_matrix().ravel()',
+    why: 'Décomposer les 4 cases de la matrice 2×2 pour distinguer fausses alertes et oublis.',
+    code: `from sklearn.metrics import confusion_matrix
+
+tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+print(f"Vrais négatifs (VN) : {tn} | Faux positifs (FP) : {fp}")
+print(f"Faux négatifs  (FN) : {fn} | Vrais positifs (VP) : {tp}")`,
+    tip: 'Retiens l’ordre exact : VN, FP, FN, VP (lecture ligne par ligne). Inverser FP et FN fausse toute l’analyse.'
+  },
+  {
+    id: 'c-12', num: 'A12', group: '5. Évaluer la Classification',
+    title: 'Calculer Précision, Rappel, F1, Spécificité et le rapport complet',
+    why: 'Choisir la métrique adaptée au risque métier (médical vs anti-spam).',
+    code: `from sklearn.metrics import precision_score, recall_score, f1_score, classification_report
+
+print("Précision   :", precision_score(y_test, y_pred))
+print("Rappel      :", recall_score(y_test, y_pred))
+print("F1-score    :", f1_score(y_test, y_pred))
+print("Spécificité :", recall_score(y_test, y_pred, pos_label=0))
+print(classification_report(y_test, y_pred))`,
+    tip: 'La spécificité n’a pas de fonction dédiée : c’est le recall_score de la classe 0 (pos_label=0).'
+  }
+];
+    const CHAPTERS = [
+  {
+    num: '01', group: '1. Le Fil Rouge', shortTitle: '01 · Le défi Titanic (0 ou 1)',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-rose-600"></span>INTRODUCTION · ÉTAPE 01
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            Ce passager a-t-il survécu au naufrage du Titanic ?
+          </h2>
+          <div class="mt-3 flex items-start sm:items-center gap-3">
+            <span class="w-1.5 h-6 rounded-full bg-rose-600 shrink-0 mt-1 sm:mt-0"></span>
+            <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+              « Sur 2 224 personnes à bord, plus de 1 500 ont péri — mais pas au hasard. Ici, on ne prédit plus un nombre : on range chaque passager dans une étiquette (Survécu ou Décédé). »
+            </p>
+          </div>
+        </header>
+
+        <!-- Comparaison visuelle illustrée -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <section class="bg-white rounded-3xl border-2 border-sky-200 p-6 flex items-center gap-5">
+            <div class="w-16 h-16 rounded-2xl bg-sky-600 text-white font-serif font-bold text-2xl flex items-center justify-center shrink-0 shadow-sm">
+              17,7°
+            </div>
+            <div>
+              <span class="px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800 font-display font-extrabold text-[11px] uppercase">Cours 02 · Régression</span>
+              <h3 class="font-serif text-2xl font-bold text-ink mt-1">Un nombre sur une règle</h3>
+              <p class="text-sm text-slate-600 mt-1">Température, prix, salaire. On mesure l’écart avec <strong>MAE, MSE, RMSE et R²</strong>.</p>
+            </div>
+          </section>
+
+          <section class="bg-white rounded-3xl border-2 border-rose-400 p-6 flex items-center gap-5 shadow-2xs">
+            <div class="w-16 h-16 rounded-2xl bg-rose-600 text-white font-serif font-bold text-xl flex items-center justify-center shrink-0 shadow-sm">
+              0 / 1
+            </div>
+            <div>
+              <span class="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 font-display font-extrabold text-[11px] uppercase">Ce cours · Classification</span>
+              <h3 class="font-serif text-2xl font-bold text-rose-700 mt-1">Une étiquette discrète</h3>
+              <p class="text-sm text-slate-600 mt-1">Survécu/Décédé, Spam/Normal. <strong>R² et MAE sont inutilisables</strong> : on utilise la matrice de confusion, Précision, Rappel, F1 et Spécificité.</p>
+            </div>
+          </section>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 space-y-4">
+          <div class="font-display text-xs font-extrabold text-slate-500 uppercase tracking-wider">Enquête Kaggle (14 762 data scientists) : les algorithmes les plus utilisés</div>
+          <div class="space-y-3 text-xs font-display font-bold">
+            <div>
+              <div class="flex justify-between mb-1"><span>1. Régression linéaire ou logistique</span><span class="font-mono text-rose-700">69,3 %</span></div>
+              <div class="w-full h-4 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-rose-600 rounded-full" style="width:69.3%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-1"><span>2. Arbres de décision &amp; Forêts aléatoires</span><span class="font-mono text-teal-700">57,5 %</span></div>
+              <div class="w-full h-4 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-teal-600 rounded-full" style="width:57.5%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-1"><span>3. Gradient Boosting (XGBoost, LightGBM...)</span><span class="font-mono text-indigo-700">37,5 %</span></div>
+              <div class="w-full h-4 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-indigo-600 rounded-full" style="width:37.5%"></div></div>
+            </div>
+          </div>
+          <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-xs text-amber-950">
+            💡 <strong>Idée maîtresse :</strong> Le modèle au meilleur score brut n’est pas toujours celui qu’on retient en entreprise. Pouvoir <strong>expliquer une décision</strong> (ex. refus de crédit) prime souvent sur quelques dixièmes de score.
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          ${renderCodeCard(CODE_ACTIONS[0])}
+          ${renderCodeCard(CODE_ACTIONS[1])}
+        </div>
+      </div>
+    `
+  },
+  {
+    num: '02', group: '2. Régression Logistique', shortTitle: '02 · Régression logistique & Sigmoïde',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-rose-600"></span>CLASSIFICATION BINAIRE · ÉTAPE 02
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            La régression logistique : une probabilité + un seuil
+          </h2>
+          <div class="mt-3 flex items-start sm:items-center gap-3">
+            <span class="w-1.5 h-6 rounded-full bg-rose-600 shrink-0 mt-1 sm:mt-0"></span>
+            <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+              « 1. Elle additionne les indices · 2. La courbe en S (sigmoïde) comprime le score entre 0 % et 100 % · 3. Un seuil décide. »
+            </p>
+          </div>
+        </header>
+
+        <!-- Pipeline visuel en 3 temps -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-5 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+            <span class="px-2 py-0.5 rounded bg-slate-900 text-white font-bold">Temps 1 · Score brut z</span>
+            <p class="text-slate-600 mt-1.5">Comme une régression linéaire, elle combine classe, sexe et âge en un nombre <em>z</em> (qui peut aller de −∞ à +∞).</p>
+          </div>
+          <div class="bg-rose-50/70 rounded-2xl p-4 border border-rose-200">
+            <span class="px-2 py-0.5 rounded bg-rose-600 text-white font-bold">Temps 2 · Courbe Sigmoïde</span>
+            <p class="text-slate-700 mt-1.5">La fonction <code class="font-mono">σ(z) = 1 / (1 + e⁻ᶻ)</code> écrase n’importe quel nombre dans l’intervalle <strong>[0, 1]</strong> : une probabilité !</p>
+          </div>
+          <div class="bg-teal-50/70 rounded-2xl p-4 border border-teal-200">
+            <span class="px-2 py-0.5 rounded bg-teal-600 text-white font-bold">Temps 3 · Règle du seuil</span>
+            <p class="text-slate-700 mt-1.5">Si probabilité ≥ 0,50 → Survécu (1). Tu peux déplacer ce curseur à tout moment <strong>sans réentraîner</strong> le modèle.</p>
+          </div>
+        </div>
+
+        <!-- Simulateur Sigmoïde interactif -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 grid grid-cols-1 xl:grid-cols-12 gap-6 items-center">
+          <div class="xl:col-span-7">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-display text-xs font-extrabold text-rose-700 uppercase">Simulateur interactif de la courbe Sigmoïde</span>
+              <span id="sig-badge" class="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-rose-600 text-white">Seuil = 0.50</span>
+            </div>
+            <svg viewBox="0 0 600 290" class="w-full h-auto bg-slate-50/70 rounded-2xl border border-slate-200">
+              <line x1="65" y1="30" x2="560" y2="30" stroke="#CBD5E1" stroke-dasharray="4 4"/>
+              <line x1="65" y1="140" x2="560" y2="140" stroke="#94A3B8"/>
+              <line x1="65" y1="250" x2="560" y2="250" stroke="#CBD5E1" stroke-dasharray="4 4"/>
+              <text x="55" y="34" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#64748B">100%</text>
+              <text x="55" y="144" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#64748B">50%</text>
+              <text x="55" y="254" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#64748B">0%</text>
+              <rect id="sig-zone-top" x="65" y="30" width="495" height="110" fill="#10B981" fill-opacity="0.08"/>
+              <rect id="sig-zone-bot" x="65" y="140" width="495" height="110" fill="#F43F5E" fill-opacity="0.06"/>
+              <path d="M 75 246 C 180 242, 245 220, 310 140 C 375 60, 440 38, 550 34" fill="none" stroke="#0F172A" stroke-width="4" stroke-linecap="round"/>
+              <line id="sig-thresh-line" x1="65" y1="140" x2="560" y2="140" stroke="#E11D48" stroke-width="3" stroke-dasharray="7 5"/>
+              <circle cx="465" cy="50" r="8" fill="#0D9488" stroke="#FFF" stroke-width="2.5"/>
+              <text x="415" y="72" font-family="Plus Jakarta Sans" font-size="11" font-weight="bold" fill="#0F172A">Femme 1re cl. (91%)</text>
+              <circle cx="290" cy="158" r="8" fill="#D97706" stroke="#FFF" stroke-width="2.5"/>
+              <text x="155" y="176" font-family="Plus Jakarta Sans" font-size="11" font-weight="bold" fill="#0F172A">Homme 1re cl. 45a (42%)</text>
+              <circle cx="170" cy="226" r="8" fill="#64748B" stroke="#FFF" stroke-width="2.5"/>
+              <text x="90" y="212" font-family="Plus Jakarta Sans" font-size="11" font-weight="bold" fill="#0F172A">Homme 3e cl. (11%)</text>
+            </svg>
+          </div>
+
+          <div class="xl:col-span-5 space-y-4">
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+              <label for="sig-slider" class="block font-display font-bold text-xs text-ink mb-2">Déplace le seuil de décision (sans réentraîner) :</label>
+              <input id="sig-slider" type="range" min="10" max="90" step="5" value="50" class="ml-slider w-full" />
+              <div class="flex justify-between text-[11px] font-mono text-slate-400 mt-1">
+                <span>0.10 (Prudent)</span><span>0.50 (Défaut)</span><span>0.90 (Strict)</span>
+              </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2.5 text-xs">
+              <div class="font-display font-extrabold text-slate-400 uppercase text-[10px]">Verdict instantané</div>
+              <div class="flex justify-between items-center py-1 border-b border-slate-100">
+                <span>👩 Femme 1re cl. <strong>(91 %)</strong></span>
+                <span id="sig-v1" class="px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">Survécu (1)</span>
+              </div>
+              <div class="flex justify-between items-center py-1 border-b border-slate-100">
+                <span>👨 Homme 1re cl. 45a <strong>(42 %)</strong></span>
+                <span id="sig-v2" class="px-2.5 py-0.5 rounded-full font-bold bg-rose-100 text-rose-800">Décédé (0)</span>
+              </div>
+              <div class="flex justify-between items-center py-1">
+                <span>👨 Homme 3e cl. 25a <strong>(11 %)</strong></span>
+                <span id="sig-v3" class="px-2.5 py-0.5 rounded-full font-bold bg-rose-100 text-rose-800">Décédé (0)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          ${renderCodeCard(CODE_ACTIONS[3])}
+          ${renderCodeCard(CODE_ACTIONS[4])}
+        </div>
+      </div>
+    `
+  },
+  {
+    num: '03', group: '2. Régression Logistique', shortTitle: '03 · Stratify, class_weight & Bilan LogReg',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-rose-600"></span>DÉCOUPAGE &amp; DÉSÉQUILIBRE · ÉTAPE 03
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            stratify=y, class_weight et forces/faiblesses
+          </h2>
+          <div class="mt-3 flex items-start sm:items-center gap-3">
+            <span class="w-1.5 h-6 rounded-full bg-rose-600 shrink-0 mt-1 sm:mt-0"></span>
+            <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+              « Sans stratify=y, un tirage au sort malchanceux peut vider le jeu de test de ses survivants. »
+            </p>
+          </div>
+        </header>
+
+        <!-- Schéma visuel stratify=y -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div class="bg-rose-50/70 border border-rose-200 rounded-2xl p-4 space-y-2">
+            <div class="font-display font-extrabold text-rose-800 uppercase">❌ Sans stratify=y (Tirage aveugle)</div>
+            <p class="text-slate-600">Le jeu complet a 40 % de survivants, mais le hasard peut créer un jeu de test avec seulement 18 % de survivants : tes métriques mesurent la malchance du tirage !</p>
+            <div class="h-4 rounded-full overflow-hidden flex"><div class="bg-emerald-500" style="width:18%"></div><div class="bg-rose-400" style="width:82%"></div></div>
+          </div>
+          <div class="bg-emerald-50/70 border border-emerald-300 rounded-2xl p-4 space-y-2">
+            <div class="font-display font-extrabold text-emerald-800 uppercase">✅ Avec stratify=y (Proportion verrouillée)</div>
+            <p class="text-slate-600">Train ET Test conservent exactement 40 % de survivants et 60 % de décédés : la comparaison entre modèles est honnête.</p>
+            <div class="h-4 rounded-full overflow-hidden flex"><div class="bg-emerald-500" style="width:40%"></div><div class="bg-rose-400" style="width:60%"></div></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+          <section class="bg-emerald-50/60 border-2 border-emerald-300 rounded-3xl p-6 space-y-2.5">
+            <div class="font-display font-extrabold text-xs uppercase text-emerald-800">✓ 5 Forces majeures</div>
+            <ul class="space-y-2 text-slate-700 text-xs sm:text-sm">
+              <li><strong>1. Interprétabilité :</strong> ses coefficients se lisent en rapports de cotes.</li>
+              <li><strong>2. Rapidité :</strong> entraînement très rapide même sur de grands volumes.</li>
+              <li><strong>3. Probabilités :</strong> fournit une probabilité continue, pas seulement une étiquette.</li>
+              <li><strong>4. Robustesse :</strong> peu sensible aux valeurs aberrantes isolées.</li>
+              <li><strong>5. Simplicité :</strong> peu de réglages → faible risque de surapprentissage.</li>
+            </ul>
+          </section>
+
+          <section class="bg-rose-50/60 border-2 border-rose-300 rounded-3xl p-6 space-y-2.5">
+            <div class="font-display font-extrabold text-xs uppercase text-rose-800">⚠ 4 Faiblesses à connaître</div>
+            <ul class="space-y-2 text-slate-700 text-xs sm:text-sm">
+              <li><strong>1. Linéarité :</strong> suppose une relation linéaire entre variables et log-cotes.</li>
+              <li><strong>2. Séparabilité :</strong> peine sur des données qui ne sont pas linéairement séparables.</li>
+              <li><strong>3. Interactions :</strong> ne les capte pas sans les créer explicitement.</li>
+              <li><strong>4. Multicolinéarité :</strong> sensible aux variables fortement corrélées entre elles.</li>
+            </ul>
+          </section>
+        </div>
+
+        ${renderCodeCard(CODE_ACTIONS[5])}
+      </div>
+    `
+  },
+  {
+    num: '04', group: '3. Arbres & Forêts', shortTitle: '04 · L’arbre de décision (Gini & Entropie)',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-100 text-teal-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-teal-600"></span>ORGANIGRAMME LISIBLE · ÉTAPE 04
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            L’arbre de décision : une suite de questions « Oui / Non »
+          </h2>
+          <div class="mt-3 flex items-start sm:items-center gap-3">
+            <span class="w-1.5 h-6 rounded-full bg-teal-600 shrink-0 mt-1 sm:mt-0"></span>
+            <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+              « Sur le Titanic, l’arbre retrouve tout seul la consigne : “les femmes et les enfants d’abord”, sans aucune mise à l’échelle nécessaire. »
+            </p>
+          </div>
+        </header>
+
+        <!-- Schéma SVG Arbre Titanic -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-5 overflow-x-auto">
+          <svg viewBox="0 0 780 280" class="w-full min-w-[620px] h-auto mx-auto">
+            <rect x="265" y="10" width="250" height="58" rx="14" fill="#0F172A"/>
+            <text x="390" y="34" text-anchor="middle" fill="#FFFFFF" font-family="Plus Jakarta Sans" font-weight="800" font-size="13">1. Le passager est-il une femme ?</text>
+            <text x="390" y="53" text-anchor="middle" fill="#94A3B8" font-family="JetBrains Mono" font-size="11">sex &lt;= 0.5 · Gini = 0.48</text>
+
+            <path d="M 325 68 L 185 118" stroke="#0D9488" stroke-width="3"/>
+            <rect x="215" y="80" width="54" height="20" rx="6" fill="#CCFBF1"/>
+            <text x="242" y="94" text-anchor="middle" fill="#0F766E" font-weight="bold" font-size="11">OUI (F)</text>
+
+            <path d="M 455 68 L 595 118" stroke="#E11D48" stroke-width="3"/>
+            <rect x="510" y="80" width="54" height="20" rx="6" fill="#FFE4E6"/>
+            <text x="537" y="94" text-anchor="middle" fill="#BE123C" font-weight="bold" font-size="11">NON (H)</text>
+
+            <rect x="75" y="118" width="220" height="54" rx="12" fill="#FFFFFF" stroke="#0D9488" stroke-width="2.5"/>
+            <text x="185" y="140" text-anchor="middle" fill="#0F172A" font-weight="bold" font-size="12">Billet 1re ou 2e classe ?</text>
+            <text x="185" y="158" text-anchor="middle" fill="#64748B" font-family="JetBrains Mono" font-size="10">pclass &lt;= 2.5</text>
+
+            <rect x="485" y="118" width="220" height="54" rx="12" fill="#FFFFFF" stroke="#E11D48" stroke-width="2.5"/>
+            <text x="595" y="140" text-anchor="middle" fill="#0F172A" font-weight="bold" font-size="12">Est-ce un jeune enfant ?</text>
+            <text x="595" y="158" text-anchor="middle" fill="#64748B" font-family="JetBrains Mono" font-size="10">age &lt;= 6.5</text>
+
+            <path d="M 135 172 L 90 214" stroke="#0D9488" stroke-width="2.5"/>
+            <rect x="15" y="214" width="150" height="54" rx="12" fill="#10B981"/>
+            <text x="90" y="237" text-anchor="middle" fill="#FFFFFF" font-weight="bold" font-size="13">SURVÉCU (93 %)</text>
+            <text x="90" y="255" text-anchor="middle" fill="#ECFDF5" font-size="10">Feuille · Classe 1</text>
+
+            <path d="M 235 172 L 280 214" stroke="#94A3B8" stroke-width="2.5"/>
+            <rect x="205" y="214" width="150" height="54" rx="12" fill="#F59E0B"/>
+            <text x="280" y="237" text-anchor="middle" fill="#FFFFFF" font-weight="bold" font-size="13">MITIGÉ (46 %)</text>
+            <text x="280" y="255" text-anchor="middle" fill="#FFFBEB" font-size="10">3e classe · À affiner</text>
+
+            <path d="M 545 172 L 500 214" stroke="#0D9488" stroke-width="2.5"/>
+            <rect x="425" y="214" width="150" height="54" rx="12" fill="#10B981"/>
+            <text x="500" y="237" text-anchor="middle" fill="#FFFFFF" font-weight="bold" font-size="13">SURVÉCU (67 %)</text>
+            <text x="500" y="255" text-anchor="middle" fill="#ECFDF5" font-size="10">Enfant prioritaire</text>
+
+            <path d="M 645 172 L 690 214" stroke="#E11D48" stroke-width="2.5"/>
+            <rect x="615" y="214" width="150" height="54" rx="12" fill="#E11D48"/>
+            <text x="690" y="237" text-anchor="middle" fill="#FFFFFF" font-weight="bold" font-size="13">DÉCÉDÉ (84 %)</text>
+            <text x="690" y="255" text-anchor="middle" fill="#FFE4E6" font-size="10">Homme adulte · Classe 0</text>
+          </svg>
+        </div>
+
+        <!-- Jauge visuelle Gini / Entropie -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div class="bg-rose-50/70 rounded-2xl p-4 border border-rose-200">
+            <div class="font-display font-extrabold text-rose-800 uppercase">Gini = 0,50 (Désordre max)</div>
+            <p class="text-slate-700 mt-1">50 % de survivants, 50 % de décédés : un mélange totalement impur.</p>
+          </div>
+          <div class="bg-emerald-50/70 rounded-2xl p-4 border border-emerald-300">
+            <div class="font-display font-extrabold text-emerald-800 uppercase">Gini = 0,00 (Pureté parfaite)</div>
+            <p class="text-slate-700 mt-1">100 % de survivants dans la feuille : plus aucune hésitation possible.</p>
+          </div>
+          <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+            <div class="font-display font-extrabold text-ink uppercase">Algorithme glouton</div>
+            <p class="text-slate-700 mt-1">Il choisit à chaque étape la question qui baisse le plus Gini ou l’Entropie, sans revenir en arrière.</p>
+          </div>
+        </div>
+
+        ${renderCodeCard(CODE_ACTIONS[6])}
+      </div>
+    `
+  },
+  {
+    num: '05', group: '3. Arbres & Forêts', shortTitle: '05 · Élagage & Forces/Faiblesses Arbre',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-amber-600"></span>CONTRÔLER LE SURAPPRENTISSAGE · ÉTAPE 05
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            Élaguer un arbre (Pruning) pour éviter le par cœur
+          </h2>
+          <div class="mt-3 flex items-start sm:items-center gap-3">
+            <span class="w-1.5 h-6 rounded-full bg-amber-600 shrink-0 mt-1 sm:mt-0"></span>
+            <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+              « Un arbre libre obtient 100 % sur Train et 72 % sur Test. Un arbre élagué obtient 78 % sur Train et 76 % sur Test : il a vraiment appris. »
+            </p>
+          </div>
+        </header>
+
+        <!-- Comparatif visuel barres Train vs Test -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-rose-50/70 rounded-3xl border-2 border-rose-300 p-6 space-y-3 text-xs">
+            <div class="flex justify-between items-center">
+              <span class="font-display font-extrabold text-rose-900 uppercase">❌ Arbre libre (sans limite)</span>
+              <span class="px-2.5 py-0.5 rounded bg-rose-200 text-rose-900 font-bold">Écart = 28 pts (Par cœur)</span>
+            </div>
+            <div>
+              <div class="flex justify-between font-bold mb-1"><span>Score Entraînement</span><span>100 %</span></div>
+              <div class="h-3 bg-rose-200 rounded-full"><div class="h-full bg-rose-600 rounded-full" style="width:100%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between font-bold mb-1"><span>Score Test (nouveaux cas)</span><span>72 %</span></div>
+              <div class="h-3 bg-rose-200 rounded-full"><div class="h-full bg-rose-500 rounded-full" style="width:72%"></div></div>
+            </div>
+          </div>
+
+          <div class="bg-emerald-50/70 rounded-3xl border-2 border-emerald-400 p-6 space-y-3 text-xs">
+            <div class="flex justify-between items-center">
+              <span class="font-display font-extrabold text-emerald-900 uppercase">✅ Arbre élagué (max_depth=3)</span>
+              <span class="px-2.5 py-0.5 rounded bg-emerald-200 text-emerald-900 font-bold">Écart = 2 pts (Généralise)</span>
+            </div>
+            <div>
+              <div class="flex justify-between font-bold mb-1"><span>Score Entraînement</span><span>78 %</span></div>
+              <div class="h-3 bg-emerald-200 rounded-full"><div class="h-full bg-emerald-600 rounded-full" style="width:78%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between font-bold mb-1"><span>Score Test (nouveaux cas)</span><span>76 %</span></div>
+              <div class="h-3 bg-emerald-200 rounded-full"><div class="h-full bg-emerald-600 rounded-full" style="width:76%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+          <div class="bg-white rounded-3xl border border-slate-200 p-6 space-y-2">
+            <div class="font-display font-extrabold text-xs uppercase text-amber-700">Les 5 paramètres d’élagage dans scikit-learn</div>
+            <ul class="space-y-1.5 text-xs sm:text-sm text-slate-700">
+              <li>• <code class="font-mono font-bold text-rose-700">max_depth</code> : profondeur maximale de l’arbre.</li>
+              <li>• <code class="font-mono font-bold text-rose-700">min_samples_split</code> : effectif minimal pour diviser un nœud.</li>
+              <li>• <code class="font-mono font-bold text-rose-700">min_samples_leaf</code> : effectif minimal dans une feuille finale.</li>
+              <li>• <code class="font-mono font-bold text-rose-700">max_features</code> : nombre maximal de colonnes examinées.</li>
+              <li>• <code class="font-mono font-bold text-rose-700">ccp_alpha</code> : élagage par coût-complexité.</li>
+            </ul>
+          </div>
+
+          <div class="bg-white rounded-3xl border border-slate-200 p-6 space-y-2">
+            <div class="font-display font-extrabold text-xs uppercase text-rose-800">⚠ Les 5 faiblesses de l’arbre unique</div>
+            <ul class="space-y-1.5 text-xs sm:text-sm text-slate-700">
+              <li><strong>1. Surapprentissage :</strong> mémorise le bruit sans élagage.</li>
+              <li><strong>2. Instabilité :</strong> une petite variation des données change tout l’arbre.</li>
+              <li><strong>3. Biais de sélection :</strong> privilégie les variables à nombreuses valeurs distinctes.</li>
+              <li><strong>4. Optima locaux :</strong> construction gloutonne sans garantie globale.</li>
+              <li><strong>5. Frontières rectangulaires :</strong> découpe uniquement en escaliers.</li>
+            </ul>
+          </div>
+        </div>
+
+        ${renderCodeCard(CODE_ACTIONS[7])}
+      </div>
+    `
+  },
+  {
+    num: '06', group: '3. Arbres & Forêts', shortTitle: '06 · Forêt Aléatoire vs Gradient Boosting',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-indigo-600"></span>MÉTHODES D'ENSEMBLE · ÉTAPE 06
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            Des arbres aux forêts : Random Forest vs Gradient Boosting
+          </h2>
+          <div class="mt-3 flex items-start sm:items-center gap-3">
+            <span class="w-1.5 h-6 rounded-full bg-indigo-600 shrink-0 mt-1 sm:mt-0"></span>
+            <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+              « Au lieu d’un seul arbre instable, on en construit 200 — soit en parallèle qui votent, soit en série l’un après l’autre pour corriger les erreurs. »
+            </p>
+          </div>
+        </header>
+
+        <!-- Schéma SVG comparatif En parallèle vs En série -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 overflow-x-auto">
+          <svg viewBox="0 0 760 210" class="w-full min-w-[580px] h-auto mx-auto">
+            <!-- Left: Random Forest -->
+            <rect x="10" y="10" width="350" height="190" rx="18" fill="#EEF2FF" stroke="#A5B4FC" stroke-width="2"/>
+            <text x="185" y="36" text-anchor="middle" font-family="Plus Jakarta Sans" font-weight="800" font-size="13" fill="#312E81">🌲 FORÊT ALÉATOIRE (En parallèle)</text>
+            <rect x="35" y="55" width="85" height="44" rx="10" fill="#4F46E5"/><text x="77" y="81" text-anchor="middle" fill="#FFF" font-size="11" font-weight="bold">Arbre 1 → 1</text>
+            <rect x="142" y="55" width="85" height="44" rx="10" fill="#4F46E5"/><text x="184" y="81" text-anchor="middle" fill="#FFF" font-size="11" font-weight="bold">Arbre 2 → 1</text>
+            <rect x="250" y="55" width="85" height="44" rx="10" fill="#6366F1"/><text x="292" y="81" text-anchor="middle" fill="#FFF" font-size="11" font-weight="bold">Arbre 3 → 0</text>
+            <path d="M 77 99 L 185 135 M 184 99 L 185 135 M 292 99 L 185 135" stroke="#4F46E5" stroke-width="2.5"/>
+            <rect x="95" y="135" width="180" height="46" rx="12" fill="#0F172A"/><text x="185" y="162" text-anchor="middle" fill="#38BDF8" font-size="12" font-weight="bold">Vote majoritaire → 1</text>
+
+            <!-- Right: Gradient Boosting -->
+            <rect x="400" y="10" width="350" height="190" rx="18" fill="#FFFBEB" stroke="#FCD34D" stroke-width="2"/>
+            <text x="575" y="36" text-anchor="middle" font-family="Plus Jakarta Sans" font-weight="800" font-size="13" fill="#78350F">🎯 GRADIENT BOOSTING (En série)</text>
+            <rect x="420" y="75" width="85" height="50" rx="10" fill="#D97706"/><text x="462" y="104" text-anchor="middle" fill="#FFF" font-size="11" font-weight="bold">Arbre 1</text>
+            <path d="M 505 100 L 533 100" stroke="#B45309" stroke-width="2.5"/><text x="519" y="90" text-anchor="middle" fill="#B45309" font-size="9" font-weight="bold">erreurs</text>
+            <rect x="533" y="75" width="85" height="50" rx="10" fill="#B45309"/><text x="575" y="104" text-anchor="middle" fill="#FFF" font-size="11" font-weight="bold">Arbre 2</text>
+            <path d="M 618 100 L 646 100" stroke="#92400E" stroke-width="2.5"/><text x="632" y="90" text-anchor="middle" fill="#92400E" font-size="9" font-weight="bold">restes</text>
+            <rect x="646" y="75" width="85" height="50" rx="10" fill="#92400E"/><text x="688" y="104" text-anchor="middle" fill="#FFF" font-size="11" font-weight="bold">Arbre 3</text>
+            <text x="575" y="165" text-anchor="middle" fill="#78350F" font-size="11" font-weight="bold">Chaque arbre corrige les fautes du précédent</text>
+          </svg>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm">
+          <div class="bg-indigo-50/60 border border-indigo-200 rounded-2xl p-5">
+            <strong class="text-indigo-950 block mb-1">n_estimators sur une Forêt :</strong>
+            <p class="text-slate-700">Augmenter le nombre d’arbres ne fait jamais surapprendre (coûte juste du temps de calcul).</p>
+          </div>
+          <div class="bg-amber-50/60 border border-amber-200 rounded-2xl p-5">
+            <strong class="text-amber-950 block mb-1">n_estimators + learning_rate sur un Boosting :</strong>
+            <p class="text-slate-700">Trop d’arbres finit par apprendre le bruit ! Un <code class="font-mono">learning_rate</code> faible stabilise l’apprentissage.</p>
+          </div>
+        </div>
+
+        ${renderCodeCard(CODE_ACTIONS[8])}
+      </div>
+    `
+  },
+  {
+    num: '07', group: '4. Feature Importance', shortTitle: '07 · Feature Importance (LogReg vs Arbre)',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-rose-600"></span>INTERPRÉTER LE MODÈLE · ÉTAPE 07
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            Feature importance : quelles colonnes pèsent vraiment ?
+          </h2>
+          <div class="mt-3 flex items-start sm:items-center gap-3">
+            <span class="w-1.5 h-6 rounded-full bg-rose-600 shrink-0 mt-1 sm:mt-0"></span>
+            <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+              « La méthode change selon l’algorithme : standardisation obligatoire en régression logistique, inutile dans un arbre. »
+            </p>
+          </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+          <section class="bg-white rounded-3xl border-2 border-rose-300 p-6 space-y-3">
+            <span class="px-2.5 py-0.5 rounded bg-rose-100 text-rose-800 font-display font-extrabold text-xs">1. Régression Logistique (coef_[0])</span>
+            <h3 class="font-serif text-xl font-bold text-ink">StandardScaler OBLIGATOIRE avant</h3>
+            <p class="text-slate-600 text-xs sm:text-sm">Comparer le coefficient de l’âge (0 à 80) et du sexe (0 ou 1) sans mise à l’échelle n’a aucun sens. Après standardisation : le <strong>signe (+/−)</strong> donne le sens de l’effet, la <strong>valeur absolue</strong> donne la force.</p>
+          </section>
+
+          <section class="bg-white rounded-3xl border-2 border-teal-300 p-6 space-y-3">
+            <span class="px-2.5 py-0.5 rounded bg-teal-100 text-teal-800 font-display font-extrabold text-xs">2. Arbres &amp; Forêts (feature_importances_)</span>
+            <h3 class="font-serif text-xl font-bold text-ink">Baisse d’impureté (somme = 1)</h3>
+            <p class="text-slate-600 text-xs sm:text-sm">Aucune standardisation requise. <strong>Angle mort à connaître :</strong> si deux colonnes sont fortement corrélées, l’arbre en choisit une et l’autre apparaît comme inutile (importance ≈ 0) alors qu’elle ne l’est pas !</p>
+          </section>
+        </div>
+
+        ${renderCodeCard(CODE_ACTIONS[9])}
+      </div>
+    `
+  },
+  {
+    num: '08', group: '5. Évaluer la Classification', shortTitle: '08 · Matrice 2×2, Précision, Rappel & F1',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-rose-600"></span>ÉVALUATION · ÉTAPE 08
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            Lire la matrice de confusion et en tirer quatre nombres
+          </h2>
+          <div class="mt-3 flex items-start sm:items-center gap-3">
+            <span class="w-1.5 h-6 rounded-full bg-rose-600 shrink-0 mt-1 sm:mt-0"></span>
+            <p class="font-display text-base sm:text-lg lg:text-xl font-semibold text-slate-700 leading-snug">
+              « Sur un jeu où 95 % des gens meurent, un modèle stupide qui dit toujours “Mort” affiche 95 % d’exactitude. La matrice 2×2 ne cache rien. »
+            </p>
+          </div>
+        </header>
+
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-center">
+          <div class="xl:col-span-6 bg-white rounded-3xl border border-slate-200 p-6">
+            <div class="font-display text-xs font-extrabold text-slate-500 uppercase mb-3">Ordre exact de <code class="font-mono text-ink">confusion_matrix().ravel()</code> :</div>
+            <div class="grid grid-cols-2 gap-3 text-center text-xs">
+              <div class="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-400">
+                <div class="font-mono font-bold text-emerald-800">1. VN (tn)</div>
+                <div class="font-serif text-xl font-bold text-ink mt-1">Vrai Négatif</div>
+                <p class="text-slate-600 mt-1">Décédé réel, prédit décédé.</p>
+              </div>
+              <div class="p-4 rounded-2xl bg-amber-50 border-2 border-amber-400">
+                <div class="font-mono font-bold text-amber-800">2. FP (fp)</div>
+                <div class="font-serif text-xl font-bold text-ink mt-1">Faux Positif</div>
+                <p class="text-slate-600 mt-1">Fausse alerte (survivant à tort).</p>
+              </div>
+              <div class="p-4 rounded-2xl bg-rose-50 border-2 border-rose-400">
+                <div class="font-mono font-bold text-rose-800">3. FN (fn)</div>
+                <div class="font-serif text-xl font-bold text-ink mt-1">Faux Négatif</div>
+                <p class="text-slate-600 mt-1">Oubli (survivant réel manqué).</p>
+              </div>
+              <div class="p-4 rounded-2xl bg-sky-50 border-2 border-sky-400">
+                <div class="font-mono font-bold text-sky-800">4. VP (tp)</div>
+                <div class="font-serif text-xl font-bold text-ink mt-1">Vrai Positif</div>
+                <p class="text-slate-600 mt-1">Survivant réel bien détecté.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="xl:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div class="bg-white rounded-2xl border border-slate-200 p-4">
+              <div class="font-display font-extrabold text-rose-700 uppercase">Précision = VP / (VP + FP)</div>
+              <p class="text-slate-600 mt-1">Fiabilité des annonces positives. <strong>À privilégier pour l’anti-spam</strong> (ne pas bloquer un mail important).</p>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200 p-4">
+              <div class="font-display font-extrabold text-teal-700 uppercase">Rappel = VP / (VP + FN)</div>
+              <p class="text-slate-600 mt-1">Capacité à attraper tous les vrais positifs. <strong>À privilégier en dépistage médical</strong> (un oubli est grave).</p>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200 p-4">
+              <div class="font-display font-extrabold text-indigo-700 uppercase">Score F1 = 2·P·R / (P + R)</div>
+              <p class="text-slate-600 mt-1">Moyenne harmonique de Précision et Rappel. Ne monte que si les deux montent (idéal sur classes déséquilibrées).</p>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200 p-4">
+              <div class="font-display font-extrabold text-slate-700 uppercase">Spécificité = VN / (VN + FP)</div>
+              <p class="text-slate-600 mt-1">Rappel de la classe négative (<code class="font-mono">recall_score(y_test, y_pred, pos_label=0)</code>).</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          ${renderCodeCard(CODE_ACTIONS[10])}
+          ${renderCodeCard(CODE_ACTIONS[11])}
+        </div>
+      </div>
+    `
+  },
+  {
+    num: '09', group: '6. Quiz & Challenge', shortTitle: '09 · Quiz & Règles du Challenge Titanic',
+    render: () => `
+      <div class="space-y-7">
+        <header class="pb-5 border-b border-slate-200/80">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+            <span class="w-2 h-2 rounded-full bg-amber-600"></span>AUTO-ÉVALUATION · ÉTAPE 09
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-ink tracking-tight leading-tight">
+            Quiz express &amp; Règles d’or du Challenge Titanic
+          </h2>
+          <p class="mt-2 text-sm sm:text-base text-slate-600">Cliquez sur chaque question pour vérifier votre compréhension.</p>
+        </header>
+
+        <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-5 text-xs sm:text-sm text-amber-950 space-y-1.5">
+          <div class="font-display font-extrabold uppercase text-amber-900">⚠ Attention aux pièges du notebook Challenge :</div>
+          <p>• Les colonnes portent une majuscule (<code class="font-mono">Survived, Pclass, Sex, Age, Fare</code>), alors que seaborn utilise des minuscules.</p>
+          <p>• <strong>Ordre strict :</strong> Encode avant de diviser (<code class="font-mono">train_test_split</code> avec <code class="font-mono">stratify=y</code>), puis standardise après le découpage (sinon fuite de données).</p>
+        </div>
+
+        <div class="space-y-3.5">
+          ${[
+            {
+              q: '1. Tu baisses le seuil de décision de 0.50 à 0.30 sur predict_proba(). Que se passe-t-il ?',
+              a: 'Le Rappel augmente et la Précision baisse : le modèle annonce davantage de positifs, sans avoir besoin de réentraîner le modèle.'
+            },
+            {
+              q: '2. Ton modèle affiche 94 % d’exactitude sur un jeu où 94 % des cas sont négatifs. Que fais-tu ?',
+              a: 'Je regarde la matrice de confusion et je compare au DummyClassifier : le modèle répond peut-être toujours « négatif » sans rien avoir appris !'
+            },
+            {
+              q: '3. Dans quel ordre confusion_matrix(y_test, y_pred).ravel() renvoie-t-il les quatre valeurs ?',
+              a: 'Vrais négatifs (tn), faux positifs (fp), faux négatifs (fn), vrais positifs (tp) — lecture ligne par ligne.'
+            },
+            {
+              q: '4. Quelle est la différence entre une forêt aléatoire et un gradient boosting ?',
+              a: 'La forêt construit ses arbres en parallèle et les fait voter ; le gradient boosting les construit l’un après l’autre pour corriger les erreurs des précédents.'
+            },
+            {
+              q: '5. Pourquoi la régression logistique porte-t-elle un nom trompeur ?',
+              a: 'Parce qu’elle sert ici à classer. La sigmoïde transforme son score en probabilité, puis un seuil choisit 0 ou 1.'
+            },
+            {
+              q: '6. Que représente la feuille d’un arbre de décision ?',
+              a: 'La décision finale après toutes les questions du chemin : par exemple « survivant ».'
+            },
+            {
+              q: '7. Quel paramètre limite la profondeur d’un arbre ?',
+              a: 'max_depth. Une profondeur plus petite peut réduire le surapprentissage, mais il faut le vérifier sur des données non vues.'
+            },
+            {
+              q: '8. Que mesurent Gini et entropie dans un arbre ?',
+              a: 'Le mélange des classes dans un groupe : une bonne séparation crée des groupes plus homogènes.'
+            },
+            {
+              q: '9. Pourquoi standardiser avant de comparer des coefficients logistiques ?',
+              a: 'Pour éviter qu’un coefficient paraisse petit seulement parce que sa variable est mesurée dans une grande unité.'
+            },
+            {
+              q: '10. Dans un diagnostic sensible, quand privilégier le rappel ?',
+              a: 'Quand rater un vrai cas positif est particulièrement grave. Le bon compromis dépend toujours du contexte métier.'
+            }
+          ].map(item => `
+            <details class="bg-white rounded-2xl border border-slate-200 p-5">
+              <summary class="font-display font-bold text-sm sm:text-base text-ink cursor-pointer list-none flex items-center justify-between gap-4">
+                <span>${item.q}</span>
+                <span class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 text-xs font-bold shrink-0">Voir la réponse</span>
+              </summary>
+              <p class="mt-3 pt-3 border-t border-slate-100 text-sm text-slate-700 leading-relaxed">${item.a}</p>
+            </details>
+          `).join('')}
+        </div>
+      </div>
+    `
+  }
+];
+
+    const LESSON_ROUTES = [
+      ["On connaît les réponses des passagers du Titanic (0 = décès, 1 = survie).", "Le modèle relie ces réponses à des indices comme l'âge, le sexe et la classe.", "Sur un autre passager, il annonce une classe : on peut ensuite compter ses erreurs."],
+      ["Les caractéristiques du passager donnent d'abord un score numérique.", "La sigmoïde transforme ce score en probabilité entre 0 et 1.", "Le seuil convertit cette probabilité en décision, sans réentraîner le modèle."],
+      ["Il y a davantage de non-survivants que de survivants dans les données.", "stratify conserve approximativement cette proportion ; class_weight peut rééquilibrer l'apprentissage.", "Je compare les modèles sur les mêmes passagers de test et à une référence naïve."],
+      ["Un passager arrive avec plusieurs caractéristiques.", "L'arbre pose une question à chaque branche pour séparer les classes.", "La dernière feuille fournit la prédiction et le chemin explique pourquoi."],
+      ["Un arbre trop profond peut mémoriser des détails sans intérêt.", "Je limite sa profondeur et le nombre minimum d'exemples par feuille.", "Je vérifie qu'il reste performant sur les passagers jamais vus."],
+      ["Un seul arbre peut changer beaucoup si les données changent.", "La forêt combine des arbres ; le boosting corrige successivement leurs erreurs.", "Je compare les résultats sans oublier la facilité d'explication."],
+      ["Je veux comprendre ce qui influence les prédictions.", "Je compare les coefficients standardisés de la logistique et les importances d'un arbre.", "Un coefficient a un sens +/− ; l'importance d'un arbre n'indique pas ce sens."],
+      ["Une bonne exactitude globale peut cacher des erreurs graves.", "Je range les prédictions en 4 cases : VN, FP, FN et VP.", "J'en déduis précision, rappel, F1 et spécificité selon le coût métier des erreurs."],
+      ["Le challenge demande plus qu'un modèle entraîné.", "J'explore, je prépare, j'évalue puis je compare cinq modèles sur un même découpage.", "Je justifie le choix final et je remplis les neuf réflexions du notebook."]
+    ];
+    function renderLessonRoute(idx) {
+      const labels = ['1 · CE QUE JE VOIS', '2 · CE QUE FAIT LE MODÈLE', '3 · CE QUE JE RETIENS'];
+      return `<section class="lesson-route" aria-label="Comprendre cette notion en trois temps">${LESSON_ROUTES[idx].map((value, i) => `<div class="lesson-route-card"><span class="lesson-route-label">${labels[i]}</span><p>${value}</p></div>`).join('')}</section>`;
+    }
+
+    function renderMetricsLab() {
+      const cases = [
+        ['tn', 'VN · Vrai négatif', 'Décédé annoncé décédé', 'bg-emerald-50 border-emerald-200', 45],
+        ['fp', 'FP · Faux positif', 'Décédé annoncé survivant', 'bg-rose-50 border-rose-200', 10],
+        ['fn', 'FN · Faux négatif', 'Survivant annoncé décédé', 'bg-amber-50 border-amber-200', 15],
+        ['tp', 'VP · Vrai positif', 'Survivant annoncé survivant', 'bg-emerald-50 border-emerald-200', 30]
+      ];
+      return `<section id="metrics-lab" class="mt-8 bg-white border-2 border-indigo-200 rounded-3xl p-5 sm:p-7 space-y-5 shadow-sm">
+        <div><span class="text-xs font-display font-extrabold tracking-wider uppercase text-indigo-700">ATELIER INTERACTIF · 4 CASES → 4 SCORES</span>
+          <h3 class="font-serif text-2xl sm:text-3xl font-bold mt-2">Fabrique ta matrice de confusion</h3>
+          <p class="text-sm text-slate-600 mt-2">Au départ : 100 décisions fictives. Déplace les curseurs : le nombre total change et tu vois exactement pourquoi les scores changent. Ici, « positif » signifie « survivant ».</p></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">${cases.map(([id, title, meaning, bg, value]) => `
+          <label class="rounded-2xl border p-4 ${bg}"><span class="font-display font-extrabold text-sm block">${title}</span>
+            <span class="text-xs text-slate-600 block mb-3">${meaning}</span>
+            <div class="flex items-center gap-3"><input class="w-full accent-indigo-600" type="range" min="0" max="80" step="1" value="${value}" data-count="${id}" aria-label="Nombre ${title}"><output class="font-mono font-extrabold text-xl min-w-[2.5rem] text-right" data-value="${id}">${value}</output></div>
+          </label>`).join('')}</div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3" aria-live="polite">
+          ${[['precision', 'Précision', 'Parmi les survivants annoncés, combien ont survécu ?'], ['recall', 'Rappel', 'Parmi les survivants réels, combien ai-je trouvés ?'], ['f1', 'F1', 'Équilibre entre précision et rappel'], ['specificity', 'Spécificité', 'Parmi les décès réels, combien ai-je reconnus ?']].map(([id,label,why]) => `<div class="rounded-2xl bg-slate-900 text-white p-4"><span class="text-xs font-bold text-slate-300">${label}</span><div class="font-mono text-2xl font-black mt-1" data-score="${id}">—</div><p class="text-[11px] text-slate-300 mt-2 leading-snug">${why}</p></div>`).join('')}
+        </div>
+        <p class="bg-indigo-50 rounded-xl p-3 text-xs text-indigo-950"><strong>À retenir :</strong> augmenter un faux négatif fait baisser le rappel ; augmenter un faux positif fait baisser la précision. Le meilleur compromis dépend de l'erreur que tu veux éviter.</p>
+      </section>`;
+    }
+
+    function renderChallengeKit() {
+      return `<section class="mt-8 bg-gradient-to-br from-rose-50 to-white border-2 border-rose-200 rounded-3xl p-5 sm:p-7 space-y-5">
+        <div><span class="text-xs font-display font-extrabold tracking-wider uppercase text-rose-700">CHALLENGE OFFICIEL · TITANIC</span>
+          <h3 class="font-serif text-2xl sm:text-3xl font-bold mt-2">Quatre parties, cinq modèles, un choix à justifier</h3>
+          <p class="text-sm text-slate-600 mt-2">La population du naufrage comptait environ 2 224 personnes ; le jeu Titanic de seaborn n'en décrit que 891. Après traitement des valeurs manquantes, on peut conserver ces 891 lignes (imputation) ou en supprimer certaines. Ne confonds pas ces effectifs.</p></div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
+          ${[['1', 'Explorer', 'Comprendre les colonnes et les manquants'], ['2', 'Préparer', 'Encoder, découper avec stratify, éviter la fuite'], ['3', 'Évaluer', 'DummyClassifier puis régression logistique'], ['4', 'Comparer', 'Arbre, forêt, boosting : mêmes métriques et même test']].map(([n,title,detail]) => `<div class="rounded-2xl bg-white border border-rose-200 p-4"><span class="w-8 h-8 rounded-full bg-rose-600 text-white font-mono font-bold inline-flex items-center justify-center">${n}</span><h4 class="font-display font-bold mt-2">${title}</h4><p class="text-xs text-slate-600 mt-1">${detail}</p></div>`).join('')}
+        </div>
+        <p class="text-sm text-slate-700"><strong>À compléter :</strong> les 9 blocs de réflexion, le tableau comparatif des 5 modèles, la lecture des 4 cases de la matrice et une conclusion métier. Conserve le même découpage train/test (avec <code>stratify=y</code>) pour tous les modèles ; apprends les paramètres de mise à l'échelle sur le train seulement.</p>
+        <p class="text-sm text-slate-700">Dans le notebook du challenge, les colonnes sont en majuscules (<code>Survived</code>, <code>Pclass</code>, <code>Sex</code>, <code>Age</code>, <code>Fare</code>) contrairement à seaborn. <strong>Rendu :</strong> <code>Prénom_Nom_classification.ipynb</code>.</p>
+        <a href="https://colab.research.google.com/drive/1PaQr9SH5pzDm7UigN_c2COmFeniipZVa?usp=sharing" target="_blank" rel="noopener noreferrer" class="inline-flex rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-display font-bold text-sm px-5 py-3">Ouvrir le notebook officiel du challenge ↗</a>
+        <p class="text-xs text-slate-500">Dans Colab : Fichier → Enregistrer une copie dans Drive, avant de modifier le notebook.</p>
+      </section>`;
+    }
+
+    document.getElementById('count-chapters').textContent = CHAPTERS.length;
+    document.getElementById('count-codes').textContent = CODE_ACTIONS.length;
+    document.getElementById('count-codes-btn').textContent = CODE_ACTIONS.length;
+
+    let viewMode = 'visual';
+    let currentIdx = 0;
+    let searchQuery = '';
+
+    const sidebarList = document.getElementById('sidebar-list');
+    const stage = document.getElementById('stage');
+    const badge = document.getElementById('progress-badge');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrevBottom = document.getElementById('btn-prev-bottom');
+    const btnNextBottom = document.getElementById('btn-next-bottom');
+    const bottomNav = document.getElementById('bottom-nav');
+    const bottomHint = document.getElementById('bottom-hint');
+    const searchInput = document.getElementById('search-input');
+    const menuBody = document.getElementById('menu-body');
+
+    function bindCopyButtons() {
+      document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const pre = document.getElementById(btn.dataset.copyTarget);
+          if (!pre) return;
+          const ta = document.createElement('textarea');
+          ta.value = pre.textContent;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          const old = btn.textContent;
+          btn.textContent = '✓ Copié !';
+          btn.classList.add('bg-emerald-600', 'text-white');
+          setTimeout(() => {
+            btn.textContent = old;
+            btn.classList.remove('bg-emerald-600', 'text-white');
+          }, 1500);
+        });
+      });
+    }
+
+    function bindSimulators() {
+      
+  const sigSlider = document.getElementById('sig-slider');
+  if (sigSlider) {
+    sigSlider.addEventListener('input', () => {
+      const val = parseInt(sigSlider.value, 10);
+      const thresh = val / 100;
+      document.getElementById('sig-badge').textContent = `Seuil = ${thresh.toFixed(2)}`;
+      const ySvg = 250 - (thresh * 220);
+      const line = document.getElementById('sig-thresh-line');
+      line.setAttribute('y1', ySvg); line.setAttribute('y2', ySvg);
+      document.getElementById('sig-zone-top').setAttribute('height', Math.max(0, ySvg - 30));
+      document.getElementById('sig-zone-bot').setAttribute('y', ySvg);
+      document.getElementById('sig-zone-bot').setAttribute('height', Math.max(0, 250 - ySvg));
+      [['sig-v1', 0.91], ['sig-v2', 0.42], ['sig-v3', 0.11]].forEach(([id, p]) => {
+        const el = document.getElementById(id);
+        el.textContent = p >= thresh ? 'Survécu (1)' : 'Décédé (0)';
+        el.className = p >= thresh
+          ? 'px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800'
+          : 'px-2.5 py-0.5 rounded-full font-bold bg-rose-100 text-rose-800';
+      });
+    });
+  }
+
+  const metricsLab = document.getElementById('metrics-lab');
+  if (metricsLab) {
+    const refreshMetrics = () => {
+      const values = {};
+      metricsLab.querySelectorAll('[data-count]').forEach(input => {
+        values[input.dataset.count] = Number(input.value);
+        metricsLab.querySelector(`[data-value="${input.dataset.count}"]`).textContent = input.value;
+      });
+      const ratio = (num, den) => den === 0 ? 0 : num / den;
+      const precision = ratio(values.tp, values.tp + values.fp);
+      const recall = ratio(values.tp, values.tp + values.fn);
+      const scores = {
+        precision, recall,
+        f1: ratio(2 * precision * recall, precision + recall),
+        specificity: ratio(values.tn, values.tn + values.fp)
+      };
+      for (const [name, score] of Object.entries(scores)) {
+        metricsLab.querySelector(`[data-score="${name}"]`).textContent = `${(score * 100).toFixed(1)} %`;
+      }
+    };
+    metricsLab.addEventListener('input', refreshMetrics);
+    refreshMetrics();
+  }
+
+    }
+
+    function renderSidebar() {
+      if (viewMode === 'visual') {
+        const filtered = CHAPTERS.filter(c =>
+          !searchQuery || c.shortTitle.toLowerCase().includes(searchQuery) || c.group.toLowerCase().includes(searchQuery)
+        );
+        const groups = [...new Set(filtered.map(c => c.group))];
+        sidebarList.innerHTML = groups.map(g => `
+          <div>
+            <div class="px-2.5 mb-1.5 text-[10px] font-display font-extrabold tracking-widest uppercase text-slate-400">${g}</div>
+            <div class="space-y-0.5">
+              ${filtered.filter(c => c.group === g).map(c => {
+                const realIdx = CHAPTERS.findIndex(x => x.num === c.num);
+                const active = realIdx === currentIdx;
+                return `
+                  <button data-idx="${realIdx}" class="chap-btn w-full text-left px-3 py-2 rounded-xl text-xs sm:text-[13px] transition cursor-pointer ${
+                    active ? 'bg-ink text-white font-display font-bold' : 'hover:bg-slate-100 text-slate-700 font-medium'
+                  }">${c.shortTitle}</button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `).join('');
+
+        document.querySelectorAll('.chap-btn').forEach(b => {
+          b.addEventListener('click', () => {
+            showChapter(parseInt(b.dataset.idx, 10));
+            if (window.innerWidth < 1024) menuBody.classList.add('hidden');
+          });
+        });
+      } else {
+        const filtered = CODE_ACTIONS.filter(a =>
+          !searchQuery || a.title.toLowerCase().includes(searchQuery) || a.code.toLowerCase().includes(searchQuery) || a.group.toLowerCase().includes(searchQuery)
+        );
+        const groups = [...new Set(filtered.map(a => a.group))];
+        sidebarList.innerHTML = groups.map(g => `
+          <div>
+            <div class="px-2.5 mb-1.5 text-[10px] font-display font-extrabold tracking-widest uppercase text-rose-800">${g}</div>
+            <div class="space-y-0.5">
+              ${filtered.filter(a => a.group === g).map(a => `
+                <a href="#card-${a.id}" class="block px-3 py-2 rounded-xl text-xs text-slate-700 hover:bg-slate-100 font-medium transition truncate">
+                  <span class="font-mono text-[11px] font-bold text-rose-800 mr-1">${a.num}</span> ${a.title}
+                </a>
+              `).join('')}
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function showChapter(idx) {
+      viewMode = 'visual';
+      currentIdx = Math.max(0, Math.min(idx, CHAPTERS.length - 1));
+      document.getElementById('tab-visual').classList.add('bg-ink', 'text-white');
+      document.getElementById('tab-visual').classList.remove('bg-white', 'text-slate-700');
+      document.getElementById('tab-code').classList.remove('bg-ink', 'text-white');
+      document.getElementById('tab-code').classList.add('bg-white', 'text-rose-800');
+
+      bottomNav.classList.remove('hidden');
+      const ch = CHAPTERS[currentIdx];
+      stage.innerHTML = ch.render();
+      stage.querySelector('header')?.insertAdjacentHTML('afterend', renderLessonRoute(currentIdx));
+      if (currentIdx === 7) stage.insertAdjacentHTML('beforeend', renderMetricsLab());
+      if (currentIdx === 8) stage.insertAdjacentHTML('beforeend', renderChallengeKit());
+      badge.textContent = `${ch.num} / ${String(CHAPTERS.length).padStart(2, '0')}`;
+
+      btnPrev.disabled = currentIdx === 0;
+      btnNext.disabled = currentIdx === CHAPTERS.length - 1;
+      btnPrevBottom.disabled = currentIdx === 0;
+      btnNextBottom.disabled = currentIdx === CHAPTERS.length - 1;
+      bottomHint.textContent = currentIdx < CHAPTERS.length - 1
+        ? `À suivre : ${CHAPTERS[currentIdx + 1].shortTitle}`
+        : `Vous avez parcouru tout le cours ! Consultez l’antisèche des ${CODE_ACTIONS.length} codes.`;
+
+      bindCopyButtons();
+      bindSimulators();
+      renderSidebar();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showCodeCheatsheet() {
+      viewMode = 'code';
+      document.getElementById('tab-code').classList.add('bg-ink', 'text-white');
+      document.getElementById('tab-code').classList.remove('bg-white', 'text-rose-800');
+      document.getElementById('tab-visual').classList.remove('bg-ink', 'text-white');
+      document.getElementById('tab-visual').classList.add('bg-white', 'text-slate-700');
+
+      bottomNav.classList.add('hidden');
+      badge.textContent = `${CODE_ACTIONS.length} CODES`;
+
+      const filtered = CODE_ACTIONS.filter(a =>
+        !searchQuery || a.title.toLowerCase().includes(searchQuery) || a.code.toLowerCase().includes(searchQuery) || a.why.toLowerCase().includes(searchQuery)
+      );
+
+      stage.innerHTML = `
+        <div class="space-y-7">
+          <header class="pb-5 border-b border-slate-200/80">
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-200/70 text-ink font-display font-extrabold text-[11px] tracking-wider uppercase mb-2.5">
+              MÉMENTO PYTHON &amp; SCIKIT-LEARN
+            </span>
+            <h2 class="font-serif text-3xl sm:text-4xl font-bold text-ink">Les ${CODE_ACTIONS.length} codes à retenir action par action</h2>
+            <p class="text-sm sm:text-base text-slate-600 mt-1">Chaque action du cours isolée, expliquée en français simple et prête à copier.</p>
+          </header>
+
+          <div class="space-y-6">
+            ${filtered.map(a => `
+              <div id="card-${a.id}" class="scroll-mt-20">
+                ${renderCodeCard({
+                  id: a.id,
+                  badge: `${a.num} · ${a.group}`,
+                  title: a.title,
+                  why: a.why,
+                  code: a.code,
+                  tip: a.tip
+                })}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      bindCopyButtons();
+      renderSidebar();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('tab-visual').addEventListener('click', () => showChapter(currentIdx));
+    document.getElementById('tab-code').addEventListener('click', showCodeCheatsheet);
+    document.getElementById('btn-cheatsheet').addEventListener('click', showCodeCheatsheet);
+
+    btnPrev.addEventListener('click', () => showChapter(currentIdx - 1));
+    btnNext.addEventListener('click', () => showChapter(currentIdx + 1));
+    btnPrevBottom.addEventListener('click', () => showChapter(currentIdx - 1));
+    btnNextBottom.addEventListener('click', () => showChapter(currentIdx + 1));
+
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.trim().toLowerCase();
+      if (viewMode === 'code') showCodeCheatsheet();
+      else renderSidebar();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (document.activeElement === searchInput || viewMode !== 'visual') return;
+      if (e.key === 'ArrowRight') showChapter(currentIdx + 1);
+      if (e.key === 'ArrowLeft') showChapter(currentIdx - 1);
+    });
+
+    document.getElementById('btn-toggle-menu').addEventListener('click', () => {
+      menuBody.classList.toggle('hidden');
+      menuBody.classList.add('flex');
+    });
+
+    showChapter(0);
+  </script>
+</body>
+</html>

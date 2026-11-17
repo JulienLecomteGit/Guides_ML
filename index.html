@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Guides Visuels — Machine Learning & Data Science</title>
-  <!-- Aperçu Discord (Open Graph) -->
-  <meta property="og:title" content="Guides Visuels — Initiation au Machine Learning & Streamlit" />
-  <meta property="og:description" content="3 guides interactifs vulgarisés : les 25 notions clés du ML, la Régression Linéaire et Streamlit (graphiques & codes prêts à copier)." />
+  <title>Guides Visuels — Machine Learning & Data Science (6 Modules)</title>
+  <meta property="og:title" content="Guides Visuels — Parcours Machine Learning & Data Apps" />
+  <meta property="og:description" content="6 guides interactifs vulgarisés : les 25 notions du ML, Régression linéaire, Streamlit, Classification & Arbres, KNN et Recherche de Similarités." />
   <meta property="og:type" content="website" />
   <meta name="theme-color" content="#0a5a8a" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,18 +21,18 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 2rem 1.25rem;
+      padding: 2.5rem 1.25rem;
     }
-    .container { max-width: 960px; width: 100%; }
+    .container { max-width: 1080px; width: 100%; }
     .badge {
       display: inline-block;
       background: #E6F0F6;
       color: #0A5A8A;
       font-weight: 700;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      padding: 0.4rem 0.9rem;
+      padding: 0.4rem 0.95rem;
       border-radius: 999px;
       margin-bottom: 1rem;
     }
@@ -44,22 +43,22 @@
       margin-bottom: 0.75rem;
     }
     .subtitle {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       color: #4A5568;
-      margin-bottom: 2.5rem;
-      max-width: 650px;
+      margin-bottom: 2.25rem;
+      max-width: 700px;
       line-height: 1.6;
     }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.4rem;
     }
     .card {
       background: #FFFFFF;
       border: 1px solid #E5E0D8;
       border-radius: 20px;
-      padding: 1.75rem;
+      padding: 1.65rem;
       text-decoration: none;
       color: inherit;
       display: flex;
@@ -73,30 +72,33 @@
       border-color: #0A5A8A;
     }
     .tag {
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.65rem;
       display: inline-block;
     }
+    .t-purple { color: #6B46C1; }
     .t-blue { color: #0A5A8A; }
     .t-coral { color: #D94E34; }
-    .t-purple { color: #6B46C1; }
+    .t-teal { color: #0D9488; }
+    .t-indigo { color: #2563EB; }
+    .t-violet { color: #7C3AED; }
     .card h2 {
       font-family: 'Fraunces', serif;
-      font-size: 1.4rem;
-      margin-bottom: 0.6rem;
+      font-size: 1.35rem;
+      margin-bottom: 0.55rem;
     }
     .card p {
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       color: #526075;
       line-height: 1.55;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.35rem;
     }
     .cta {
       font-weight: 700;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       color: #0A5A8A;
       display: flex;
       align-items: center;
@@ -106,9 +108,9 @@
 </head>
 <body>
   <div class="container">
-    <span class="badge">Parcours Data Analyst · Fiches Visuelles</span>
+    <span class="badge">Parcours Data Analyst · Semaine 10 · Fiches Visuelles</span>
     <h1>Comprendre le Machine Learning par l'image</h1>
-    <p class="subtitle">Des guides visuels, vulgarisés et interactifs avec schémas explicatifs et codes Python prêts à copier.</p>
+    <p class="subtitle">6 guides interactifs, vulgarisés et sans jargon avec simulateurs visuels et tous les codes Python commentés prêts à copier.</p>
 
     <div class="grid">
       <a class="card" href="Machine_learning.html">
@@ -122,9 +124,9 @@
 
       <a class="card" href="Regression_lineaire.html">
         <div>
-          <span class="tag t-blue">Module 02 · Modélisation</span>
-          <h2>Régression linéaire & scikit-learn</h2>
-          <p>Simple et multiple, simulateur météo interactif, R², MAE/RMSE et les 10 blocs de code Python commentés.</p>
+          <span class="tag t-blue">Module 02 · Régression</span>
+          <h2>Régression linéaire &amp; scikit-learn</h2>
+          <p>Simple et multiple, simulateur météo interactif, R², MAE/RMSE et tous les blocs de code Python commentés.</p>
         </div>
         <span class="cta">Ouvrir le guide →</span>
       </a>
@@ -134,6 +136,33 @@
           <span class="tag t-coral">Module 03 · Data App</span>
           <h2>Streamlit : les graphiques</h2>
           <p>Graphiques natifs, Matplotlib, Plotly interactif, cartes et pilotage par widgets avec antisèche code.</p>
+        </div>
+        <span class="cta">Ouvrir le guide →</span>
+      </a>
+
+      <a class="card" href="Classification_et_arbres.html">
+        <div>
+          <span class="tag t-teal">Module 04 · Classification</span>
+          <h2>Classification, Arbres &amp; Forêts</h2>
+          <p>Régression logistique (sigmoïde &amp; seuil), arbres de décision, Random Forest, Gradient Boosting et matrice 2×2.</p>
+        </div>
+        <span class="cta">Ouvrir le guide →</span>
+      </a>
+
+      <a class="card" href="KNN_classification.html">
+        <div>
+          <span class="tag t-indigo">Module 05 · Classification</span>
+          <h2>KNN : Les k plus proches voisins</h2>
+          <p>Vote des voisins, piège des échelles (StandardScaler), factorize vs get_dummies et comparaison à la référence.</p>
+        </div>
+        <span class="cta">Ouvrir le guide →</span>
+      </a>
+
+      <a class="card" href="KNN_similarites.html">
+        <div>
+          <span class="tag t-violet">Module 06 · Recommandation</span>
+          <h2>KNN &amp; Recherche de Similarités</h2>
+          <p>NearestNeighbors sans colonne cible, piège du [1:], distances, radius_neighbors, PCA 2D et évaluation sans score.</p>
         </div>
         <span class="cta">Ouvrir le guide →</span>
       </a>
