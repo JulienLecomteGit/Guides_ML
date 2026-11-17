@@ -1,14 +1,24 @@
 # Historique des modifications
 
+## 1.1.1-preview — 17 novembre 2026
+
+**État : correctif préparé et testé localement, non publié.**
+
+- Corrige « UNDEFINED » dans les étiquettes des blocs Python intégrés aux chapitres 04, 05 et 06.
+- Utilise automatiquement les champs `num` et `group` si le badge explicite n'est pas fourni.
+- Conserve les badges de l'antisèche Python ; affiche « CODE » si aucune information de badge n'est disponible.
+- Ajoute un contrôle automatisé des 30 actions en mode chapitre et antisèche, plus trois cas sans numéro (63 sorties vérifiées).
+- Aucun changement dans les exemples Python, les simulateurs, les textes pédagogiques ou les cours 01 à 03.
+
 ## 1.1.0-preview — 17 novembre 2026
 
-**État : candidate à la recette, non publiée.**
+**État : version publiée sur GitHub Pages le 17 novembre 2026 (PR #1).**
 
 ### Navigation
 
 - Même bouton « ← Accueil » (style, position dans l'en-tête de la barre latérale et `href="index.html"`) dans les six pages de cours.
 - Les trois premiers cours conservent intégralement leur contenu pédagogique ; seule la navigation a été ajoutée.
-- `index.html` transmis conservé, avec les six cartes existantes. Les cours 04, 05 et 06 ne sont pas encore présents sur le dépôt GitHub public au moment du cadrage.
+- `index.html` transmis conservé, avec les six cartes existantes. Les cours 04, 05 et 06 étaient absents de GitHub au cadrage ; ils ont été ajoutés par la PR #1.
 
 ### Cours 04 — Classification et arbres
 
@@ -40,7 +50,7 @@
 
 - Voir `TESTS.md` pour les tests exécutés et les limites de recette visuelle.
 
-### Non effectué
+### Lors de la préparation initiale
 
 - Aucun fichier d'origine joint au chat n'a été modifié.
-- Aucune installation, aucune suppression, aucune publication, aucun commit ou push GitHub.
+- Aucune installation ni suppression. La publication a ensuite été autorisée et réalisée sur GitHub.

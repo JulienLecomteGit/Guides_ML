@@ -91,6 +91,32 @@ check('Tous les scripts JavaScript sont syntaxiquement corrects', () => {
   }
 });
 
+check('Cartes de code : aucune étiquette UNDEFINED dans les cours 04 à 06', () => {
+  for (const name of modules.slice(3)) {
+    const source = read(name);
+    const begin = source.indexOf('function renderCodeCard(');
+    const end = source.indexOf('\n    const CODE_ACTIONS = [', begin);
+    assert.ok(begin !== -1 && end > begin, `${name} : générateur introuvable`);
+    const renderCard = new vm.Script(`${source.slice(begin, end)}\nrenderCodeCard`, { filename: name })
+      .runInNewContext({});
+    const actionsStart = end + 5;
+    const actionsEnd = source.indexOf('\n];', actionsStart);
+    assert.ok(actionsEnd > actionsStart, `${name} : catalogue de codes introuvable`);
+    const actions = new vm.Script(`${source.slice(end, actionsEnd + 3)}\nCODE_ACTIONS`, { filename: name })
+      .runInNewContext({});
+    assert.ok(actions.length > 0, `${name} : catalogue vide`);
+    for (const action of actions) {
+      const embedded = renderCard(action);
+      assert.ok(embedded.includes(`${action.num} · ${action.group}`), `${name}/${action.id} : badge du chapitre incorrect`);
+      assert.ok(!embedded.includes('undefined'), `${name}/${action.id} : badge manquant`);
+      const fullList = renderCard({ ...action, badge: `${action.num} · Antisèche` });
+      assert.ok(fullList.includes(`${action.num} · Antisèche`), `${name}/${action.id} : badge de l’antisèche incorrect`);
+    }
+    const fallback = renderCard({ id: 'sample', title: 'Exemple', why: 'Rappel', code: 'pass' });
+    assert.ok(fallback.includes('>CODE</span>'), `${name} : repli sans données absent`);
+  }
+});
+
 check('Les trois nouveaux guides ont leur progression et leurs ateliers', () => {
   for (const name of modules.slice(3)) {
     const html = read(name);
